@@ -17,7 +17,7 @@ print(df.head())
 ```
 >*Replace 161 with the ID of your desired location*  
 
-## Import necessary libraries
+## Import Necessary Libraries
 
 ```py hl_lines="1 2"
 from openaq import OpenAQ
@@ -65,7 +65,7 @@ print(df.head())
 
 Serialize the data into a Python Dict.
 
-## Using Pandas, Flatten Data and Create DataFrame with the `json_normalize` method
+## Using Pandas, Flatten Data and Create DataFrame with the `json_normalize` Method
 
 ```py hl_lines="7"
 from openaq import OpenAQ
@@ -81,7 +81,7 @@ print(df.head())
 
 Normalize the fetched data and transform it into a Pandas DataFrame. Responses have a nested structure and need to be flattened to make the DataFrame.
 
-## Step 7: Inspect the DataFrame
+## Inspect the DataFrame
 
 ```py hl_lines="9"
 from openaq import OpenAQ
