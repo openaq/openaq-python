@@ -7,8 +7,8 @@ The official Python wrapper for the OpenAQ API.
 
 OpenAQ Python is a low-level API wrapper for the OpenAQ Version 3 API. 
 
-[![PyPI - Version](https://img.shields.io/pypi/v/openaq-python.svg)](https://pypi.org/project/openaq-python)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/openaq-python.svg)](https://pypi.org/project/openaq-python)
+[![PyPI - Version](https://img.shields.io/pypi/v/openaq.svg)](https://pypi.org/project/openaq)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/openaq.svg)](https://pypi.org/project/openaq)
 
 -----
 
