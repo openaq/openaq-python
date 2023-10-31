@@ -1,0 +1,56 @@
+site_name: OpenAQ Python API Wrapper
+
+repo_url: https://github.com/openaq/openaq-python
+repo_name: openaq/openaq-python
+
+theme:
+  name: "material"
+  logo: assets/logo.svg
+  palette:
+    primary: custom
+  features:
+    - search.suggest
+    - content.tabs.link
+    - navigation.tracking
+    - navigation.path
+    - navigation.top
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - mkdocstrings
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.critic
+  - pymdownx.tilde
+  - toc:
+      title: On this page
+
+nav:
+  - OpenAQ Python: index.md
+  - Tutorial:
+    - tutorial/getting-started.md
+  - How-To Guides:
+    - Working with the client: how-to-guides/working-with-the-client.md
+    - Working with pagination: how-to-guides/working-with-pagination.md
+    - Integrating with Pandas: how-to-guides/integrating-with-pandas.md
+  - Reference:
+    - OpenAQ: reference/openaq.md
+    - AsyncOpenAQ: reference/asyncopenaq.md
+    - Responses: reference/responses.md
+    - Exceptions: reference/exceptions.md

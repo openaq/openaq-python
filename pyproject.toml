@@ -1,0 +1,94 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openaq"
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Russ Biggs", email = "russ@openaq.org" },
+  { name = "Gabe Fosse", email = "gabe@openaq.org" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = ["httpx==0.25.0", "pyhumps==3.8.0"]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+all = ["orjson >=3.2.1"]
+
+[project.urls]
+Documentation = "https://github.com/openaq/openaq-python#readme"
+Issues = "https://github.com/openaq/openaq-python/issues"
+Source = "https://github.com/openaq/openaq-python"
+
+[tool.hatch.version]
+path = "openaq/__init__.py"
+
+
+[tool.hatch.envs.test]
+dependencies = ["coverage[toml]", "pytest", "pytest-cov", "respx"]
+
+[tool.hatch.envs.test.scripts]
+test = 'pytest -s -vv'
+
+cov = 'pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=openaq'
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.style]
+detached = true
+dependencies = ["ruff", "black", "isort", "pydocstyle"]
+
+[tool.hatch.envs.style.scripts]
+check = ["ruff .", "black --check --diff .", "isort --check-only --diff ."]
+fmt = ["isort .", "black .", "check"]
+
+[tool.hatch.envs.docs]
+dependencies = ["mkdocs", "mkdocstrings[python]", "mkdocs-material"]
+
+[tool.hatch.envs.docs.scripts]
+build = ["mkdocs build -c"]
+serve = ["mkdocs serve"]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = ["openaq/__about__.py"]
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+
+[tool.ruff]
+extend-exclude = ["tests"]
+
+ignore = [
+  "E501", # line too long, handled by black
+]
+select = ["D"]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.black]
+target-version = ['py311']
+skip-string-normalization = true
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+combine_as_imports = true

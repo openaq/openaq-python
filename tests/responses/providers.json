@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "name": "openaq-api",
+    "website": "/",
+    "page": 1,
+    "limit": 100,
+    "found": 1
+  },
+  "results": [
+    {
+      "id": 62,
+      "name": "Rio City Hall",
+      "sourceName": "rio-city-hall",
+      "exportPrefix": "rio",
+      "license": null,
+      "datetimeAdded": "2023-03-29T20:23:57.054584Z",
+      "datetimeFirst": "2023-04-06T16:00:00Z",
+      "datetimeLast": "2023-10-18T19:00:00Z",
+      "ownerEntity": {
+        "id": 1,
+        "name": "OpenAQ admin"
+      },
+      "parameters": [
+        {
+          "id": 1,
+          "name": "pm10",
+          "units": "µg/m³",
+          "displayName": null
+        },
+        {
+          "id": 2,
+          "name": "pm25",
+          "units": "µg/m³",
+          "displayName": null
+        },
+        {
+          "id": 3,
+          "name": "o3",
+          "units": "µg/m³",
+          "displayName": null
+        },
+        {
+          "id": 5,
+          "name": "no2",
+          "units": "µg/m³",
+          "displayName": null
+        },
+        {
+          "id": 6,
+          "name": "so2",
+          "units": "µg/m³",
+          "displayName": null
+        },
+        {
+          "id": 8,
+          "name": "co",
+          "units": "ppm",
+          "displayName": null
+        },
+        {
+          "id": 27,
+          "name": "nox",
+          "units": "µg/m³",
+          "displayName": null
+        },
+        {
+          "id": 19843,
+          "name": "no",
+          "units": "µg/m³",
+          "displayName": null
+        }
+      ],
+      "bbox": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-43.6291, -23.0044],
+            [-43.6291, -22.8316],
+            [-43.1795, -22.8316],
+            [-43.1795, -23.0044],
+            [-43.6291, -23.0044]
+          ]
+        ]
+      }
+    }
+  ]
+}

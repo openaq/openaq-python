@@ -1,0 +1,22 @@
+name: OpenAQ Python Feature request
+description: Suggest a new feature for OpenAQ python
+labels: [feature request]
+
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for contributing to OpenAQ python
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: |
+        Please give as much detail as possible about the feature you would like to suggest.
+
+        You might like to add:
+        * A demonstration of how code might look when using the feature
+        * Your use case(s) for the feature
+        * Why the feature should be added to OpenAQ python.
+    validations:
+      required: true
