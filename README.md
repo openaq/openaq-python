@@ -29,7 +29,7 @@ pip install openaq
 
 ## Documentation
 
-Coming soon...
+Documentation available at [python.openaq.org](https://python.openaq.org)
 
 ## License
 
