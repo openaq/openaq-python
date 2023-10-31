@@ -45,7 +45,7 @@ class BaseTransport(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def aclose(self):
+    async def close(self):
         """Closes transport connection. To be overridden in subclass."""
         raise NotImplementedError
 
