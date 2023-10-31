@@ -74,7 +74,7 @@ Alternatively we can use a context manager to handle closing the connection for 
 
     async def main():
         async with AsyncOpenAQ(api_key='replace-with-a-valid-openaq-api-key') as client:
-            client.locations.get(2178)
+            await client.locations.get(2178)
 
     if __name__ ==  '__main__':
         loop = asyncio.get_event_loop()
