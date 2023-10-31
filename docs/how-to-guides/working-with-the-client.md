@@ -8,7 +8,6 @@ OpenAQ Python provides a synchronous client via the `OpenAQ` class and an asynch
     ```py
     from openaq import OpenAQ
 
-
     client = OpenAQ(api_key='replace-with-a-valid-openaq-api-key')
     ```
 
@@ -16,7 +15,6 @@ OpenAQ Python provides a synchronous client via the `OpenAQ` class and an asynch
 
     ```py
     from openaq import AsyncOpenAQ
-
 
     client = AsyncOpenAQ(api_key='replace-with-a-valid-openaq-api-key')
     ```
@@ -27,6 +25,7 @@ OpenAQ Python provides a synchronous client via the `OpenAQ` class and an asynch
 
 
 === "Sync"
+
     ```py
     from openaq import OpenAQ
 
@@ -45,7 +44,7 @@ OpenAQ Python provides a synchronous client via the `OpenAQ` class and an asynch
     async def main():
         client = AsyncOpenAQ(api_key='replace-with-a-valid-openaq-api-key')
         await client.locations.get(2178)
-        client.close()
+        await client.close()
 
     if __name__ ==  '__main__':
         loop = asyncio.get_event_loop()
