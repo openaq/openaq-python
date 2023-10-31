@@ -76,9 +76,10 @@ class BaseClient(ABC):
         """
         return self._transport
 
+    @abstractmethod
     def close(self):
         """Closes transport connection."""
-        self._transport.close()
+        raise NotImplementedError
 
     @abstractmethod
     def _do(

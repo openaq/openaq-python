@@ -106,8 +106,11 @@ class AsyncOpenAQ(BaseClient):
     ):
         return await self._do("get", path, params=params, headers=headers)
 
+    async def close(self):
+        await self._transport.close()
+
     async def __aenter__(self) -> AsyncOpenAQ:
         return self
 
     async def __aexit__(self, *_: Any):
-        await self.transport.aclose()
+        await self.close()

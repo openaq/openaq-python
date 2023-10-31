@@ -106,6 +106,9 @@ class OpenAQ(BaseClient):
     ):
         return self._do("get", path, params=params, headers=headers)
 
+    def close(self):
+        self._transport.close()
+
     def __enter__(self) -> OpenAQ:
         return self
 

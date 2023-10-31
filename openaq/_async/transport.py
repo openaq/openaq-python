@@ -25,5 +25,5 @@ class AsyncTransport(BaseTransport):
         res = await self.client.send(request)
         return check_response(res)
 
-    async def aclose(self):
+    async def close(self):
         await self.client.aclose()
