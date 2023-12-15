@@ -8,6 +8,8 @@ import re
 from collections.abc import Mapping
 
 UNDERSCORE_RE = re.compile(r"(?<=[^\-_])[\-_]+[^\-_]")
+ACRONYM_RE = re.compile(r"([A-Z\d]+)(?=[A-Z\d]|$)")
+SPLIT_RE = re.compile(r"([\-_]*(?<=[^0-9])(?=[A-Z])[^A-Z]*[\-_]*)")
 
 
 def camelize(str_or_iter):
@@ -55,3 +57,51 @@ def decamelize(str_or_iter):
         return str_or_iter
 
     return _separate_words(_fix_abbreviations(s)).lower()
+
+
+def _is_none(_in):
+    """
+    Determine if the input is None
+    and returns a string with white-space removed
+    :param _in: input
+    :return:
+        an empty sting if _in is None,
+        else the input is returned with white-space removed
+    """
+    return "" if _in is None else re.sub(r"\s+", "", str(_in))
+
+
+def _separate_words(string, separator="_"):
+    """
+    Split words that are separated by case differentiation.
+    :param string: Original string.
+    :param separator: String by which the individual
+        words will be put back together.
+    :returns:
+        New string.
+    """
+    return separator.join(s for s in SPLIT_RE.split(string) if s)
+
+
+def _process_keys(str_or_iter, fn):
+    if isinstance(str_or_iter, list):
+        return [_process_keys(k, fn) for k in str_or_iter]
+    if isinstance(str_or_iter, Mapping):
+        return {fn(k): _process_keys(v, fn) for k, v in str_or_iter.items()}
+    return str_or_iter
+
+
+def _fix_abbreviations(string):
+    """
+    Rewrite incorrectly cased acronyms, initialisms, and abbreviations,
+    allowing them to be decamelized correctly. For example, given the string
+    "APIResponse", this function is responsible for ensuring the output is
+    "api_response" instead of "a_p_i_response".
+
+    :param string: A string that may contain an incorrectly cased abbreviation.
+    :type string: str
+    :rtype: str
+    :returns:
+        A rewritten string that is safe for decamelization.
+    """
+    return ACRONYM_RE.sub(lambda m: m.group(0).title(), string)
