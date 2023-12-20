@@ -1,7 +1,11 @@
-# This implementation of camelize and decamelize functions is adapted from the humps library by Nick Ficano.
-# Original source: https://github.com/nficano/humps
-# The humps library is used for converting strings into different naming conventions (e.g., camelCase, PascalCase, snake_case).
-# Thanks to Nick Ficano for the original implementation.
+"""
+This module is a vendored version of the 'humps' package originally found at:
+https://github.com/nficano/humps
+
+The original package is licensed under the "Unlicense", a public domain equivalent license.
+For more details, see: https://github.com/nficano/humps/blob/master/LICENSE
+Thanks to Nick Ficano for the original implementation.
+"""
 
 import re
 
