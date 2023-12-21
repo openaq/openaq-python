@@ -16,6 +16,7 @@ from openaq.shared.models import build_query_params
                 'bbox': [42.0, 42.0, 42.0, 42.0],
                 "providers_id": 42,
                 "countries_id": 42,
+                "parameters_id": 2,
                 'iso': 'us',
                 'monitor': True,
                 'mobile': False,
@@ -30,6 +31,7 @@ from openaq.shared.models import build_query_params
                 'bbox': '42.0,42.0,42.0,42.0',
                 "providers_id": 42,
                 "countries_id": 42,
+                "parameters_id": 2,
                 'iso': 'us',
                 'monitor': True,
                 'mobile': False,
@@ -41,10 +43,12 @@ from openaq.shared.models import build_query_params
             {
                 "providers_id": [1, 2, 3],
                 "countries_id": [1, 2, 3],
+                "parameters_id": [1, 2, 10],
             },
             {
                 "providers_id": '1,2,3',
                 "countries_id": '1,2,3',
+                "parameters_id": '1,2,10',
             },
         ),
     ],
