@@ -14,3 +14,11 @@ Initial release
 ### Fixed
 
 - `AsyncOpenAQ` client `close()` method. 
+
+## [0.2.0] - 2023-12-21
+
+### Added
+
+- `parameters_id` arguments for `OpenAQ.locations()` method and `AsyncOpenAQ.locations()` method
+- Added `Forbidden` and `ServerError` exceptions to `__all__` export.
+- vendored pyhump, removed as `pyproject.toml` dependency
