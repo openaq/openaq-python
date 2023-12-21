@@ -23,7 +23,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["httpx==0.25.0", "pyhumps==3.8.0"]
+dependencies = ["httpx==0.25.0"]
 dynamic = ["version"]
 
 [project.optional-dependencies]

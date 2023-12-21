@@ -42,6 +42,7 @@ class Locations(AsyncResourceBase):
         bbox: Union[Tuple[float, float, float, float], None] = None,
         providers_id: Union[int, List[int], None] = None,
         countries_id: Union[int, List[int], None] = None,
+        parameters_id: Union[int, List[int], None] = None,
         iso: Union[str, None] = None,
         monitor: Union[bool, None] = None,
         mobile: Union[bool, None] = None,
@@ -59,6 +60,7 @@ class Locations(AsyncResourceBase):
         * `bbox` - Filters locations using a bounding box. Cannot be used with `coordinates` or `radius`
         * `providers_id` - Filters results by selected providers ID(s)
         * `countries_id` - Filters results by selected countries ID(s)
+        * `parameters_id` - Filters results by selected parameters ID(s)
         * `iso` - Filters results by selected country code
         * `monitor` - Filters results by reference grade monitors (`true`), air sensors (`false`), or both if not used
         * `mobile` - Filters results for mobile sensors (`true`), non-mobile sensors (`false`), or both if not used
@@ -73,6 +75,7 @@ class Locations(AsyncResourceBase):
             bbox: Geospatial bounding box of min X, min Y, max X, max Y in WGS 84 coordinates. Limited to four decimals precision.
             providers_id: Single providers ID or an array of IDs.
             countries_id: Single countries ID or an array of IDs.
+            parameters_id: Single parameters ID or an array of IDs.
             iso:  2 letter ISO 3166-alpha-2 country code.
             monitor: Boolean for reference grade monitors (true) or air sensors (false)
             mobile: Boolean mobile locations (true) or not mobile locations (false).
@@ -100,6 +103,7 @@ class Locations(AsyncResourceBase):
             bbox=bbox,
             providers_id=providers_id,
             countries_id=countries_id,
+            parameters_id=parameters_id,
             iso=iso,
             monitor=monitor,
             mobile=mobile,

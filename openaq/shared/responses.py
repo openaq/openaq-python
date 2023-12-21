@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass
 from types import ModuleType
 from typing import Any, Dict, List, Tuple, Union
 
-from humps import camelize, decamelize
+from openaq.utils.humps import camelize, decamelize
 
 try:
     import orjson
