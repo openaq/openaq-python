@@ -71,7 +71,13 @@ class _ResponseBase:
         Returns:
             Deserialized representation of the response data as a Python object.
         """
-        return cls(**cls._deserialize(data))
+        deserialized_data = cls._deserialize(data)
+
+        # Filter out fields that are not in the class annotations
+        expected_fields = {
+            k: v for k, v in deserialized_data.items() if k in cls.__annotations__
+        }
+        return cls(**expected_fields)
 
     def dict(self) -> Dict:
         """Serializes response data to Python dictionary.
