@@ -92,11 +92,11 @@ def test_response_ignores_unexpected_fields(
     base_response = read_response_file('locations')
     base_json = json.loads(base_response)
 
-    additional_json = json.loads(extra_field)
-    modified_json = base_json['results'][0].update(additional_json)
+    modified_json = json.loads(extra_field)
+    base_json['results'][0].update(modified_json)
 
     try:
-        response_instance = response_class.load(modified_json)
+        response_instance = response_class.load(base_json)
         assert not hasattr(
             response_instance.results[0], 'anotherField'
         ), "Unexpected 'anotherField' was not ignored"
