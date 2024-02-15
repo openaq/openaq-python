@@ -22,3 +22,9 @@ Initial release
 - `parameters_id` arguments for `OpenAQ.locations()` method and `AsyncOpenAQ.locations()` method
 - Added `Forbidden` and `ServerError` exceptions to `__all__` export.
 - vendored pyhump, removed as `pyproject.toml` dependency
+
+## [0.2.1] - 2024-02-15
+
+### Fixed
+
+- Resolves issue that breaks `OpenAQ.locations()` method and `AsyncOpenAQ.locations()` from upstream API change. Checks for and ignore fields not included in response model.
