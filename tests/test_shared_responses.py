@@ -77,3 +77,28 @@ def test_responses_json(name: str, response_class: _ResponseBase):
     assert json.loads(response) == json.loads(
         response_class.load(json.loads(response)).json()
     )
+
+
+@pytest.mark.parametrize(
+    "extra_field,response_class",
+    [
+        ('{"anotherField": null}', LocationsResponse),
+    ],
+)
+def test_response_ignores_unexpected_fields(
+    extra_field: str, response_class: _ResponseBase
+):
+    """Tests that the response model ignores unexpected fields."""
+    base_response = read_response_file('locations')
+    base_json = json.loads(base_response)
+
+    additional_json = json.loads(extra_field)
+    modified_json = base_json['results'][0].update(additional_json)
+
+    try:
+        response_instance = response_class.load(modified_json)
+        assert not hasattr(
+            response_instance.results[0], 'anotherField'
+        ), "Unexpected 'anotherField' was not ignored"
+    except Exception as e:
+        pytest.fail(f"Deserialization failed with unexpected field 'anotherField': {e}")
