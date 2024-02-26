@@ -10,6 +10,8 @@ from openaq._async.models.measurements import Measurements
 from openaq._async.models.owners import Owners
 from openaq._async.models.parameters import Parameters
 from openaq._async.models.providers import Providers
+from openaq._async.models.sensors import Sensors
+
 from openaq.shared.client import (
     DEFAULT_USER_AGENT,
     BaseClient,
@@ -70,6 +72,7 @@ class AsyncOpenAQ(BaseClient):
         self.manufacturers = Manufacturers(self)
         self.measurements = Measurements(self)
         self.owners = Owners(self)
+        self.sensors = Sensors(self)
 
     @property
     def transport(self) -> AsyncTransport:
