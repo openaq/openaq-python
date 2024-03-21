@@ -14,7 +14,7 @@ pip install openaq
 
 ## Register for an OpenAQ API Key
 
-Visit [explore.openaq.org/register](http://explore.openaq.org/register).
+Visit [explore.openaq.org/register](https://explore.openaq.org/register).
 
 
 !!! warning
