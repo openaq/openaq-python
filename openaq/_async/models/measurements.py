@@ -107,11 +107,11 @@ class Measurements(AsyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        location = await self._client._get(f"/locations/{locations_id}")
-        location_data = location.json()
+        response = await self._client._get(f"/locations/{locations_id}")
+        data = response.json()
 
-        location_obj = location_data["results"][0]
-        sensor_ids = [sensor["id"] for sensor in location_obj["sensors"]]
+        location = data["results"][0]
+        sensor_ids = [sensor["id"] for sensor in location["sensors"]]
 
         if parameters_id:
             if isinstance(parameters_id, int):
@@ -121,7 +121,7 @@ class Measurements(AsyncResourceBase):
                 for sensor_id in sensor_ids
                 if any(
                     sensor["parameter"]["id"] in parameters_id
-                    for sensor in location_obj["sensors"]
+                    for sensor in location["sensors"]
                     if sensor["id"] == sensor_id
                 )
             ]
@@ -143,8 +143,7 @@ class Measurements(AsyncResourceBase):
         response_data = {
             "meta": {
                 "name": "openaq-api",
-                "license": "CC BY 4.0",
-                "website": "https://u50g7n0cbj.execute-api.us-east-1.amazonaws.com/",
+                "website": "/",
                 "page": 1,
                 "limit": len(measurements),
                 "found": len(measurements),
