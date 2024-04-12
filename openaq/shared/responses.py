@@ -385,7 +385,7 @@ class Sensor(_ResponseBase):
 
     id: int
     name: str
-    parameter: Parameter
+    parameter: ParameterBase
     datetime_first: Datetime
     datetime_last: Datetime
     coverage: Coverage
@@ -394,7 +394,7 @@ class Sensor(_ResponseBase):
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
-        self.parameter = Parameter.load(self.parameter)
+        self.parameter = ParameterBase.load(self.parameter)
         self.datetime_first = Datetime.load(self.datetime_first)
         self.datetime_last = Datetime.load(self.datetime_last)
         self.coverage = Coverage.load(self.coverage)
@@ -694,29 +694,34 @@ class ManufacturersResponse(_ResponseBase):
 # Measurements
 
 
+from typing import Union
+
+
 @dataclass
 class Summary(_ResponseBase):
     """Statistical summary of measurement values.
 
     Attributes:
-        min: mininum value
+        min: minimum value
         q02: 2nd percentile
         q25: 25th percentile
         median: median value i.e. 50th percentile
         q75: 75th percentile
         q98: 98th percentile
         max: maximum value
+        avg: average value
         sd: standard deviation
     """
 
     min: float
-    q02: float
-    q25: float
-    median: float
-    q75: float
-    q98: float
+    q02: Union[float, None]
+    q25: Union[float, None]
+    median: Union[float, None]
+    q75: Union[float, None]
+    q98: Union[float, None]
     max: float
-    sd: float
+    avg: Union[float, None]
+    sd: Union[float, None]
 
 
 @dataclass

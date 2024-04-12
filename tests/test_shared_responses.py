@@ -12,6 +12,7 @@ from openaq.shared.responses import (
     OwnersResponse,
     ParametersResponse,
     ProvidersResponse,
+    SensorsResponse,
     _ResponseBase,
 )
 
@@ -42,6 +43,7 @@ def read_response_file(name: str) -> str:
         ('owners', OwnersResponse),
         ('manufacturers', ManufacturersResponse),
         ('locations_variation', LocationsResponse),
+        ('sensors', SensorsResponse),
     ],
 )
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")
@@ -68,6 +70,7 @@ def test_responses_validation(name: str, response_class: _ResponseBase):
         ('owners', OwnersResponse),
         ('manufacturers', ManufacturersResponse),
         ('locations_variation', LocationsResponse),
+        ('sensors', SensorsResponse),
     ],
 )
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")
