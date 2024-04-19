@@ -31,6 +31,8 @@ pip install openaq
 
 Documentation available at [python.openaq.org](https://python.openaq.org)
 
+Documentation can also be run locally using `hatch run docs:serve`
+
 ## License
 
 `openaq` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
