@@ -2,6 +2,7 @@ import platform
 
 import pytest
 
+from openaq import __version__
 from openaq._sync.client import OpenAQ
 
 from .mocks import MockTransport
@@ -18,7 +19,7 @@ class TestClient:
     def test_default_headers(self):
         assert (
             self.client._headers["User-Agent"]
-            == f"openaq-python-{platform.python_version()}"
+            == f"openaq-python-{__version__}-{platform.python_version()}"
         )
         assert self.client._headers["Accept"] == "application/json"
 
