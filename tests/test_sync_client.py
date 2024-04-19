@@ -1,3 +1,4 @@
+import os
 import platform
 
 import pytest
@@ -8,19 +9,19 @@ from .mocks import MockTransport
 
 
 class TestClient:
-    @pytest.fixture(autouse=True)
+    @pytest.fixture()
     def setup(self):
         self.client = OpenAQ(api_key="abc123-def456-ghi789", _transport=MockTransport)
 
-    def test_default_client_params(self):
-        assert self.client._base_url == "https://api.openaq.org/v3/"
+    def test_default_client_params(self, setup):
+        assert self.client._BaseClient__base_url == "https://api.openaq.org/v3/"
 
-    def test_default_headers(self):
+    def test_default_headers(self, setup):
         assert (
-            self.client._headers["User-Agent"]
+            self.client.headers["User-Agent"]
             == f"openaq-python-{platform.python_version()}"
         )
-        assert self.client._headers["Accept"] == "application/json"
+        assert self.client.headers["Accept"] == "application/json"
 
     def test_custom_headers(self):
         self.client = OpenAQ(
@@ -29,8 +30,8 @@ class TestClient:
             user_agent="my-custom-useragent",
             _transport=MockTransport(),
         )
-        assert self.client._headers["X-API-Key"] == "abc123-def456-ghi789"
-        assert self.client._headers["User-Agent"] == "my-custom-useragent"
+        assert self.client.headers["X-API-Key"] == "abc123-def456-ghi789"
+        assert self.client.headers["User-Agent"] == "my-custom-useragent"
 
     def test_client_params(self):
         self.client = OpenAQ(
@@ -38,4 +39,11 @@ class TestClient:
             base_url="https://mycustom.openaq.org",
             _transport=MockTransport(),
         )
-        assert self.client._base_url == "https://mycustom.openaq.org"
+        assert self.client.base_url == "https://mycustom.openaq.org"
+
+    def test_client_api_key_env_vars(self):
+        os.environ["OPENAQ-API-KEY"] = "1"
+        self.client = OpenAQ(
+            _transport=MockTransport(),
+        )
+        assert self.client.api_key == "1"

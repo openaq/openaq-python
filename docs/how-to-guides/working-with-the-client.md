@@ -80,3 +80,8 @@ Alternatively we can use a context manager to handle closing the connection for 
         loop.run_until_complete(main())
     ```
 
+### API key
+
+An API Key is required to make requests with the OpenAQ API. 
+
+We can add an API Key to the OpenAQ Python wrapper one of two ways. As shown above, the API key string can be directly passed when instantiating the `OpenAQ` or `AsyncOpenAQ` class via the `api_key` argument. Alternatively if a key is not passed to the constructor `OpenAQ` and `AsyncOpenAQ` will automatically look for a system environment variable named `OPENAQ-API-KEY` and set the value of that to the `api_key` argument. Directly passing a value to the `api_key` argument in the client constructors will always override an environment variable.
