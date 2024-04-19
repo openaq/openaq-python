@@ -7,14 +7,14 @@ from ._async.client import AsyncOpenAQ as AsyncOpenAQ
 from ._sync.client import OpenAQ as OpenAQ
 from .shared.exceptions import (
     AuthError,
+    BadRequestError,
+    Forbidden,
     GatewayTimeoutError,
     NotAuthorized,
     NotFoundError,
     RateLimit,
-    ValidationError,
-    BadRequestError,
-    Forbidden,
     ServerError,
+    ValidationError,
 )
 
 __all__ = [

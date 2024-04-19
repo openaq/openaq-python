@@ -26,8 +26,8 @@ class Countries(SyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        country = self._client._get(f"/countries/{countries_id}")
-        return CountriesResponse.load(country.json())
+        country_response = self._client._get(f"/countries/{countries_id}")
+        return CountriesResponse(country_response)
 
     def list(
         self,
@@ -79,5 +79,5 @@ class Countries(SyncResourceBase):
             providers_id=providers_id,
         )
 
-        countries = self._client._get("/countries", params=params)
-        return CountriesResponse.load(countries.json())
+        countries_response = self._client._get("/countries", params=params)
+        return CountriesResponse(countries_response)

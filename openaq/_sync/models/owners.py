@@ -26,8 +26,8 @@ class Owners(SyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        owner = self._client._get(f"/owners/{owners_id}")
-        return OwnersResponse.load(owner.json())
+        owner_response = self._client._get(f"/owners/{owners_id}")
+        return OwnersResponse.read_response(owner_response)
 
     def list(
         self,
@@ -68,5 +68,5 @@ class Owners(SyncResourceBase):
             page=page, limit=limit, order_by=order_by, sort_order=sort_order
         )
 
-        owners = self._client._get("/owners", params=params)
-        return OwnersResponse.load(owners.json())
+        owners_response = self._client._get("/owners", params=params)
+        return OwnersResponse.read_response(owners_response)

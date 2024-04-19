@@ -26,8 +26,8 @@ class Parameters(SyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        parameter = self._client._get(f"/parameters/{parameters_id}")
-        return ParametersResponse.load(parameter.json())
+        parameter_response = self._client._get(f"/parameters/{parameters_id}")
+        return ParametersResponse.read_response(parameter_response)
 
     def list(
         self,
@@ -95,5 +95,5 @@ class Parameters(SyncResourceBase):
             countries_id=countries_id,
         )
 
-        parameters = self._client._get("/parameters", params=params)
-        return ParametersResponse.load(parameters.json())
+        parameters_response = self._client._get("/parameters", params=params)
+        return ParametersResponse.read_response(parameters_response)
