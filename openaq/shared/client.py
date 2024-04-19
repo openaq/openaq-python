@@ -5,11 +5,12 @@ from abc import ABC, abstractmethod
 import os
 from typing import Any, Mapping, Union
 
+from openaq import __version__
 from openaq.shared.transport import BaseTransport
 
 ACCEPT_HEADER = "application/json"
 
-DEFAULT_USER_AGENT = f"openaq-python-{platform.python_version()}"
+DEFAULT_USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
 
 DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 

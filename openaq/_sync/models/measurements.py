@@ -63,7 +63,7 @@ class Measurements(SyncResourceBase):
             parameters_id=parameters_id,
         )
 
-        measurements = self._client._get(
+        measurements_response = self._client._get(
             f"/locations/{locations_id}/measurements", params=params
         )
-        return MeasurementsResponse.load(measurements.json())
+        return MeasurementsResponse.read_response(measurements_response)

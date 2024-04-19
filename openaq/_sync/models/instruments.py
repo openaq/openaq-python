@@ -26,8 +26,8 @@ class Instruments(SyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        instrument = self._client._get(f"/instruments/{providers_id}")
-        return InstrumentsResponse.load(instrument.json())
+        instrument_response = self._client._get(f"/instruments/{providers_id}")
+        return InstrumentsResponse.read_response(instrument_response)
 
     def list(
         self,
@@ -68,5 +68,5 @@ class Instruments(SyncResourceBase):
             page=page, limit=limit, order_by=order_by, sort_order=sort_order
         )
 
-        instruments = self._client._get("/instruments", params=params)
-        return InstrumentsResponse.load(instruments.json())
+        instruments_response = self._client._get("/instruments", params=params)
+        return InstrumentsResponse.read_response(instruments_response)

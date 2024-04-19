@@ -1,0 +1,7 @@
+{
+  "id": 2,
+  "name": "pm25",
+  "units": "µg/m³",
+  "displayName": "PM2.5",
+  "description": "Particulate matter less than 2.5 micrometers in diameter mass concentration"
+}
