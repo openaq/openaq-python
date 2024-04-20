@@ -22,6 +22,7 @@ from openaq.shared.responses import (
     ParametersResponse,
     Provider,
     ProvidersResponse,
+    SensorsResponse,
     _ResourceBase,
     _ResponseBase,
 )
@@ -92,6 +93,7 @@ def test_resources_validation(name: str, resource_class: _ResourceBase):
         ('owners', OwnersResponse),
         ('manufacturers', ManufacturersResponse),
         ('locations_variation', LocationsResponse),
+        ('sensors', SensorsResponse),
     ],
 )
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")
@@ -129,6 +131,7 @@ def mock_response(data):
         ('owners', OwnersResponse),
         ('manufacturers', ManufacturersResponse),
         ('locations_variation', LocationsResponse),
+        ('sensors', SensorsResponse),
     ],
 )
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")

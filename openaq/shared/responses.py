@@ -397,6 +397,81 @@ class LocationsResponse(_ResponseBase):
             self.results = [Location.load(x) for x in self.results]
 
 
+# Sensors
+
+
+@dataclass
+class SensorLatest(_ResponseBase):
+    """Represents the latest measurement from a sensor in OpenAQ.
+
+    Attributes:
+        datetime: The datetime of the latest measurement.
+        value: The value of the latest measurement.
+        coordinates: The geographic coordinates of the sensor when the measurement was taken.
+    """
+
+    datetime: Datetime
+    value: float
+    coordinates: Coordinates
+
+
+@dataclass
+class Sensor(_ResponseBase):
+    """Represents a sensor in OpenAQ, including its measurement details and metadata.
+
+    Attributes:
+        id: Unique identifier for the sensor.
+        name: Name of the sensor.
+        parameter: The measurement parameter associated with the sensor.
+        datetime_first: The datetime of the first measurement recorded by the sensor.
+        datetime_last: The datetime of the last measurement recorded by the sensor.
+        coverage: Coverage details for the sensor's measurements.
+        latest: The latest measurement recorded by the sensor.
+        summary: A summary of the sensor's measurement values.
+
+    Methods:
+        __post_init__: Initializes complex types from the raw response data.
+    """
+
+    id: int
+    name: str
+    parameter: ParameterBase
+    datetime_first: Datetime
+    datetime_last: Datetime
+    coverage: Coverage
+    latest: SensorLatest
+    summary: Summary
+
+    def __post_init__(self):
+        """Sets class attributes to correct type after checking input type."""
+        self.parameter = ParameterBase.load(self.parameter)
+        self.datetime_first = Datetime.load(self.datetime_first)
+        self.datetime_last = Datetime.load(self.datetime_last)
+        self.coverage = Coverage.load(self.coverage)
+        self.latest = SensorLatest.load(self.latest)
+        self.summary = Summary.load(self.summary)
+
+
+@dataclass
+class SensorsResponse(_ResponseBase):
+    """Represents a response containing a list of sensors from the OpenAQ API.
+
+    Attributes:
+        meta: Metadata about the response, such as pagination details.
+        results: A list of sensors.
+
+    Methods:
+        __post_init__: Initializes the list of sensors from the raw response data.
+    """
+
+    meta: Meta
+    results: List[Sensor]
+
+    def __post_init__(self):
+        """Sets class attributes to correct type after checking input type."""
+        self.results = [Sensor.load(x) for x in self.results]
+
+
 # Providers
 
 
@@ -662,29 +737,34 @@ class ManufacturersResponse(_ResponseBase):
 # Measurements
 
 
+from typing import Union
+
+
 @dataclass
 class Summary(_ResourceBase):
     """Statistical summary of measurement values.
 
     Attributes:
-        min: mininum value
+        min: minimum value
         q02: 2nd percentile
         q25: 25th percentile
         median: median value i.e. 50th percentile
         q75: 75th percentile
         q98: 98th percentile
         max: maximum value
+        avg: average value
         sd: standard deviation
     """
 
     min: float
-    q02: float
-    q25: float
-    median: float
-    q75: float
-    q98: float
+    q02: Union[float, None]
+    q25: Union[float, None]
+    median: Union[float, None]
+    q75: Union[float, None]
+    q98: Union[float, None]
     max: float
-    sd: float
+    avg: Union[float, None]
+    sd: Union[float, None]
 
 
 @dataclass

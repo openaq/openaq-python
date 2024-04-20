@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "name": "openaq-api",
+    "website": "/",
+    "page": 1,
+    "limit": 100,
+    "found": 1
+  },
+  "results": [
+    {
+      "id": 6530142,
+      "name": "temperature c",
+      "parameter": {
+        "id": 100,
+        "name": "temperature",
+        "units": "c",
+        "displayName": "T"
+      },
+      "datetimeFirst": {
+        "utc": "2023-07-15T13:00:00+00:00",
+        "local": "2023-07-15T09:00:00-04:00"
+      },
+      "datetimeLast": {
+        "utc": "2024-04-11T19:00:00+00:00",
+        "local": "2024-04-11T15:00:00-04:00"
+      },
+      "coverage": {
+        "expectedCount": 6510,
+        "expectedInterval": "6510:00:00",
+        "observedCount": 5181,
+        "observedInterval": "5181:00:00",
+        "percentComplete": 80,
+        "percentCoverage": 80,
+        "datetimeFrom": null,
+        "datetimeTo": null
+      },
+      "latest": {
+        "datetime": {
+          "utc": "2024-04-11T19:00:00+00:00",
+          "local": "2024-04-11T15:00:00-04:00"
+        },
+        "value": 22.348610242207844,
+        "coordinates": {
+          "latitude": 39.12406,
+          "longitude": -76.70745
+        }
+      },
+      "summary": {
+        "min": 14.641666809717814,
+        "q02": null,
+        "q25": null,
+        "median": null,
+        "q75": null,
+        "q98": null,
+        "max": 30.550000031789143,
+        "avg": 23.144444624582928,
+        "sd": null
+      }
+    }
+  ]
+}
