@@ -1,6 +1,4 @@
-"""
-This module is a vendored version of the 'humps' package originally found at:
-https://github.com/nficano/humps
+"""This module is a vendored version of the 'humps' package originally found at: https://github.com/nficano/humps.
 
 The original package is licensed under the "Unlicense", a public domain equivalent license.
 For more details, see: https://github.com/nficano/humps/blob/master/LICENSE
@@ -8,7 +6,6 @@ Thanks to Nick Ficano for the original implementation.
 """
 
 import re
-
 from collections.abc import Mapping
 
 UNDERSCORE_RE = re.compile(r"(?<=[^\-_])[\-_]+[^\-_]")
@@ -17,8 +14,7 @@ SPLIT_RE = re.compile(r"([\-_]*(?<=[^0-9])(?=[A-Z])[^A-Z]*[\-_]*)")
 
 
 def camelize(str_or_iter):
-    """
-    Convert a string, dict, or list of dicts to camel case.
+    """Convert a string, dict, or list of dicts to camel case.
 
     :param str_or_iter:
         A string or iterable.
@@ -43,8 +39,7 @@ def camelize(str_or_iter):
 
 
 def decamelize(str_or_iter):
-    """
-    Convert a string, dict, or list of dicts to snake case.
+    """Convert a string, dict, or list of dicts to snake case.
 
     :param str_or_iter:
         A string or iterable.
@@ -64,9 +59,8 @@ def decamelize(str_or_iter):
 
 
 def _is_none(_in):
-    """
-    Determine if the input is None
-    and returns a string with white-space removed
+    """Determines if the input is None and returns a string with white-space removed.
+
     :param _in: input
     :return:
         an empty sting if _in is None,
@@ -76,8 +70,8 @@ def _is_none(_in):
 
 
 def _separate_words(string, separator="_"):
-    """
-    Split words that are separated by case differentiation.
+    """Split words that are separated by case differentiation.
+
     :param string: Original string.
     :param separator: String by which the individual
         words will be put back together.
@@ -96,11 +90,7 @@ def _process_keys(str_or_iter, fn):
 
 
 def _fix_abbreviations(string):
-    """
-    Rewrite incorrectly cased acronyms, initialisms, and abbreviations,
-    allowing them to be decamelized correctly. For example, given the string
-    "APIResponse", this function is responsible for ensuring the output is
-    "api_response" instead of "a_p_i_response".
+    """Rewrite incorrectly cased acronyms, initialisms, and abbreviations, allowing them to be decamelized correctly. For example, given the string "APIResponse", this function is responsible for ensuring the output is "api_response" instead of "a_p_i_response".
 
     :param string: A string that may contain an incorrectly cased abbreviation.
     :type string: str

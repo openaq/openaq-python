@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from types import ModuleType
 from typing import Any, Dict, List, Tuple, Union
+
+from httpx import Response
 
 from openaq.utils.humps import camelize, decamelize
 
@@ -16,11 +18,12 @@ except ImportError:
     orjson = None
 
 
-class _ResponseBase:
-    """Base clase for all reponse classes.
+class _ResourceBase:
+    """Base clase for all response classes.
 
     Handles serialization and deserialization of JSON data and setting of
     class attributes
+
     """
 
     @classmethod
@@ -45,6 +48,61 @@ class _ResponseBase:
                 out[decamelize(k)] = v
         return out
 
+    @classmethod
+    def load(cls, results: Mapping[str, any]) -> _ResponseBase:
+        """Deserializes JSON response from API into response object.
+
+        Args:
+            results: A dictionary representation of the data returned from the API.
+
+        Returns:
+            Deserialized representation of the response data as a Python object.
+        """
+        deserialized_data = cls._deserialize(results)
+
+        # Filter out fields that are not in the class annotations
+        expected_fields = {
+            k: v for k, v in deserialized_data.items() if k in cls.__annotations__
+        }
+        return cls(**expected_fields)
+
+
+@dataclass
+class _ResponseBase:
+    """Base clase for all response classes.
+
+    Handles serialization and deserialization of JSON data and setting of
+    class attributes
+
+    Attributes:
+        headers:
+        meta:
+    """
+
+    headers: Headers
+    meta: Meta
+    results: List[Any]
+
+    @classmethod
+    def read_response(cls, response: Response):
+        valid_headers = [field.name for field in fields(Headers)]
+        return cls(
+            Headers(
+                **{
+                    k.replace('-', '_'): v
+                    for k, v in response.headers.items()
+                    if k.replace('-', '_') in valid_headers
+                }
+            ),
+            json.loads(response.json())['meta'],
+            json.loads(response.json())['results'],
+        )
+
+    def __post_init__(self):
+        """Sets class attributes to correct type after checking input type."""
+        if isinstance(self.meta, dict):
+            self.meta = Meta.load(self.meta)
+
     def _serialize(self, data: Mapping):
         """Serializes data and convert keys to camel case.
 
@@ -60,24 +118,6 @@ class _ResponseBase:
             camelize(k): self._serialize(v) if isinstance(v, (Mapping, list)) else v
             for k, v in data.items()
         }
-
-    @classmethod
-    def load(cls, data: Mapping) -> _ResponseBase:
-        """Deserializes JSON response from API into response object.
-
-        Args:
-            data: A dictionary representation of the data returned from the API.
-
-        Returns:
-            Deserialized representation of the response data as a Python object.
-        """
-        deserialized_data = cls._deserialize(data)
-
-        # Filter out fields that are not in the class annotations
-        expected_fields = {
-            k: v for k, v in deserialized_data.items() if k in cls.__annotations__
-        }
-        return cls(**expected_fields)
 
     def dict(self) -> Dict:
         """Serializes response data to Python dictionary.
@@ -104,20 +144,30 @@ class _ResponseBase:
 
 
 @dataclass
-class OpenAQResponse(_ResponseBase):
-    """Base class for generic OpenAQ API response.
+class Headers:
+    """API response headers.
 
     Attributes:
-        meta: a metadata object containing information about the results.
-        results: a list of records, typed as Any to be overridden.
+        ratelimit_limit: The RateLimit-Limit header indicates the maximum number of requests for rate limit policy
+        ratelimit_policy: The RateLimit-Policy header indicates the rate limit policy
+        ratelimit_remaining: The RateLimit-Remaining header indicates the remaining number of requests for the period
+        ratelimit_reset: The RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
     """
 
-    meta: Meta
-    results: List[Any]
+    ratelimit_limit: int = None
+    ratelimit_policy: str = None
+    ratelimit_remaining: int = None
+    ratelimit_reset: int = None
+
+    def __post_init__(self):
+        """Coerces attribute values to correct types."""
+        self.ratelimit_limit = int(self.ratelimit_limit)
+        self.ratelimit_remaining = int(self.ratelimit_remaining)
+        self.ratelimit_reset = int(self.ratelimit_reset)
 
 
 @dataclass
-class Meta(_ResponseBase):
+class Meta(_ResourceBase):
     """API response metadata.
 
     Attributes:
@@ -136,7 +186,7 @@ class Meta(_ResponseBase):
 
 
 @dataclass
-class CountryBase(_ResponseBase):
+class CountryBase(_ResourceBase):
     """Base representation for country resource in OpenAQ.
 
     Attributes:
@@ -151,7 +201,7 @@ class CountryBase(_ResponseBase):
 
 
 @dataclass
-class InstrumentBase(_ResponseBase):
+class InstrumentBase(_ResourceBase):
     """Base representation for instrument resource in OpenAQ.
 
     Attributes:
@@ -164,7 +214,7 @@ class InstrumentBase(_ResponseBase):
 
 
 @dataclass
-class ManufacturerBase(_ResponseBase):
+class ManufacturerBase(_ResourceBase):
     """Base representation for manufacturer resource in OpenAQ.
 
     Attributes:
@@ -177,7 +227,7 @@ class ManufacturerBase(_ResponseBase):
 
 
 @dataclass
-class OwnerBase(_ResponseBase):
+class OwnerBase(_ResourceBase):
     """Base representation for owner resource in OpenAQ.
 
     Attributes:
@@ -190,7 +240,7 @@ class OwnerBase(_ResponseBase):
 
 
 @dataclass
-class ParameterBase(_ResponseBase):
+class ParameterBase(_ResourceBase):
     """Base representation for measurement parameter resource in OpenAQ.
 
     Attributes:
@@ -205,7 +255,7 @@ class ParameterBase(_ResponseBase):
 
 
 @dataclass
-class ProviderBase(_ResponseBase):
+class ProviderBase(_ResourceBase):
     """Base representation for providers in OpenAQ.
 
     Attributes:
@@ -218,7 +268,7 @@ class ProviderBase(_ResponseBase):
 
 
 @dataclass
-class SensorBase(_ResponseBase):
+class SensorBase(_ResourceBase):
     """Base representation for sensor resource in OpenAQ.
 
     Attributes:
@@ -238,7 +288,7 @@ class SensorBase(_ResponseBase):
 
 
 @dataclass
-class Coordinates(_ResponseBase):
+class Coordinates(_ResourceBase):
     """Representation for geographic coordinates in OpenAQ.
 
     coordinates are represented in WGS84 (AKA EPSG 4326) coordinate system.
@@ -253,7 +303,7 @@ class Coordinates(_ResponseBase):
 
 
 @dataclass
-class Datetime(_ResponseBase):
+class Datetime(_ResourceBase):
     """Representation for timestamps in OpenAQ.
 
     Attributes:
@@ -266,7 +316,7 @@ class Datetime(_ResponseBase):
 
 
 @dataclass
-class Location(_ResponseBase):
+class Location(_ResourceBase):
     """Representation of location resource in OpenAQ.
 
     Attributes:
@@ -331,12 +381,12 @@ class LocationsResponse(_ResponseBase):
     """Representation of the API response for locations resource.
 
     Attributes:
+        headers: a Headers object of response headers
         meta: a metadata object containing information about the results.
         results: a list of location records.
 
     """
 
-    meta: Meta
     results: List[Location]
 
     def __post_init__(self):
@@ -426,7 +476,7 @@ class SensorsResponse(_ResponseBase):
 
 
 @dataclass
-class OwnerEntity(_ResponseBase):
+class OwnerEntity(_ResourceBase):
     """Representation of owner entitiy resource in OpenAQ.
 
     Attributes:
@@ -439,7 +489,7 @@ class OwnerEntity(_ResponseBase):
 
 
 @dataclass
-class Bbox(_ResponseBase):
+class Bbox(_ResourceBase):
     """Bounding box representation for geographic areas.
 
     Attributes:
@@ -454,7 +504,7 @@ class Bbox(_ResponseBase):
 
 
 @dataclass
-class Provider(_ResponseBase):
+class Provider(_ResourceBase):
     """Representation of provider resource in OpenAQ.
 
     id: unique identifier for provider
@@ -501,7 +551,6 @@ class ProvidersResponse(_ResponseBase):
         results: a list of provider records.
     """
 
-    meta: Meta
     results: List[Provider]
 
     def __post_init__(self):
@@ -516,7 +565,7 @@ class ProvidersResponse(_ResponseBase):
 
 
 @dataclass
-class Parameter(_ResponseBase):
+class Parameter(_ResourceBase):
     """Representation of parameter resource in OpenAQ.
 
     Attributes:
@@ -543,7 +592,6 @@ class ParametersResponse(_ResponseBase):
         results: a list of parameter records.
     """
 
-    meta: Meta
     results: List[Parameter]
 
     def __post_init__(self):
@@ -558,7 +606,7 @@ class ParametersResponse(_ResponseBase):
 
 
 @dataclass
-class Country(_ResponseBase):
+class Country(_ResourceBase):
     """Representation of country resource in OpenAQ.
 
     Attributes:
@@ -592,13 +640,10 @@ class CountriesResponse(_ResponseBase):
         results: a list of country records.
     """
 
-    meta: Meta
     results: List[Country]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
         if isinstance(self.results, list):
             self.results = [Country.load(x) for x in self.results]
 
@@ -607,7 +652,7 @@ class CountriesResponse(_ResponseBase):
 
 
 @dataclass
-class Instrument(_ResponseBase):
+class Instrument(_ResourceBase):
     """Representation of instrument resource in OpenAQ.
 
     Attributes:
@@ -637,7 +682,6 @@ class InstrumentsResponse(_ResponseBase):
         results: a list of instrument records.
     """
 
-    meta: Meta
     results: List[Instrument]
 
     def __post_init__(self):
@@ -652,7 +696,7 @@ class InstrumentsResponse(_ResponseBase):
 
 
 @dataclass
-class Manufacturer(_ResponseBase):
+class Manufacturer(_ResourceBase):
     """Representation of manufacturer resource in OpenAQ.
 
     Attributes:
@@ -680,7 +724,6 @@ class ManufacturersResponse(_ResponseBase):
         results: a list of manufacturer records.
     """
 
-    meta: Meta
     results: List[Manufacturer]
 
     def __post_init__(self):
@@ -698,7 +741,7 @@ from typing import Union
 
 
 @dataclass
-class Summary(_ResponseBase):
+class Summary(_ResourceBase):
     """Statistical summary of measurement values.
 
     Attributes:
@@ -725,7 +768,7 @@ class Summary(_ResponseBase):
 
 
 @dataclass
-class Coverage(_ResponseBase):
+class Coverage(_ResourceBase):
     """Data coverage details for measurements.
 
     Attributes:
@@ -757,7 +800,7 @@ class Coverage(_ResponseBase):
 
 
 @dataclass
-class Period(_ResponseBase):
+class Period(_ResourceBase):
     """Representation of a measurement time period.
 
     Attributes:
@@ -782,7 +825,7 @@ class Period(_ResponseBase):
 
 
 @dataclass
-class Measurement(_ResponseBase):
+class Measurement(_ResourceBase):
     """Representation of measurement resource in OpenAQ.
 
     Attributes:
@@ -824,7 +867,6 @@ class MeasurementsResponse(_ResponseBase):
         results: a list of measurement records.
     """
 
-    meta: Meta
     results: List[Measurement]
 
     def __post_init__(self):
@@ -839,7 +881,7 @@ class MeasurementsResponse(_ResponseBase):
 
 
 @dataclass
-class Owner(_ResponseBase):
+class Owner(_ResourceBase):
     """Detailed information about an owner in OpenAQ.
 
     Attributes:
@@ -860,7 +902,6 @@ class OwnersResponse(_ResponseBase):
         results: a list of owner records.
     """
 
-    meta: Meta
     results: List[Owner]
 
     def __post_init__(self):

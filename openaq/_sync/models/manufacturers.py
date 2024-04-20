@@ -26,8 +26,8 @@ class Manufacturers(SyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        manufacturer = self._client._get(f"/manufacturers/{manufacturers_id}")
-        return ManufacturersResponse.load(manufacturer.json())
+        manufacturer_response = self._client._get(f"/manufacturers/{manufacturers_id}")
+        return ManufacturersResponse.read_response(manufacturer_response)
 
     def list(
         self,
@@ -68,5 +68,5 @@ class Manufacturers(SyncResourceBase):
             page=page, limit=limit, order_by=order_by, sort_order=sort_order
         )
 
-        manufacturers = self._client._get("/manufacturers", params=params)
-        return ManufacturersResponse.load(manufacturers.json())
+        manufacturer_response = self._client._get("/manufacturers", params=params)
+        return ManufacturersResponse.read_response(manufacturer_response)
