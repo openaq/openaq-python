@@ -30,8 +30,8 @@ class Locations(SyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        location = self._client._get(f"/locations/{locations_id}")
-        return LocationsResponse.load(location.json())
+        location_response = self._client._get(f"/locations/{locations_id}")
+        return LocationsResponse.read_response(location_response)
 
     def list(
         self,
@@ -111,5 +111,5 @@ class Locations(SyncResourceBase):
             sort_order=sort_order,
         )
 
-        locations = self._client._get("/locations", params=params)
-        return LocationsResponse.load(locations.json())
+        locations_response = self._client._get("/locations", params=params)
+        return LocationsResponse.read_response(locations_response)

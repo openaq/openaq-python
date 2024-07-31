@@ -12,8 +12,8 @@ from openaq._async.models.parameters import Parameters
 from openaq._async.models.providers import Providers
 from openaq.shared.client import (
     DEFAULT_USER_AGENT,
+    DEFAULT_BASE_URL,
     BaseClient,
-    resolve_headers,
 )
 
 from .transport import AsyncTransport
@@ -29,6 +29,12 @@ class AsyncOpenAQ(BaseClient):
         base_url: The base URL for the API endpoint.
 
     Note:
+        An API key can either be passed directly to the OpenAQ client class at
+        instantiation or can be accessed from a system environment variable
+        name `OPENAQ-API-KEY`. An API key added at instantiation will always
+        override one set in the environment variable.
+
+    Warning:
         Although the `api_key` parameter is not required for instantiating the
         OpenAQ client, an API Key is required for using the OpenAQ API.
 
@@ -48,19 +54,15 @@ class AsyncOpenAQ(BaseClient):
     def __init__(
         self,
         api_key: Union[str, None] = None,
-        user_agent: str = DEFAULT_USER_AGENT,
         headers: Mapping[str, str] = {},
-        base_url: str = "https://api.openaq.org/v3/",
+        base_url: str = DEFAULT_BASE_URL,
+        user_agent: str = DEFAULT_USER_AGENT,
         _transport: AsyncTransport = AsyncTransport(),
     ) -> AsyncOpenAQ:
-        super().__init__(_transport, headers, api_key, base_url)
+        super().__init__(_transport, user_agent, base_url, headers, api_key)
         if headers:
-            self._headers.update(headers)
-        self._headers = resolve_headers(
-            self._headers,
-            api_key=api_key,
-            user_agent=user_agent,
-        )
+            self.__headers.update(headers)
+        self.resolve_headers()
 
         self.locations = Locations(self)
         self.providers = Providers(self)
@@ -84,12 +86,12 @@ class AsyncOpenAQ(BaseClient):
         headers: Union[Mapping[str, str], None] = None,
     ):
         if headers:
-            request_headers = self._headers.copy()
+            request_headers = self.__headers.copy()
             request_headers.update(headers)
         else:
-            request_headers = self._headers
+            request_headers = self.__headers
         try:
-            url = self._base_url + path
+            url = self.__base_url + path
             data = await self.transport.send_request(
                 method=method, url=url, params=params, headers=request_headers
             )
