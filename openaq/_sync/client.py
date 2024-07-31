@@ -59,10 +59,7 @@ class OpenAQ(BaseClient):
         user_agent: str = DEFAULT_USER_AGENT,
         _transport: Transport = Transport(),
     ) -> OpenAQ:
-        super().__init__(_transport, user_agent, base_url, headers, api_key)
-        if headers:
-            self._BaseClient__headers.update(headers)
-        self.resolve_headers()
+        super().__init__(_transport, user_agent, headers, api_key, base_url)
 
         self.locations = Locations(self)
         self.providers = Providers(self)
@@ -91,7 +88,7 @@ class OpenAQ(BaseClient):
         else:
             request_headers = self.headers
         try:
-            url = self._BaseClient__base_url + path
+            url = self._base_url + path
             data = self.transport.send_request(
                 method=method, url=url, params=params, headers=request_headers
             )

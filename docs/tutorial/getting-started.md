@@ -14,7 +14,7 @@ pip install openaq
 
 ## Register for an OpenAQ API Key
 
-Visit [api.openaq.org/register](https://api.openaq.org/register).
+Visit [explore.openaq.org/register](https://explore.openaq.org/register).
 
 
 !!! warning
@@ -56,7 +56,7 @@ print(location)
 
 `OpenAQ` is a Python class that provides access to communicate with API resources.
 
-### Step 2: Instantiate the client.
+### Step 2: Instantiate the client
 
 ```py hl_lines="3"
 from openaq import OpenAQ
