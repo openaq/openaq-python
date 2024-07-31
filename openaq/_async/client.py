@@ -57,12 +57,9 @@ class AsyncOpenAQ(BaseClient):
         headers: Mapping[str, str] = {},
         base_url: str = DEFAULT_BASE_URL,
         user_agent: str = DEFAULT_USER_AGENT,
-        _transport: AsyncTransport = AsyncTransport(),
+        transport: AsyncTransport = AsyncTransport(),
     ) -> AsyncOpenAQ:
-        super().__init__(_transport, user_agent, base_url, headers, api_key)
-        if headers:
-            self.__headers.update(headers)
-        self.resolve_headers()
+        super().__init__(transport, user_agent, headers, api_key, base_url)
 
         self.locations = Locations(self)
         self.providers = Providers(self)
@@ -86,12 +83,12 @@ class AsyncOpenAQ(BaseClient):
         headers: Union[Mapping[str, str], None] = None,
     ):
         if headers:
-            request_headers = self.__headers.copy()
+            request_headers = self._headers.copy()
             request_headers.update(headers)
         else:
-            request_headers = self.__headers
+            request_headers = self._headers
         try:
-            url = self.__base_url + path
+            url = self._base_url + path
             data = await self.transport.send_request(
                 method=method, url=url, params=params, headers=request_headers
             )

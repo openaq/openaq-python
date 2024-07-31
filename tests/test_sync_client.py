@@ -32,13 +32,13 @@ class TestClient:
             os.environ, {"OPENAQ_API_KEY": "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"}
         ):
             yield
-            
+
     def test_default_client_params(self, setup):
-        assert self.client._BaseClient__base_url == "https://api.openaq.org/v3/"
+        assert self.client._base_url == "https://api.openaq.org/v3/"
 
     def test_default_headers(self, setup):
         assert (
-            self.client._headers["User-Agent"]
+            self.client.headers["User-Agent"]
             == f"openaq-python-{__version__}-{platform.python_version()}"
         )
         assert self.client.headers["Accept"] == "application/json"
@@ -95,10 +95,3 @@ class TestClient:
         tests that api_key argument overrides api key value set in config file and system environment variable
         """
         assert self.client.api_key == "abc123-def456-ghi789"
-
-    def test_client_api_key_env_vars(self):
-        os.environ["OPENAQ-API-KEY"] = "1"
-        self.client = OpenAQ(
-            _transport=MockTransport(),
-        )
-        assert self.client.api_key == "1"

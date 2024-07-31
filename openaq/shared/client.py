@@ -37,8 +37,8 @@ class BaseClient(ABC):
         _base_url: The base URL of the OpenAQ API.
 
     Args:
-        _transport: The transport mechanism used for making requests to the OpenAQ API.
-        _headers: mapping of HTTP headers to be sent with request.
+        transport: The transport mechanism used for making requests to the OpenAQ API.
+        headers: mapping of HTTP headers to be sent with request.
         api_key: OpenAQ API key string.
         user_agent: User-Agent header value to be sent with HTTP requests.
         base_url: The base URL for the OpenAQ API. Defaults to "https://api.openaq.org/v3/".
@@ -46,38 +46,37 @@ class BaseClient(ABC):
 
     def __init__(
         self,
-        _transport: BaseTransport,
+        transport: BaseTransport,
         user_agent: str,
-        base_url: str,
-        _headers: Mapping[str, str] = {},
+        headers: Mapping[str, str] = {},
         api_key: Union[str, None] = None,
         base_url: str = "https://api.openaq.org/v3/",
     ) -> None:
         """Initialize a new instance of BaseClient.
 
         Args:
-            _transport: The transport mechanism used for making requests to the OpenAQ API.
-            _headers: mapping of HTTP headers to be sent with request.
+            transport: The transport mechanism used for making requests to the OpenAQ API.
+            headers: mapping of HTTP headers to be sent with request.
             api_key: OpenAQ API key string.
             user_agent: User-Agent header value to be sent with HTTP requests.
             base_url: The base URL for the OpenAQ API. Defaults to "https://api.openaq.org/v3/".
         """
-
         if api_key:
-            self.api_key = api_key
+            self._api_key = api_key
         else:
-            self.api_key = self._api_key()
-        self.__headers = _headers
-        self.__transport = _transport
-        self.__base_url = base_url
-        self.__user_agent = user_agent
+            self._api_key = self._get_api_key()
+        self._headers = headers
+        self._transport = transport
+        self._base_url = base_url
+        self._user_agent = user_agent
+        self.resolve_headers()
 
-    def _api_key(self) -> str:
+    def _get_api_key(self) -> str:
         """Gets API key value from env or openaq config file.
 
         Returns:
             The API key value set either in the `OPENAQ_API_KEY` environment
-            variable or the `api-key` value in the .openaq.toml configutation
+            variable or the `api-key` value in the .openaq.toml configuration
             file. A value passed to the `api_key` parameter in the class
             constructor will always override these other values. the
             `OPENAQ_API_KEY` environment variable get second priority with
@@ -90,6 +89,15 @@ class BaseClient(ABC):
             return config.get('api-key')
 
     @property
+    def api_key(self) -> str:
+        """Accessor for private _api_key field.
+
+        Returns:
+            The API key string.
+        """
+        return self._api_key
+
+    @property
     def transport(self) -> BaseTransport:
         """Get the transport mechanism used by the client.
 
@@ -99,41 +107,26 @@ class BaseClient(ABC):
         Returns:
             The transport instance.
         """
-        return self.__transport
+        return self._transport
 
     @property
     def headers(self) -> Mapping[str, str]:
-        """Accessor for private __headers field.
+        """Accessor for private _headers field.
 
         Returns:
             dictionary of http headers to be sent with request
         """
-        return self.__headers
-
-    @property
-    def api_key(self) -> Union[str, None]:
-        """Access for private __api_key field.
-
-        Returns:
-            API key value
-        """
-        return self.__api_key
+        return self._headers
 
     @property
     def base_url(self) -> str:
-        """Accessor for private __base_url field.
+        """Accessor for private _base_url field.
 
         Returns:
             base URL string value
 
         """
-        return self.__base_url
-
-    @staticmethod
-    def _set_api_key():
-        """Sets API key from environment variable."""
-        api_key = os.environ.get('OPENAQ-API-KEY', None)
-        return api_key
+        return self._base_url
 
     def resolve_headers(self):
         """Resolves and updates the HTTP headers with the given API key and User Agent.
@@ -146,9 +139,9 @@ class BaseClient(ABC):
         Returns:
             Updated headers with the added API key and User Agent.
         """
-        self.__headers["X-API-Key"] = self.__api_key
-        self.__headers["User-Agent"] = self.__user_agent
-        self.__headers["Accept"] = ACCEPT_HEADER
+        self._headers["X-API-Key"] = self.api_key
+        self._headers["User-Agent"] = self._user_agent
+        self._headers["Accept"] = ACCEPT_HEADER
 
     @abstractmethod
     def close(self):
