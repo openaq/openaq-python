@@ -1,8 +1,17 @@
 """Base class and utilities to for shared client code."""
 
+import os
 import platform
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, Mapping, Union
+
+# for Python versions <3.11 tomllib is not part of std. library
+_has_toml = True
+try:
+    import tomllib
+except ImportError:
+    _has_toml = False
 
 from openaq.shared.transport import BaseTransport
 
@@ -52,6 +61,7 @@ class BaseClient(ABC):
         self,
         _transport: BaseTransport,
         _headers: Mapping[str, str] = {},
+        api_key: Union[str, None] = None,
         base_url: str = "https://api.openaq.org/v3/",
     ) -> None:
         """Initialize a new instance of BaseClient.
@@ -62,7 +72,28 @@ class BaseClient(ABC):
         """
         self._headers = _headers
         self._transport = _transport
+        if api_key:
+            self.api_key = api_key
+        else:
+            self.api_key = self._api_key()
         self._base_url = base_url
+
+    def _api_key(self) -> str:
+        """Gets API key value from env or openaq config file.
+
+        Returns:
+            The API key value set either in the `OPENAQ_API_KEY` environment
+            variable or the `api-key` value in the .openaq.toml configutation
+            file. A value passed to the `api_key` parameter in the class
+            constructor will always override these other values. the
+            `OPENAQ_API_KEY` environment variable get second priority with
+            the configuration file `api-key` having last priority.
+        """
+        if os.environ.get("OPENAQ_API_KEY", None):
+            return os.environ.get("OPENAQ_API_KEY")
+        config = _get_openaq_config()
+        if config:
+            return config.get('api-key')
 
     @property
     def transport(self) -> BaseTransport:
@@ -101,3 +132,20 @@ class BaseClient(ABC):
         headers: Union[Mapping[str, Any], None] = None,
     ):
         raise NotImplementedError
+
+
+def _get_openaq_config() -> Union[Mapping[str, str], None]:
+    """Reads .openaq.toml configuration file.
+
+    Depends on tomllib so only available in Python >3.11.
+
+    """
+    config_path = Path(Path.home() / ".openaq.toml")
+    if config_path.is_file():
+        with open(config_path, 'rb') as f:
+            if _has_toml:
+                config = tomllib.load(f)
+            else:
+                config = None
+            return config
+    return None

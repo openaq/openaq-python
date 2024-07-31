@@ -53,7 +53,7 @@ class AsyncOpenAQ(BaseClient):
         base_url: str = "https://api.openaq.org/v3/",
         _transport: AsyncTransport = AsyncTransport(),
     ) -> AsyncOpenAQ:
-        super().__init__(_transport, headers, base_url)
+        super().__init__(_transport, headers, api_key, base_url)
         if headers:
             self._headers.update(headers)
         self._headers = resolve_headers(

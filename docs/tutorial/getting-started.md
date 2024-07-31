@@ -56,7 +56,7 @@ print(location)
 
 `OpenAQ` is a Python class that provides access to communicate with API resources.
 
-### Step 2: Instantiate the client.
+### Step 2: Instantiate the client
 
 ```py hl_lines="3"
 from openaq import OpenAQ
