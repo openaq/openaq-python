@@ -1,11 +1,11 @@
 
 
-In this tutorial, we will learn how to install and setup the OpenAQ API Python wrapper and query a location from the OpenAQ API .
+In this tutorial, we will learn how to install and setup the OpenAQ Python SDK and query a location from the OpenAQ API.
 
 
 ## Install OpenAQ Python
 
-With Python and pip installed on our system we can install the OpenAQ Python API wrapper via pip.
+With Python and pip installed on our system we can install the OpenAQ Python SDK via pip.
 
 ```sh
 pip install openaq
@@ -132,4 +132,4 @@ LocationsResponse(meta=Meta(name='openaq-api', website='/', page=1, limit=100, f
 
 ## Conclusion
 
-You have now successfully requested and downloaded data from the OpenAQ API with the OpenAQ Python wrapper. To learn more check out the [how-to guides](/how-to-guides/working-with-the-client/) and [reference](/reference/openaq/) documentation.
+You have now successfully requested and downloaded data from the OpenAQ API with the OpenAQ Python SDK. To learn more check out the [how-to guides](/how-to-guides/working-with-the-client/) and [reference](/reference/openaq/) documentation.

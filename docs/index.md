@@ -1,4 +1,4 @@
-# OpenAQ Python API Wrapper
+# OpenAQ Python SDK
 
 !!! warning
 
@@ -6,7 +6,7 @@
     a v1.0.0 release. 
 
 
-The OpenAQ Python API wrapper provides a low-level python interface for interacting the with OpenAQ API. The library is compatible with Python versions 3.8, 3.9, 3.10, 3.11 and 3.12
+The OpenAQ Python SDK provides a Python interface for interacting the with OpenAQ API. The library is compatible with Python versions 3.8, 3.9, 3.10, 3.11 and 3.12
 
 Features:
 

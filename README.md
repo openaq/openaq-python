@@ -1,10 +1,10 @@
 # openaq-python
 
-The official Python wrapper for the OpenAQ API.
+The official Python SDK for the OpenAQ API.
 
 > :warning: OpenAQ python is still under active development and may be unstable until a v1.0.0 release
 
-OpenAQ Python is a low-level API wrapper for the OpenAQ Version 3 API.
+Python SDK for the OpenAQ Version 3 API.
 
 [![PyPI - Version](https://img.shields.io/pypi/v/openaq.svg)](https://pypi.org/project/openaq)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/openaq.svg)](https://pypi.org/project/openaq)
@@ -67,4 +67,4 @@ hatch run test:cov
 
 ## Acknowledgements
 
-For many years [py-openaq](https://github.com/dhhagan/py-openaq) by David Hagan filled the gap for a Python API wrapper for the OpenAQ API. Thank you to David for many years of maintaining py-openaq and for taking the original step to develop a wrapper for OpenAQ.
+For many years [py-openaq](https://github.com/dhhagan/py-openaq) by David Hagan filled the gap for a Python API SDK for the OpenAQ API. Thank you to David for many years of maintaining py-openaq and for taking the original step to develop a Python tool for OpenAQ.
