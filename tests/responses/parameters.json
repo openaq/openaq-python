@@ -1,4 +1,4 @@
-{ "headers": {"ratelimitLimit": 3, "ratelimitPolicy": "3;w=60", "ratelimitRemaining": 2, "ratelimitReset": 60}, 
+{ 
   "meta": {
     "name": "openaq-api",
     "website": "/",

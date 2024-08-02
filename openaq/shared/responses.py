@@ -148,22 +148,23 @@ class Headers:
     """API response headers.
 
     Attributes:
-        ratelimit_limit: The RateLimit-Limit header indicates the maximum number of requests for rate limit policy
-        ratelimit_policy: The RateLimit-Policy header indicates the rate limit policy
-        ratelimit_remaining: The RateLimit-Remaining header indicates the remaining number of requests for the period
-        ratelimit_reset: The RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
+        x_ratelimit_limit: The X-RateLimit-Limit header indicates the maximum number of requests for rate limit policy
+        x_ratelimit_remaining: The X-RateLimit-Remaining header indicates the remaining number of requests for the period
+        x_ratelimit_used: The X-RateLimit-Remaining header indicates the number of requests used for the period
+        x_ratelimit_reset: The X-RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
     """
 
-    ratelimit_limit: int = None
-    ratelimit_policy: str = None
-    ratelimit_remaining: int = None
-    ratelimit_reset: int = None
+    x_ratelimit_limit: int = None
+    x_ratelimit_remaining: int = None
+    x_ratelimit_used: int = None
+    x_ratelimit_reset: int = None
 
     def __post_init__(self):
         """Coerces attribute values to correct types."""
-        self.ratelimit_limit = int(self.ratelimit_limit)
-        self.ratelimit_remaining = int(self.ratelimit_remaining)
-        self.ratelimit_reset = int(self.ratelimit_reset)
+        self.x_ratelimit_limit = int(self.x_ratelimit_limit)
+        self.x_ratelimit_remaining = int(self.x_ratelimit_remaining)
+        self.x_ratelimit_used = int(self.x_ratelimit_used)
+        self.x_ratelimit_reset = int(self.x_ratelimit_reset)
 
 
 @dataclass

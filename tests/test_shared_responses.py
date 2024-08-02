@@ -7,9 +7,7 @@ import pytest
 from openaq.shared.responses import (
     CountriesResponse,
     Country,
-    CountryBase,
     Instrument,
-    InstrumentBase,
     InstrumentsResponse,
     Location,
     LocationsResponse,
@@ -25,6 +23,13 @@ from openaq.shared.responses import (
     _ResourceBase,
     _ResponseBase,
 )
+
+RATE_LIMIT_HEADERS = {
+    "X-Ratelimit-Limit": "23",
+    "X-RateLimit-Used": "3",
+    "X-RateLimit-Remaining": "2",
+    "X-RateLimit-Reset": "60",
+}
 
 
 def read_resource_file(name: str) -> str:
@@ -53,6 +58,19 @@ def read_response_file(name: str) -> str:
     path = Path(Path(__file__).parent, 'responses', f'{name}.json').absolute()
     with open(path, 'r', encoding='utf-8') as f:
         return f.read()
+
+
+def mock_response(data) -> httpx.Response:
+    return httpx.Response(status_code=200, headers=RATE_LIMIT_HEADERS, json=data)
+
+
+@pytest.mark.respx(base_url="https://api.openaq.org/v3/")
+def test_rate_limit_headers_response():
+    """Tests that example JSON responses validate against response models."""
+    response = read_response_file('locations')
+    mocked = mock_response(response)
+    location = LocationsResponse.read_response(mocked)
+    assert location.headers.x_ratelimit_limit == 23
 
 
 @pytest.mark.parametrize(
@@ -107,16 +125,6 @@ def test_responses_validation(name: str, response_class: _ResponseBase):
         )
 
 
-def mock_response(data):
-    headers = {
-        "Ratelimit-Limit": "3",
-        "RateLimit-Policy": "3;w=60",
-        "RateLimit-Remaining": "2",
-        "RateLimit-Reset": "60",
-    }
-    return httpx.Response(status_code=200, headers=headers, json=data)
-
-
 @pytest.mark.parametrize(
     "name,response_class",
     [
@@ -136,31 +144,23 @@ def test_responses_json(name: str, response_class: _ResponseBase):
     """Tests that example JSON responses validate against response models."""
     response = read_response_file(name)
     mocked = mock_response(response)
-    assert json.loads(response) == json.loads(
-        response_class.read_response(mocked).json()
-    )
+    d = json.loads(response_class.read_response(mocked).json())
+    headers_less_response = {k: d[k] for k in set(list(d.keys())) - set(['headers'])}
+
+    assert json.loads(response) == headers_less_response
 
 
-# @pytest.mark.parametrize(
-#     "extra_field,response_class",
-#     [
-#         ('{"anotherField": null}', LocationsResponse),
-#     ],
-# )
-# def test_response_ignores_unexpected_fields(
-#     extra_field: str, response_class: _ResponseBase
-# ):
-#     """Tests that the response model ignores unexpected fields."""
-#     base_response = read_response_file('locations')
-#     base_json = json.loads(base_response)
-
-#     modified_json = json.loads(extra_field)
-#     base_json['results'][0].update(modified_json)
-
-#     try:
-#         response_instance = response_class.load(base_json)
-#         assert not hasattr(
-#             response_instance.results[0], 'anotherField'
-#         ), "Unexpected 'anotherField' was not ignored"
-#     except Exception as e:
-#         pytest.fail(f"Deserialization failed with unexpected field 'anotherField': {e}")
+def test_response_ignores_unexpected_fields():
+    """Tests that the response model ignores unexpected fields."""
+    base_response = read_response_file('locations')
+    base_json = json.loads(base_response)
+    modified_json = json.loads('{"anotherField": null}')
+    base_json['results'][0].update(modified_json)
+    mocked = mock_response(json.dumps(base_json))
+    try:
+        response_instance = LocationsResponse.read_response(mocked)
+        assert not hasattr(
+            response_instance.results[0], 'anotherField'
+        ), "Unexpected 'anotherField' was not ignored"
+    except Exception as e:
+        pytest.fail(f"Deserialization failed with unexpected field 'anotherField': {e}")
