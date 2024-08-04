@@ -37,9 +37,9 @@ Documentation available at [python.openaq.org](https://python.openaq.org)
 
 ## Development
 
-Code is styled according to [black](https://github.com/psf/black), imports are sorted using [isort](https://pycqa.github.io/isort/) and code is linted using [ruff](https://github.com/astral-sh/ruff).
+Code is styled according to [black](https://github.com/psf/black), imports are sorted using [isort](https://pycqa.github.io/isort/), and code is linted using [ruff](https://github.com/astral-sh/ruff).
 
-Codebase can be automatcally formatted and linted by running:
+Codebase can be automatically formatted and linted by running:
 
 ```console
 hatch run style:fmt
@@ -66,4 +66,4 @@ hatch run test:cov
 
 ## Acknowledgements
 
-For many years [py-openaq](https://github.com/dhhagan/py-openaq) by David Hagan filled the gap for a Python API wrapper for the OpenAQ API. Thank you to David for many years of maintaining py-openaq and for taking the original step to develop a wrapper for OpenAQ.
+For many years [py-openaq](https://github.com/dhhagan/py-openaq) by David Hagan filled the gap for a Python API wrapper for the OpenAQ API. Thank you to David for this initial wrapper and maintaining it for so long. 
