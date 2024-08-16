@@ -65,7 +65,7 @@ Setting the API key via the client class argument on instantiation will also sup
     ```py
     import asyncio
 
-    from openaq import OpenAQ
+    from openaq import AsyncOpenAQ
 
     async def main():
         client = AsyncOpenAQ(api_key='replace-with-a-valid-openaq-api-key')
@@ -93,7 +93,7 @@ Alternatively we can use a context manager to handle closing the connection for 
     ```py
     import asyncio
 
-    from openaq import OpenAQ
+    from openaq import AsyncOpenAQ
 
     async def main():
         async with AsyncOpenAQ(api_key='replace-with-a-valid-openaq-api-key') as client:
