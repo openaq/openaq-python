@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+from .types import Rollup, Data
+from .exceptions import NotFoundError
+
+
 import datetime
-from typing import Any, Mapping
+from typing import Any, Mapping, Union
 
 
 def build_query_params(**kwargs) -> Mapping[str, Any]:
@@ -30,3 +34,39 @@ def build_query_params(**kwargs) -> Mapping[str, Any]:
                 v = v.isoformat()
             params[k] = v
     return params
+
+
+def build_measurements_path(
+    sensors_id: int, data: Union[Data, None] = None, rollup: Union[Rollup, None] = None
+):
+    """Prepares and builds the path for measurements endpoint using data and rollup parameters.
+
+    Args:
+        sensors_id: sensors ID
+        data: the base measurement unit to query. options are 'measurements', 'hours', 'days', 'years'
+        rollup: the period by which to rollup the base measurement data. Options are 'hourly', 'daily', 'yearly'
+
+    Returns:
+        string of url path
+
+    Raises:
+        NotFoundError:
+    """
+    base_path = f'/sensors/{sensors_id}'
+    if data == 'measurements' or data == None:
+        path = base_path + '/measurements'
+    if data == 'hours':
+        path = base_path + '/hours'
+    if data == 'days':
+        path = base_path + '/days'
+    if data == 'years':
+        path = base_path + '/years'
+    if rollup:
+        path += f'/{rollup}'
+    if data == 'hours' and rollup == 'hourly':
+        raise NotFoundError()
+    if data == 'days' and rollup == 'daily':
+        raise NotFoundError()
+    if data == 'years' and rollup == 'yearly':
+        raise NotFoundError()
+    return path

@@ -25,7 +25,6 @@ OpenAQ python is availble on pip.
 pip install openaq
 ```
 
-
 ## Documentation
 
 Documentation available at [python.openaq.org](https://python.openaq.org)
@@ -63,7 +62,6 @@ Code coverage can be viewed with:
 ```console
 hatch run test:cov
 ```
-
 
 ## Acknowledgements
 

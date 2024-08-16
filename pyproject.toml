@@ -39,7 +39,7 @@ path = "openaq/__init__.py"
 
 
 [tool.hatch.envs.test]
-dependencies = ["coverage[toml]", "pytest", "pytest-cov", "respx"]
+dependencies = ["coverage[toml]", "pytest", "pytest-cov","pytest-mock", "respx"]
 
 [tool.hatch.envs.test.scripts]
 test = 'pytest -s -vv'
