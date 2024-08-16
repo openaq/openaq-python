@@ -9,6 +9,8 @@ from openaq.shared.responses import (
     Country,
     Instrument,
     InstrumentsResponse,
+    License,
+    LicensesResponse,
     Location,
     LocationsResponse,
     Manufacturer,
@@ -78,6 +80,7 @@ def test_rate_limit_headers_response():
     [
         ('country', Country),
         ('instrument', Instrument),
+        ('license', License),
         ('location', Location),
         ('manufacturer', Manufacturer),
         ('owner', Owner),

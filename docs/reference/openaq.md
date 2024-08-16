@@ -51,6 +51,15 @@ __Manufacturers__
       show_root_heading: false
       show_source: true
 
+__Licenses__
+
+::: openaq._sync.models.licenses.Licenses
+    options:
+      heading_level: 3
+      show_bases: false
+      show_root_heading: false
+      show_source: true
+
 __Owners__
 
 ::: openaq._sync.models.owners.Owners

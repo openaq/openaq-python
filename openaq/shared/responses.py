@@ -618,6 +618,53 @@ class InstrumentsResponse(_ResponseBase):
             self.results = [Instrument.load(x) for x in self.results]
 
 
+# Licenses
+
+
+@dataclass
+class License(_ResourceBase):
+    """Representation of license resource in OpenAQ.
+
+    Attributes:
+        id: unique identifier for license
+        name: name of license
+        commercial_use_allowed: boolean indicating if commercial use is allowed
+        attribution_required: boolean indicating if attribution is required
+        share_alike_required:boolean indicating if share alike is required
+        modification_allowed: boolean indicating if modification is allowed
+        redistribution_allowed:boolean indicating if redistribution is allowed
+        source_url: URL of original source of license
+    """
+
+    id: int
+    name: str
+    commercial_use_allowed: bool
+    attribution_required: bool
+    share_alike_required: bool
+    modification_allowed: bool
+    redistribution_allowed: bool
+    source_url: Union[str, None] = None
+
+
+@dataclass
+class LicensesResponse(_ResponseBase):
+    """Representation of the API response for licenses resource.
+
+    Attributes:
+        meta: a metadata object containing information about the results.
+        results: a list of license records.
+    """
+
+    results: List[License]
+
+    def __post_init__(self):
+        """Sets class attributes to correct type after checking input type."""
+        if isinstance(self.meta, dict):
+            self.meta = Meta.load(self.meta)
+        if isinstance(self.results, list):
+            self.results = [License.load(x) for x in self.results]
+
+
 # Manufacturers
 
 
