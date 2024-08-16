@@ -161,10 +161,10 @@ class Headers:
 
     def __post_init__(self):
         """Coerces attribute values to correct types."""
-        self.x_ratelimit_limit = int(self.x_ratelimit_limit)
-        self.x_ratelimit_remaining = int(self.x_ratelimit_remaining)
-        self.x_ratelimit_used = int(self.x_ratelimit_used)
-        self.x_ratelimit_reset = int(self.x_ratelimit_reset)
+        self.x_ratelimit_limit = int(self.x_ratelimit_limit or 0)
+        self.x_ratelimit_remaining = int(self.x_ratelimit_remaining or 0)
+        self.x_ratelimit_used = int(self.x_ratelimit_used or 0)
+        self.x_ratelimit_reset = int(self.x_ratelimit_reset or 0)
 
 
 @dataclass
