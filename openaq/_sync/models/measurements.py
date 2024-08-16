@@ -4,7 +4,7 @@ import datetime
 from typing import Union
 
 from openaq.shared.exceptions import NotFoundError
-from openaq.shared.models import build_query_params
+from openaq.shared.models import build_measurements_path, build_query_params
 from openaq.shared.responses import MeasurementsResponse
 from openaq.shared.types import Rollup, Data
 
@@ -17,19 +17,21 @@ class Measurements(SyncResourceBase):
     def list(
         self,
         sensors_id: int,
-        date_from: Union[datetime.datetime, str, None] = "2016-10-10",
-        date_to: Union[datetime.datetime, str, None] = None,
         data: Union[Data, None] = None,
         rollup: Union[Rollup, None] = None,
+        date_from: Union[datetime.datetime, str, None] = "2016-10-10",
+        date_to: Union[datetime.datetime, str, None] = None,
         page: int = 1,
         limit: int = 1000,
     ) -> MeasurementsResponse:
         """List air quality measurements based on provided filters.
 
-        Provides the ability to filter the measurements resource by sensor, date range,
-        pagination settings.
+        Provides the ability to return sensor measurements resource by date range,
+        data periods and aggregation rollups, and pagination settings.
 
         * `sensors_id` - Filters measurements to a specific sensors ID (required)
+        * `data` - the base measurement unit to query. options are 'measurements', 'hours', 'days', 'years'
+        * `rollup` - the period by which to rollup the base measurement data. Options are 'hourly', 'daily', 'yearly'
         * `date_from` - Declare a start time for data retrieval
         * `date_to` - Declare an end time or data retrieval
         * `page` - Specifies the page number of results to retrieve
@@ -37,6 +39,8 @@ class Measurements(SyncResourceBase):
 
         Args:
             sensors_id: The ID of the sensor for which measurements should be retrieved.
+            data: The base measurement unit to query
+            rollup: The period by which to rollup the base measurement data.
             date_from: Starting date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
             date_to: Ending date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
             page: The page number to fetch. Page count is determined by total measurements found divided by the limit.
@@ -61,23 +65,7 @@ class Measurements(SyncResourceBase):
             date_from=date_from,
             date_to=date_to,
         )
-        base_path = f'/sensors/{sensors_id}'
-        if data == 'measurements' or data == None:
-            path = base_path + '/measurements'
-        if data == 'hours':
-            path = base_path + '/hours'
-        if data == 'days':
-            path = base_path + '/days'
-        if data == 'years':
-            path = base_path + '/years'
-        if rollup:
-            path += f'/{rollup}'
-        if data == 'hours' and rollup == 'hourly':
-            raise NotFoundError()
-        if data == 'days' and rollup == 'daily':
-            raise NotFoundError()
-        if data == 'years' and rollup == 'yearly':
-            raise NotFoundError()
+        path = build_measurements_path(sensors_id, data, rollup)
 
         measurements_response = self._client._get(path, params=params)
 

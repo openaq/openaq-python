@@ -3,8 +3,9 @@ from __future__ import annotations
 import datetime
 from typing import List, Union
 
-from openaq.shared.models import build_query_params
+from openaq.shared.models import build_measurements_path, build_query_params
 from openaq.shared.responses import MeasurementsResponse
+from openaq.shared.types import Data, Rollup
 
 from .base import AsyncResourceBase
 
@@ -14,32 +15,35 @@ class Measurements(AsyncResourceBase):
 
     async def list(
         self,
-        locations_id: int,
+        sensors_id: int,
+        data: Union[Data, None] = None,
+        rollup: Union[Rollup, None] = None,
         date_from: Union[datetime.datetime, str, None] = "2016-10-10",
         date_to: Union[datetime.datetime, str, None] = None,
         page: int = 1,
         limit: int = 1000,
-        parameters_id: Union[int, List[int], None] = None,
     ) -> MeasurementsResponse:
         """List air quality measurements based on provided filters.
 
         Provides the ability to filter the measurements resource by location, date range,
         pagination settings, and specific parameters.
 
-        * `locations_id` - Filters measurements to a specific locations ID (required)
+        * `sensors_id` - Filters measurements to a specific sensors ID (required)
+        * `data` - the base measurement unit to query. options are 'measurements', 'hours', 'days', 'years'
+        * `rollup` - the period by which to rollup the base measurement data. Options are 'hourly', 'daily', 'yearly'
         * `date_from` - Declare a start time for data retrieval
         * `date_to` - Declare an end time or data retrieval
         * `page` - Specifies the page number of results to retrieve
         * `limit` - Sets the number of results generated per page
-        * `parameters_id` - Filters results by selected parameters ID(s)
 
         Args:
-            locations_id: The ID of the location for which measurements should be retrieved.
+            sensors_id: The ID of the sensor for which measurements should be retrieved.
+            data: The base measurement unit to query
+            rollup: The period by which to rollup the base measurement data.
             date_from: Starting date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
             date_to: Ending date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
             page: The page number to fetch. Page count is determined by total measurements found divided by the limit.
             limit: The number of results returned per page.
-            parameters_id: Single parameters ID or an array of IDs.
 
         Returns:
             MeasurementsResponse: An instance representing the list of retrieved air quality measurements.
@@ -55,15 +59,9 @@ class Measurements(AsyncResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         params = build_query_params(
-            page=page,
-            limit=limit,
-            locations_id=locations_id,
-            date_from=date_from,
-            date_to=date_to,
-            parameters_id=parameters_id,
+            page=page, limit=limit, date_from=date_from, date_to=date_to
         )
+        path = build_measurements_path(sensors_id, data, rollup)
 
-        measurements = await self._client._get(
-            f"/locations/{locations_id}/measurements", params=params
-        )
+        measurements = await self._client._get(path, params=params)
         return MeasurementsResponse.load(measurements.json())
