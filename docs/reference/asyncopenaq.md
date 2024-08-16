@@ -5,7 +5,6 @@
       show_root_heading: false
       show_source: true
 
-
 __Locations__
 
 ::: openaq._async.models.locations.Locations
@@ -36,6 +35,15 @@ __Countries__
 __Instruments__
 
 ::: openaq._async.models.instruments.Instruments
+    options:
+      heading_level: 3
+      show_bases: false
+      show_root_heading: false
+      show_source: true
+
+__Licenses__
+
+::: openaq._async.models.licenses.Licenses
     options:
       heading_level: 3
       show_bases: false

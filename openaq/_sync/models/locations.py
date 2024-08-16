@@ -43,6 +43,7 @@ class Locations(SyncResourceBase):
         providers_id: Union[int, List[int], None] = None,
         countries_id: Union[int, List[int], None] = None,
         parameters_id: Union[int, List[int], None] = None,
+        licenses_id: Union[int, List[int], None] = None,
         iso: Union[str, None] = None,
         monitor: Union[bool, None] = None,
         mobile: Union[bool, None] = None,
@@ -61,6 +62,7 @@ class Locations(SyncResourceBase):
         * `providers_id` - Filters results by selected providers ID(s)
         * `countries_id` - Filters results by selected countries ID(s)
         * `parameters_id` - Filters results by selected parameters ID(s)
+        * `licenses_id` - Filters results by selected licenses ID(s)
         * `iso` - Filters results by selected country code
         * `monitor` - Filters results by reference grade monitors (`true`), air sensors (`false`), or both if not used
         * `mobile` - Filters results for mobile sensors (`true`), non-mobile sensors (`false`), or both if not used
@@ -76,7 +78,8 @@ class Locations(SyncResourceBase):
             providers_id: Single providers ID or an array of IDs.
             countries_id: Single countries ID or an array of IDs.
             parameters_id: Single parameters ID or an array of IDs.
-            iso:  2 letter ISO 3166-alpha-2 country code.
+            licenses_id: Single licenses ID or an array of IDs.
+            iso: 2 letter ISO 3166-alpha-2 country code.
             monitor: Boolean for reference grade monitors (true) or air sensors (false)
             mobile: Boolean mobile locations (true) or not mobile locations (false).
             order_by: Order by operators for results.
@@ -104,6 +107,7 @@ class Locations(SyncResourceBase):
             providers_id=providers_id,
             countries_id=countries_id,
             parameters_id=parameters_id,
+            licenses_id=licenses_id,
             iso=iso,
             monitor=monitor,
             mobile=mobile,
