@@ -4,6 +4,7 @@ from typing import Any, Mapping, Union
 
 from openaq._sync.models.countries import Countries
 from openaq._sync.models.instruments import Instruments
+from openaq._sync.models.licenses import Licenses
 from openaq._sync.models.locations import Locations
 from openaq._sync.models.manufacturers import Manufacturers
 from openaq._sync.models.measurements import Measurements
@@ -66,6 +67,7 @@ class OpenAQ(BaseClient):
         self.parameters = Parameters(self)
         self.countries = Countries(self)
         self.instruments = Instruments(self)
+        self.licenses = Licenses(self)
         self.manufacturers = Manufacturers(self)
         self.measurements = Measurements(self)
         self.owners = Owners(self)
