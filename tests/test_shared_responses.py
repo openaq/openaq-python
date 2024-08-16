@@ -62,8 +62,10 @@ def read_response_file(name: str) -> str:
         return f.read()
 
 
-def mock_response(data) -> httpx.Response:
-    return httpx.Response(status_code=200, headers=RATE_LIMIT_HEADERS, json=data)
+def mock_response(data: str) -> httpx.Response:
+    return httpx.Response(
+        status_code=200, headers=RATE_LIMIT_HEADERS, json=json.loads(data)
+    )
 
 
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")

@@ -94,8 +94,8 @@ class _ResponseBase:
                     if k.replace('-', '_') in valid_headers
                 }
             ),
-            json.loads(response.json())['meta'],
-            json.loads(response.json())['results'],
+            response.json()['meta'],
+            response.json()['results'],
         )
 
     def __post_init__(self):
