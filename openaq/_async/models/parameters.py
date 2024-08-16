@@ -27,7 +27,7 @@ class Parameters(AsyncResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         parameter = await self._client._get(f"/parameters/{parameters_id}")
-        return ParametersResponse.load(parameter.json())
+        return ParametersResponse.read_response(parameter)
 
     async def list(
         self,
@@ -96,4 +96,4 @@ class Parameters(AsyncResourceBase):
         )
 
         parameters = await self._client._get("/parameters", params=params)
-        return ParametersResponse.load(parameters.json())
+        return ParametersResponse.read_response(parameters)

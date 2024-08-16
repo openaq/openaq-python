@@ -27,7 +27,7 @@ class Owners(AsyncResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         owner = await self._client._get(f"/owners/{owners_id}")
-        return OwnersResponse.load(owner.json())
+        return OwnersResponse.read_response(owner)
 
     async def list(
         self,
@@ -69,4 +69,4 @@ class Owners(AsyncResourceBase):
         )
 
         owners = await self._client._get("/owners", params=params)
-        return OwnersResponse.load(owners.json())
+        return OwnersResponse.read_response(owners)

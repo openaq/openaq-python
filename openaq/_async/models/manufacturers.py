@@ -27,7 +27,7 @@ class Manufacturers(AsyncResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         manufacturer = await self._client._get(f"/manufacturers/{manufacturers_id}")
-        return ManufacturersResponse.load(manufacturer.json())
+        return ManufacturersResponse.read_response(manufacturer)
 
     async def list(
         self,
@@ -69,4 +69,4 @@ class Manufacturers(AsyncResourceBase):
         )
 
         manufacturers = await self._client._get("/manufacturers", params=params)
-        return ManufacturersResponse.load(manufacturers.json())
+        return ManufacturersResponse.read_response(manufacturers)

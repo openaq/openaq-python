@@ -64,4 +64,4 @@ class Measurements(AsyncResourceBase):
         path = build_measurements_path(sensors_id, data, rollup)
 
         measurements = await self._client._get(path, params=params)
-        return MeasurementsResponse.load(measurements.json())
+        return MeasurementsResponse.read_response(measurements)

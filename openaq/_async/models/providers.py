@@ -20,7 +20,7 @@ class Providers(AsyncResourceBase):
             See the 'Raises' section of the 'list' method for potential exceptions.
         """
         provider = await self._client._get(f"/providers/{providers_id}")
-        return ProvidersResponse.load(provider.json())
+        return ProvidersResponse.read_response(provider)
 
     async def list(
         self,
@@ -93,4 +93,4 @@ class Providers(AsyncResourceBase):
         )
 
         providers = await self._client._get("/providers", params=params)
-        return ProvidersResponse.load(providers.json())
+        return ProvidersResponse.read_response(providers)

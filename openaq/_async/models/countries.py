@@ -27,7 +27,7 @@ class Countries(AsyncResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         country = await self._client._get(f"/countries/{countries_id}")
-        return CountriesResponse.load(country.json())
+        return CountriesResponse.read_response(country)
 
     async def list(
         self,
@@ -80,4 +80,4 @@ class Countries(AsyncResourceBase):
         )
 
         countries = await self._client._get("/countries", params=params)
-        return CountriesResponse.load(countries.json())
+        return CountriesResponse.read_response(countries)

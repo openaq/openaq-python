@@ -31,7 +31,7 @@ class Locations(AsyncResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         location = await self._client._get(f"/locations/{locations_id}")
-        return LocationsResponse.load(location.json())
+        return LocationsResponse.read_response(location)
 
     async def list(
         self,
@@ -116,4 +116,4 @@ class Locations(AsyncResourceBase):
         )
 
         locations = await self._client._get("/locations", params=params)
-        return LocationsResponse.load(locations.json())
+        return LocationsResponse.read_response(locations)

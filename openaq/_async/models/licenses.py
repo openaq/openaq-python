@@ -31,7 +31,7 @@ class Licenses(AsyncResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         license = await self._client._get(f"/licenses/{licenses_id}")
-        return LicensesResponse.load(license.json())
+        return LicensesResponse.read_response(license))
 
     async def list(
         self,
@@ -76,4 +76,4 @@ class Licenses(AsyncResourceBase):
         )
 
         licenses = await self._client._get("/licenses", params=params)
-        return LicensesResponse.load(licenses.json())
+        return LicensesResponse.read_response(licenses)
