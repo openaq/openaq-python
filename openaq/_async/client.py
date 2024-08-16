@@ -4,6 +4,7 @@ from typing import Any, Mapping, Union
 
 from openaq._async.models.countries import Countries
 from openaq._async.models.instruments import Instruments
+from openaq._async.models.licenses import Licenses
 from openaq._async.models.locations import Locations
 from openaq._async.models.manufacturers import Manufacturers
 from openaq._async.models.measurements import Measurements
@@ -66,6 +67,7 @@ class AsyncOpenAQ(BaseClient):
         self.parameters = Parameters(self)
         self.countries = Countries(self)
         self.instruments = Instruments(self)
+        self.licenses = Licenses(self)
         self.manufacturers = Manufacturers(self)
         self.measurements = Measurements(self)
         self.owners = Owners(self)

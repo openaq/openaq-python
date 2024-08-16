@@ -93,4 +93,4 @@ class Providers(SyncResourceBase):
         )
 
         providers_response = self._client._get("/providers", params=params)
-        return ProvidersResponse(providers_response)
+        return ProvidersResponse.read_response(providers_response)

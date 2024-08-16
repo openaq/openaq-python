@@ -437,11 +437,10 @@ class Provider(_ResourceBase):
     name: provider name
     source_name: name of source
     export_prefix:
-    license: data license of provider
     datetime_added: ISO-8601 datetime of when provider was added to OpenAQ
     datetime_first: ISO-8601 datetime of first measurement
     datetime_last: ISO-8601 datetime of first measurement
-    owner_entity: owner entity object
+    entities_id: entity id
     parameters: list of parameters available from provider
     bbox: bounding box of geographic area of provider locations
     """
@@ -450,18 +449,15 @@ class Provider(_ResourceBase):
     name: str
     source_name: str
     export_prefix: str
-    license: Any
     datetime_added: str
     datetime_first: str
     datetime_last: str
-    owner_entity: OwnerEntity
+    entities_id: int
     parameters: List[ParameterBase]
     bbox: Union[Bbox, None]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.owner_entity, dict):
-            self.owner_entity = OwnerEntity.load(self.owner_entity)
         if isinstance(self.parameters, list):
             self.parameters = [ParameterBase.load(x) for x in self.parameters]
         if isinstance(self.bbox, dict):

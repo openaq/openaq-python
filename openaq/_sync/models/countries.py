@@ -27,7 +27,7 @@ class Countries(SyncResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         country_response = self._client._get(f"/countries/{countries_id}")
-        return CountriesResponse(country_response)
+        return CountriesResponse.read_response(country_response)
 
     def list(
         self,
@@ -80,4 +80,4 @@ class Countries(SyncResourceBase):
         )
 
         countries_response = self._client._get("/countries", params=params)
-        return CountriesResponse(countries_response)
+        return CountriesResponse.read_response(countries_response)
