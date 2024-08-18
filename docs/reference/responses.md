@@ -1,4 +1,4 @@
-OpenAQ python returns API responses as deserialized objects with helper methods to serialize the results to JSON. 
+OpenAQ python returns API responses as deserialized objects with helper methods to serialize the results to JSON.
 
 ## Base Response Class
 
@@ -28,7 +28,6 @@ __Country__
       show_bases: false
       show_source: false
 
-
 __InstrumentBase__
 
 ::: openaq.shared.responses.InstrumentBase
@@ -39,7 +38,6 @@ __InstrumentBase__
       show_root_heading: false
       show_bases: false
       show_source: false
-
 
 __Instrument__
 
@@ -52,7 +50,6 @@ __Instrument__
       show_bases: false
       show_source: false
 
-
 __ManufacturerBase__
 
 ::: openaq.shared.responses.ManufacturerBase
@@ -63,7 +60,6 @@ __ManufacturerBase__
       show_root_heading: false
       show_bases: false
       show_source: false
-
 
 __Manufacturer__
 
@@ -76,8 +72,6 @@ __Manufacturer__
       show_bases: false
       show_source: false
 
-
-
 __Measurement__
 
 ::: openaq.shared.responses.Measurement
@@ -89,31 +83,27 @@ __Measurement__
       show_bases: false
       show_source: false
 
-
 __Period__
 
 ::: openaq.shared.responses.Period
     options:
-      heading_level: 4      
+      heading_level: 4
       members:
         -
       show_root_heading: false
       show_bases: false
       show_source: false
-
 
 __Summary__
 
 ::: openaq.shared.responses.Summary
     options:
-      heading_level: 4      
+      heading_level: 4
       members:
         -
       show_root_heading: false
       show_bases: false
       show_source: false
-
-
 
 __OwnerBase__
 
@@ -148,7 +138,6 @@ __ParameterBase__
       show_bases: false
       show_source: false
 
-
 __Parameter__
 
 ::: openaq.shared.responses.Parameter
@@ -159,7 +148,6 @@ __Parameter__
       show_root_heading: false
       show_bases: false
       show_source: false
-
 
 __ProviderBase__
 
@@ -183,7 +171,6 @@ __Provider__
       show_bases: false
       show_source: false
 
-
 __SensorBase__
 
 ::: openaq.shared.responses.SensorBase
@@ -194,7 +181,6 @@ __SensorBase__
       show_root_heading: false
       show_bases: false
       show_source: false
-
 
 __Coordinates__
 
@@ -229,7 +215,6 @@ __OwnerEntity__
       show_bases: false
       show_source: false
 
-
 __Location__
 
 ::: openaq.shared.responses.Location
@@ -252,10 +237,20 @@ __License__
       show_bases: false
       show_source: false
 
-
 ## API Responses
 
-__Meta__ 
+__Headers__
+
+::: openaq.shared.responses.Headers
+    options:
+      heading_level: 3
+      members:
+        -
+      show_root_heading: false
+      show_bases: false
+      show_source: false
+
+__Meta__
 
 ::: openaq.shared.responses.Meta
     options:
@@ -308,7 +303,6 @@ __ManufacturersResponse__
       show_bases: false
       show_source: false
 
-
 __MeasurementsResponse__
 
 ::: openaq.shared.responses.MeasurementsResponse
@@ -319,7 +313,6 @@ __MeasurementsResponse__
       show_root_heading: false
       show_bases: false
       show_source: false
-
 
 __OwnersResponse__
 

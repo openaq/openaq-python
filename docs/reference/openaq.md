@@ -5,7 +5,6 @@
       show_root_heading: false
       show_source: true
 
-
 __Locations__
 
 ::: openaq._sync.models.locations.Locations
@@ -86,7 +85,3 @@ __Providers__
       show_bases: false
       show_root_heading: false
       show_source: true
-
-
-
-

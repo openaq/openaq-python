@@ -39,10 +39,11 @@ path = "openaq/__init__.py"
 
 
 [tool.hatch.envs.test]
-dependencies = ["coverage[toml]", "pytest", "pytest-cov","pytest-mock", "respx"]
+dependencies = ["coverage[toml]", "pytest", "pytest-asyncio", "pytest-cov","pytest-mock", "respx"]
 
 [tool.hatch.envs.test.scripts]
-test = 'pytest -s -vv'
+test-unit = 'pytest tests/unit/ -s -vv'
+test-integration = 'pytest tests/integration/ -s -vv'
 
 cov = 'pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=openaq'
 
@@ -62,7 +63,7 @@ dependencies = ["mkdocs", "mkdocstrings[python]", "mkdocs-material"]
 
 [tool.hatch.envs.docs.scripts]
 build = ["mkdocs build -c"]
-serve = ["mkdocs serve"]
+serve = ["mkdocs serve -a localhost:8080"]
 
 [tool.coverage.run]
 branch = true

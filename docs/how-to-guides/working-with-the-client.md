@@ -104,7 +104,6 @@ Alternatively we can use a context manager to handle closing the connection for 
         loop.run_until_complete(main())
     ```
 
-
 ### API key
 
 An API Key is required to make requests with the OpenAQ API.
