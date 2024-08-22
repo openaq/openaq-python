@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 from typing import Union
 
-from openaq.shared.exceptions import NotFoundError
 from openaq.shared.models import build_measurements_path, build_query_params
 from openaq.shared.responses import MeasurementsResponse
 from openaq.shared.types import Rollup, Data
@@ -19,8 +18,8 @@ class Measurements(SyncResourceBase):
         sensors_id: int,
         data: Union[Data, None] = None,
         rollup: Union[Rollup, None] = None,
-        date_from: Union[datetime.datetime, str, None] = "2016-10-10",
-        date_to: Union[datetime.datetime, str, None] = None,
+        datetime_from: Union[datetime.datetime, str, None] = "2016-10-10",
+        datetime_to: Union[datetime.datetime, str, None] = None,
         page: int = 1,
         limit: int = 1000,
     ) -> MeasurementsResponse:
@@ -32,8 +31,8 @@ class Measurements(SyncResourceBase):
         * `sensors_id` - Filters measurements to a specific sensors ID (required)
         * `data` - the base measurement unit to query. options are 'measurements', 'hours', 'days', 'years'
         * `rollup` - the period by which to rollup the base measurement data. Options are 'hourly', 'daily', 'yearly'
-        * `date_from` - Declare a start time for data retrieval
-        * `date_to` - Declare an end time or data retrieval
+        * `datetime_from` - Declare a start time for data retrieval
+        * `datetime_to` - Declare an end time or data retrieval
         * `page` - Specifies the page number of results to retrieve
         * `limit` - Sets the number of results generated per page
 
@@ -62,8 +61,8 @@ class Measurements(SyncResourceBase):
         params = build_query_params(
             page=page,
             limit=limit,
-            date_from=date_from,
-            date_to=date_to,
+            datetime_from=datetime_from,
+            datetime_to=datetime_to,
         )
         path = build_measurements_path(sensors_id, data, rollup)
 
