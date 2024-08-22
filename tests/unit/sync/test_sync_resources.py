@@ -36,7 +36,7 @@ def test_measurements_list_endpoints(
     mock_response = Mock()
     MeasurementsResponse.read_response = Mock(return_value=mock_response)
     mock_client._get.return_value = mock_response
-    mock_params = {'page': 1, 'limit': 1000, 'date_from': '2016-10-10'}
+    mock_params = {'page': 1, 'limit': 1000, 'datetime_from': '2016-10-10'}
     mocker.patch('openaq.shared.models.build_query_params', return_value=mock_params)
     result = measurements.list(sensors_id=1, data=data, rollup=rollup)
 

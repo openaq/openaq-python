@@ -53,6 +53,23 @@ def build_measurements_path(
         NotFoundError:
     """
     base_path = f'/sensors/{sensors_id}'
+    if data == 'measurements' and rollup in (
+        'hourofday',
+        'dayofweek',
+        'monthofyear',
+        'yearly',
+    ):
+        raise NotFoundError()
+    if data == 'hours' and rollup == 'hourly':
+        raise NotFoundError()
+    if data == 'days' and rollup == 'daily':
+        raise NotFoundError()
+    if data == 'days' and rollup == 'hourofday':
+        raise NotFoundError()
+    if data == 'years' and rollup in ('monthly', 'yearly'):
+        raise NotFoundError()
+    if data == 'years' and rollup in ('hourofday', 'dayofweek', 'monthofyear'):
+        raise NotFoundError()
     if data == 'measurements' or data == None:
         path = base_path + '/measurements'
     if data == 'hours':
@@ -63,10 +80,4 @@ def build_measurements_path(
         path = base_path + '/years'
     if rollup:
         path += f'/{rollup}'
-    if data == 'hours' and rollup == 'hourly':
-        raise NotFoundError()
-    if data == 'days' and rollup == 'daily':
-        raise NotFoundError()
-    if data == 'years' and rollup == 'yearly':
-        raise NotFoundError()
     return path
