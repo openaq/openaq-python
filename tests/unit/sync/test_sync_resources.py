@@ -1,7 +1,7 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
-
+from openaq._sync.models.base import SyncResourceBase
 from openaq._sync.models.measurements import Measurements
 from openaq.shared.exceptions import NotFoundError
 from openaq.shared.responses import MeasurementsResponse
@@ -10,6 +10,12 @@ from openaq.shared.responses import MeasurementsResponse
 @pytest.fixture
 def mock_client():
     return Mock()
+
+
+def test_sync_resource_base_init():
+    mock_client = MagicMock()
+    resource = SyncResourceBase(client=mock_client)
+    assert resource._client == mock_client
 
 
 @pytest.fixture
@@ -38,7 +44,7 @@ def test_measurements_list_endpoints(
     mock_client._get.return_value = mock_response
     mock_params = {'page': 1, 'limit': 1000, 'datetime_from': '2016-10-10'}
     mocker.patch('openaq.shared.models.build_query_params', return_value=mock_params)
-    result = measurements.list(sensors_id=1, data=data, rollup=rollup)
+    measurements.list(sensors_id=1, data=data, rollup=rollup)
 
     call_args = mock_client._get.call_args
 

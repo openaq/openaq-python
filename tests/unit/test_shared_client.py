@@ -3,7 +3,17 @@ import platform
 
 from unittest.mock import mock_open, patch
 
-from openaq.shared.client import _get_openaq_config
+import pytest
+
+from openaq.shared.client import _get_openaq_config, _has_toml
+from tests.unit.mocks import MockTransport
+
+
+def test_tomllib_conditional_import():
+    if int(platform.python_version_tuple()[1]) >= 11:
+        assert _has_toml == True
+    else:
+        assert _has_toml == False
 
 
 def test__get_openaq_config_file_exists():

@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Tuple, Union
 
 from httpx import Response
 
-from openaq.utils.humps import camelize, decamelize
+from openaq.vendor.humps import camelize, decamelize
 
 try:
     import orjson

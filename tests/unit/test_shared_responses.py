@@ -112,6 +112,7 @@ def test_resources_validation(name: str, resource_class: _ResourceBase):
         ('providers', ProvidersResponse),
         ('parameters', ParametersResponse),
         ('instruments', InstrumentsResponse),
+        ('licenses', LicensesResponse),
         ('owners', OwnersResponse),
         ('manufacturers', ManufacturersResponse),
         ('locations_variation', LocationsResponse),

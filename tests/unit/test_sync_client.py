@@ -33,6 +33,11 @@ class TestClient:
         ):
             yield
 
+    def test_transport_property(self, setup):
+        assert self.client.transport == MockTransport
+        with pytest.raises(AttributeError):
+            self.client.transport = MockTransport
+
     def test_default_client_params(self, setup):
         assert self.client._base_url == "https://api.openaq.org/v3/"
 
