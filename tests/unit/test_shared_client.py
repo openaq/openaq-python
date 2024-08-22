@@ -7,8 +7,8 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from openaq.shared.client import BaseClient, _get_openaq_config, _has_toml
-from httpx import MockTransport
+from openaq.shared.client import _get_openaq_config, _has_toml
+from tests.unit.mocks import MockTransport
 
 
 def test_tomllib_conditional_import():
