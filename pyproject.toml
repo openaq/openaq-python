@@ -76,6 +76,11 @@ omit = ["openaq/__about__.py", "openaq/vendor/*"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+exclude_also = [
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "@(abc\\.)?abstractmethod",
+    ]
 
 [tool.ruff]
 extend-exclude = ["tests"]

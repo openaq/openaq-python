@@ -24,6 +24,8 @@ from openaq.shared.responses import (
     ProvidersResponse,
     _ResourceBase,
     _ResponseBase,
+    Sensor,
+    SensorsResponse,
 )
 
 RATE_LIMIT_HEADERS = {
@@ -88,6 +90,7 @@ def test_rate_limit_headers_response():
         ('owner', Owner),
         ('parameter', Parameter),
         ('provider', Provider),
+        ('sensor', Sensor),
     ],
 )
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")
@@ -116,6 +119,7 @@ def test_resources_validation(name: str, resource_class: _ResourceBase):
         ('owners', OwnersResponse),
         ('manufacturers', ManufacturersResponse),
         ('locations_variation', LocationsResponse),
+        ('sensors', SensorsResponse),
     ],
 )
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")
@@ -143,6 +147,7 @@ def test_responses_validation(name: str, response_class: _ResponseBase):
         ('owners', OwnersResponse),
         ('manufacturers', ManufacturersResponse),
         ('locations_variation', LocationsResponse),
+        ('sensors', SensorsResponse),
     ],
 )
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")

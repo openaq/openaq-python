@@ -85,3 +85,12 @@ __Providers__
       show_bases: false
       show_root_heading: false
       show_source: true
+
+__Sensors__
+
+::: openaq._async.models.sensors.Sensors
+    options:
+      heading_level: 3
+      show_bases: false
+      show_root_heading: false
+      show_source: true

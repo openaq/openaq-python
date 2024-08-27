@@ -46,6 +46,12 @@ class TestAsyncClient:
     async def test_licenses_get(self):
         await self.client.licenses.get(1)
 
+    async def test_licenses_list(self):
+        await self.client.owners.list()
+
+    async def test_licenses_get(self):
+        await self.client.owners.get(1)
+
     async def test_providers_list(self):
         await self.client.providers.list()
 

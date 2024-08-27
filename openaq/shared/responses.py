@@ -874,3 +874,59 @@ class OwnersResponse(_ResponseBase):
             self.meta = Meta.load(self.meta)
         if isinstance(self.results, list):
             self.results = [Owner.load(x) for x in self.results]
+
+
+# Sensors
+
+
+@dataclass
+class Latest(_ResourceBase):
+    """latest measurement.
+
+    Attributes:
+        datetime: datetime object
+        value: measured value
+        coordinates:  coordinates object with latitude and longitude of measurement
+    """
+
+    datetime: Datetime
+    value: float
+    coordinates: Coordinates
+
+
+@dataclass
+class Sensor(_ResourceBase):
+    """Detailed information about an owner in OpenAQ.
+
+    Attributes:
+        id: unique identifier for owner
+        name: owner name
+    """
+
+    id: int
+    name: str
+    parameter: Parameter
+    datetime_first: Datetime
+    datetime_last: Datetime
+    coverage: Coverage
+    latest: Latest
+    summary: Summary
+
+
+@dataclass
+class SensorsResponse(_ResponseBase):
+    """Representation of the API response for sensors resource.
+
+    Attributes:
+        meta: a metadata object containing information about the results.
+        results: a list of sensor records.
+    """
+
+    results: List[Sensor]
+
+    def __post_init__(self):
+        """Sets class attributes to correct type after checking input type."""
+        if isinstance(self.meta, dict):
+            self.meta = Meta.load(self.meta)
+        if isinstance(self.results, list):
+            self.results = [Sensor.load(x) for x in self.results]
