@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 
 from openaq.shared.exceptions import NotFoundError
@@ -23,6 +25,7 @@ from openaq.shared.models import build_measurements_path, build_query_params
                 'mobile': False,
                 'order_by': 'id',
                 'sort_order': 'asc',
+                'datetime_from': datetime(2024, 8, 22),
             },
             {
                 'page': 1,
@@ -38,6 +41,7 @@ from openaq.shared.models import build_measurements_path, build_query_params
                 'mobile': False,
                 'order_by': 'id',
                 'sort_order': 'asc',
+                'datetime_from': '2024-08-22T00:00:00',
             },
         ),
         (

@@ -182,6 +182,17 @@ __SensorBase__
       show_bases: false
       show_source: false
 
+__Sensor__
+
+::: openaq.shared.responses.Sensor
+    options:
+      heading_level: 3
+      members:
+        -
+      show_root_heading: false
+      show_bases: false
+      show_source: false
+
 __Coordinates__
 
 ::: openaq.shared.responses.Coordinates
@@ -347,9 +358,21 @@ __ProvidersResponse__
       show_bases: false
       show_source: false
 
-__LicensesReponse__
+__LicensesResponse__
 
 ::: openaq.shared.responses.LicensesResponse
+    options:
+      heading_level: 3
+      members:
+        -
+      show_root_heading: false
+      show_bases: false
+      show_source: false
+
+
+__SensorsResponse__
+
+::: openaq.shared.responses.SensorsResponse
     options:
       heading_level: 3
       members:

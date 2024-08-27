@@ -11,6 +11,7 @@ from openaq._async.models.measurements import Measurements
 from openaq._async.models.owners import Owners
 from openaq._async.models.parameters import Parameters
 from openaq._async.models.providers import Providers
+from openaq._async.models.sensors import Sensors
 from openaq.shared.client import (
     DEFAULT_USER_AGENT,
     DEFAULT_BASE_URL,
@@ -62,15 +63,16 @@ class AsyncOpenAQ(BaseClient):
     ) -> AsyncOpenAQ:
         super().__init__(transport, user_agent, headers, api_key, base_url)
 
-        self.locations = Locations(self)
-        self.providers = Providers(self)
-        self.parameters = Parameters(self)
         self.countries = Countries(self)
         self.instruments = Instruments(self)
         self.licenses = Licenses(self)
+        self.locations = Locations(self)
         self.manufacturers = Manufacturers(self)
         self.measurements = Measurements(self)
         self.owners = Owners(self)
+        self.providers = Providers(self)
+        self.parameters = Parameters(self)
+        self.sensors = Sensors(self)
 
     @property
     def transport(self) -> AsyncTransport:
@@ -84,11 +86,7 @@ class AsyncOpenAQ(BaseClient):
         params: Union[Mapping[str, Any], None] = None,
         headers: Union[Mapping[str, str], None] = None,
     ):
-        if headers:
-            request_headers = self._headers.copy()
-            request_headers.update(headers)
-        else:
-            request_headers = self._headers
+        request_headers = self.build_request_headers(headers)
         try:
             url = self._base_url + path
             data = await self.transport.send_request(

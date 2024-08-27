@@ -41,6 +41,10 @@ path = "openaq/__init__.py"
 [tool.hatch.envs.test]
 dependencies = ["coverage[toml]", "pytest", "pytest-asyncio", "pytest-cov","pytest-mock", "respx"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+
+
 [tool.hatch.envs.test.scripts]
 test-unit = 'pytest tests/unit/ -s -vv'
 test-integration = 'pytest tests/integration/ -s -vv'
@@ -68,10 +72,15 @@ serve = ["mkdocs serve -a localhost:8080"]
 [tool.coverage.run]
 branch = true
 parallel = true
-omit = ["openaq/__about__.py"]
+omit = ["openaq/__about__.py", "openaq/vendor/*"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+exclude_also = [
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "@(abc\\.)?abstractmethod",
+    ]
 
 [tool.ruff]
 extend-exclude = ["tests"]

@@ -27,6 +27,12 @@ class TestClient:
     def test_licenses_get(self):
         self.client.licenses.get(1)
 
+    def test_licenses_list(self):
+        self.client.owners.list()
+
+    def test_licenses_get(self):
+        self.client.owners.get(1)
+
     def test_providers_list(self):
         self.client.providers.list()
 
@@ -44,3 +50,9 @@ class TestClient:
 
     def test_manufacturers_get(self):
         self.client.manufacturers.get(1)
+
+    def test_sensors_get(self):
+        self.client.sensors.get(1)
+
+    def test_locations_sensors_list(self):
+        self.client.sensors.list(1)

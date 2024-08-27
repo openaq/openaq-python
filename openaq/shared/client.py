@@ -6,6 +6,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Mapping, Union
 
+from openaq._sync.transport import Transport
+from openaq._async.transport import AsyncTransport
+
 # for Python versions <3.11 tomllib is not part of std. library
 _has_toml = True
 try:
@@ -14,7 +17,6 @@ except ImportError:
     _has_toml = False
 
 from openaq import __version__
-from openaq.shared.transport import BaseTransport
 
 ACCEPT_HEADER = "application/json"
 
@@ -46,7 +48,7 @@ class BaseClient(ABC):
 
     def __init__(
         self,
-        transport: BaseTransport,
+        transport: Union[AsyncTransport, Transport],
         user_agent: str,
         headers: Mapping[str, str] = {},
         api_key: Union[str, None] = None,
@@ -98,7 +100,7 @@ class BaseClient(ABC):
         return self._api_key
 
     @property
-    def transport(self) -> BaseTransport:
+    def transport(self) -> Union[AsyncTransport, Transport]:
         """Get the transport mechanism used by the client.
 
         Provides access to the transport instance that the client uses to
@@ -117,6 +119,24 @@ class BaseClient(ABC):
             dictionary of http headers to be sent with request
         """
         return self._headers
+
+    def build_request_headers(
+        self, headers: Union[Mapping[str, str], None] = None
+    ) -> Mapping[str, str]:
+        """Copies and updates headers based on input.
+
+        Args:
+            headers: The headers to add to the request.
+
+        Returns:
+            A mapping of headers for the request
+        """
+        if headers:
+            request_headers = self._headers.copy()
+            request_headers.update(headers)
+        else:
+            request_headers = self._headers
+        return request_headers
 
     @property
     def base_url(self) -> str:
