@@ -3,11 +3,14 @@
 import os
 import platform
 from abc import ABC, abstractmethod
+import logging
 from pathlib import Path
 from typing import Any, Mapping, Union
 
 from openaq._sync.transport import Transport
 from openaq._async.transport import AsyncTransport
+
+logger = logging.getLogger('openaq')
 
 # for Python versions <3.11 tomllib is not part of std. library
 _has_toml = True
@@ -72,6 +75,12 @@ class BaseClient(ABC):
         self._base_url = base_url
         self._user_agent = user_agent
         self.resolve_headers()
+
+    def _check_api_key_url(self):
+        if not self.api_key and self.base_url == DEFAULT_BASE_URL:
+            logger.warning(
+                "API key not set: An API key is required when using the OpenAQ API"
+            )
 
     def _get_api_key(self) -> str:
         """Gets API key value from env or openaq config file.
