@@ -1,6 +1,13 @@
 """OpenAQ Python SDK."""
 
+import logging
+
+
 __version__ = "0.3.0"
+
+
+logger = logging.getLogger("openaq")
+logger.addHandler(logging.NullHandler())
 
 
 from ._async.client import AsyncOpenAQ as AsyncOpenAQ
