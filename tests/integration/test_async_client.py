@@ -28,11 +28,14 @@ class TestAsyncClient:
     def setup(self):
         self.client = AsyncOpenAQ(base_url=os.environ.get("TEST_BASE_URL"))
 
+    async def test_locations_list(self):
+        await self.client.locations.list()
+
     async def test_locations_get(self):
         await self.client.locations.get(1)
 
-    async def test_locations_list(self):
-        await self.client.locations.list()
+    async def test_latest_get(self):
+        await self.client.locations.latest(1)
 
     async def test_countries_list(self):
         await self.client.countries.list()
@@ -46,11 +49,20 @@ class TestAsyncClient:
     async def test_licenses_get(self):
         await self.client.licenses.get(1)
 
-    async def test_licenses_list(self):
+    async def test_owners_list(self):
         await self.client.owners.list()
 
-    async def test_licenses_get(self):
+    async def test_owners_get(self):
         await self.client.owners.get(1)
+
+    async def test_parameters_list(self):
+        await self.client.parameters.list()
+
+    async def test_parameters_get(self):
+        await self.client.parameters.get(1)
+
+    async def test_parameters_latest(self):
+        await self.client.parameters.latest(1)
 
     async def test_providers_list(self):
         await self.client.providers.list()
@@ -63,3 +75,15 @@ class TestAsyncClient:
 
     async def test_instruments_get(self):
         await self.client.instruments.get(1)
+
+    async def test_manufacturers_list(self):
+        await self.client.manufacturers.list()
+
+    async def test_manufacturers_get(self):
+        await self.client.manufacturers.get(1)
+
+    async def test_manufacturers_instruments(self):
+        await self.client.manufacturers.instruments(1)
+
+    async def test_sensors_get(self):
+        await self.client.sensors.get(1)

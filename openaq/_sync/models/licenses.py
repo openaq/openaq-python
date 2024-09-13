@@ -9,7 +9,7 @@ from .base import SyncResourceBase
 
 
 class Licenses(SyncResourceBase):
-    """This provides methods to retrieve air monitor locations resource from the OpenAQ API."""
+    """This provides methods to retrieve air monitor latest resource from the OpenAQ API."""
 
     def get(self, licenses_id: int) -> LicensesResponse:
         """Retrieve a specific license by its licenses ID.
