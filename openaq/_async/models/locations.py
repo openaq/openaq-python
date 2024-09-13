@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Tuple, Union
 
 from openaq.shared.models import build_query_params
-from openaq.shared.responses import LocationsResponse
+from openaq.shared.responses import LatestResponse, LocationsResponse, SensorsResponse
 
 from .base import AsyncResourceBase
 
@@ -33,10 +33,32 @@ class Locations(AsyncResourceBase):
         location = await self._client._get(f"/locations/{locations_id}")
         return LocationsResponse.read_response(location)
 
+    async def latest(self, locations_id: int) -> LatestResponse:
+        """Retrieve latest measurements from a location.
+
+        Args:
+            locations_id: The locations ID of the location to retrieve.
+
+        Returns:
+            LatestResponse: An instance representing the retrieved latest results.
+
+        Raises:
+            BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
+            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
+        """
+        latest = await self._client._get(f"/locations/{locations_id}/latest")
+        return LatestResponse.read_response(latest)
+
     async def list(
         self,
         page: int = 1,
-        limit: int = 1000,
+        limit: int = 100,
         radius: Union[int, None] = None,
         coordinates: Union[Tuple[float, float], None] = None,
         bbox: Union[Tuple[float, float, float, float], None] = None,
@@ -117,3 +139,25 @@ class Locations(AsyncResourceBase):
 
         locations = await self._client._get("/locations", params=params)
         return LocationsResponse.read_response(locations)
+
+    async def sensors(self, locations_id: int) -> SensorsResponse:
+        """Retrieve sensors from a location.
+
+        Args:
+            locations_id: The locations ID of the location to retrieve.
+
+        Returns:
+            SensorsResponse: An instance representing the retrieved latest results.
+
+        Raises:
+            BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
+            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
+        """
+        sensors = await self._client._get(f"/locations/{locations_id}/sensors")
+        return SensorsResponse.read_response(sensors)

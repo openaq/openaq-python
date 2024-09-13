@@ -880,7 +880,7 @@ class OwnersResponse(_ResponseBase):
 
 
 @dataclass
-class Latest(_ResourceBase):
+class LatestBase(_ResourceBase):
     """latest measurement.
 
     Attributes:
@@ -896,11 +896,11 @@ class Latest(_ResourceBase):
 
 @dataclass
 class Sensor(_ResourceBase):
-    """Detailed information about an owner in OpenAQ.
+    """Detailed information about an sensor in OpenAQ.
 
     Attributes:
-        id: unique identifier for owner
-        name: owner name
+        id: unique identifier for sensor
+        name: sensor name
     """
 
     id: int
@@ -909,7 +909,7 @@ class Sensor(_ResourceBase):
     datetime_first: Datetime
     datetime_last: Datetime
     coverage: Coverage
-    latest: Latest
+    latest: LatestBase
     summary: Summary
 
 
@@ -930,3 +930,41 @@ class SensorsResponse(_ResponseBase):
             self.meta = Meta.load(self.meta)
         if isinstance(self.results, list):
             self.results = [Sensor.load(x) for x in self.results]
+
+
+@dataclass
+class Latest(_ResourceBase):
+    """Latest measurement.
+
+    Attributes:
+        datetime: datetime object
+        value: measured value
+        coordinates: coordinates object with latitude and longitude of measurement
+        sensors_id: unique identifier for sensor
+        locations_id: unique identifier for location
+    """
+
+    datetime: Datetime
+    value: float
+    coordinates: Coordinates
+    sensors_id: int
+    locations_id: int
+
+
+@dataclass
+class LatestResponse(_ResponseBase):
+    """Representation of the API response for latest resource.
+
+    Attributes:
+        meta: a metadata object containing information about the results.
+        results: a list of latest records.
+    """
+
+    results: List[Latest]
+
+    def __post_init__(self):
+        """Sets class attributes to correct type after checking input type."""
+        if isinstance(self.meta, dict):
+            self.meta = Meta.load(self.meta)
+        if isinstance(self.results, list):
+            self.results = [Latest.load(x) for x in self.results]
