@@ -11,7 +11,7 @@ Python SDK for the OpenAQ Version 3 API.
 
 -----
 
-**Table of Contents**
+## Table of Contents
 
 - [Installation](#installation)
 - [Documentation](#documentation)
