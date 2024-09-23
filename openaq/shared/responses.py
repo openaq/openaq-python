@@ -326,8 +326,8 @@ class Location(_ResourceBase):
         locality: name of locality
         timezone: timezone of location
         country: country base object with country information
-        owner: owner object
-        provider: provider object
+        owner: object with information about the location owner
+        provider: object with information about the location provider
         is_mobile: boolean indicating whether or not location is mobile (true) or stationary (false)
         is_monitor: boolean indicating whether or not location is a reference monitor (true) or air sensor (false)
         instruments: list of instruments used by locaiton node
@@ -714,7 +714,7 @@ class Summary(_ResourceBase):
         min: mininum value
         q02: 2nd percentile
         q25: 25th percentile
-        median: median value i.e. 50th percentile
+        median: median value/50th percentile
         q75: 75th percentile
         q98: 98th percentile
         max: maximum value
@@ -728,7 +728,7 @@ class Summary(_ResourceBase):
     q75: float
     q98: float
     max: float
-    sd: float
+    sd: Union[float, None]
 
 
 @dataclass
@@ -736,14 +736,14 @@ class Coverage(_ResourceBase):
     """Data coverage details for measurements.
 
     Attributes:
-        expected_count:
+        expected_count: expected number of measurements in the period
         expected_interval:
-        observed_count:
+        observed_count: observed number of measurements in the period
         observed_interval:
         percent_complete:
-        percent_coverage:
-        datetime_from:
-        datetime_to:
+        percent_coverage: percentage value representing the coverage based on the observed count divded by the expected count of measurements.
+        datetime_from: ISO 8601 timestamp
+        datetime_to: ISO 8601 timestamp
     """
 
     expected_count: int
@@ -793,12 +793,12 @@ class Measurement(_ResourceBase):
     """Representation of measurement resource in OpenAQ.
 
     Attributes:
-        period: period object
+        period: object detailing the measurement period.
         value: measured value or mean value if aggregate to period.
-        parameter: parameter object
+        parameter: object representing the parameter measured by the sensor.
         coordinates: WGS84 coordinate values if location is mobile.
-        summary: summary object
-        coverage: coverage object
+        coverage: object detailing the data coverage of the sensor for the period.
+        summary: object with summary statistics of mueasurment values of the sensor for the period.
     """
 
     period: Period
@@ -886,7 +886,7 @@ class LatestBase(_ResourceBase):
     Attributes:
         datetime: datetime object
         value: measured value
-        coordinates:  coordinates object with latitude and longitude of measurement
+        coordinates: coordinates object with latitude and longitude of measurement
     """
 
     datetime: Datetime
@@ -896,21 +896,27 @@ class LatestBase(_ResourceBase):
 
 @dataclass
 class Sensor(_ResourceBase):
-    """Detailed information about an sensor in OpenAQ.
+    """Detailed information about a sensor in OpenAQ.
 
     Attributes:
         id: unique identifier for sensor
         name: sensor name
+        parameter: object representing the parameter measured by the sensor.
+        datetime_first: datetime value representing first value available for the sensor.
+        datetime_last: datetime value representing last value available for the sensor.
+        coverage: object detailing the data coverage of the sensor
+        latest: latest measurement value for the sensor
+        summary: object with summary statistics of mueasurment values for the sensor
     """
 
     id: int
     name: str
     parameter: Parameter
-    datetime_first: Datetime
-    datetime_last: Datetime
-    coverage: Coverage
-    latest: LatestBase
-    summary: Summary
+    datetime_first: Union[Datetime, None] = None
+    datetime_last: Union[Datetime, None] = None
+    coverage: Union[Coverage, None] = None
+    latest: Union[LatestBase, None] = None
+    summary: Union[Summary, None] = None
 
 
 @dataclass
