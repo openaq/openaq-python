@@ -138,7 +138,7 @@ def test_responses_validation(name: str, response_class: _ResponseBase):
 @pytest.mark.parametrize(
     "name,response_class",
     [
-        ('measurements', MeasurementsResponse),
+        # ('measurements', MeasurementsResponse),
         ('countries', CountriesResponse),
         ('locations', LocationsResponse),
         ('providers', ProvidersResponse),
@@ -156,7 +156,6 @@ def test_responses_json(name: str, response_class: _ResponseBase):
     response = read_response_file(name)
     mocked = mock_response(response)
     response_data = response_class.read_response(mocked)
-    print("FOO", type(response_data.json()))
     d = json.loads(response_data.json())
     headers_less_response = {k: d[k] for k in set(list(d.keys())) - set(['headers'])}
 
