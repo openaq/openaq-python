@@ -156,7 +156,7 @@ def test_responses_json(name: str, response_class: _ResponseBase):
     response = read_response_file(name)
     mocked = mock_response(response)
     response_data = response_class.read_response(mocked)
-    d = json.loads(response_data.json())
+    d = response_data.json()
     headers_less_response = {k: d[k] for k in set(list(d.keys())) - set(['headers'])}
 
     assert json.loads(response) == headers_less_response
