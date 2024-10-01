@@ -1,4 +1,4 @@
-## Create an instance of the client
+# Create an instance of the client
 
 OpenAQ Python provides a synchronous client via the `OpenAQ` class and an
 asynchronous client via the `AsyncOpenAQ` class, for working with
@@ -22,7 +22,7 @@ create an instance of the client class.
     ```
 
 The OpenAQ API key can be passed directly as an argument on the creation of the
-client as shown above. Alternatively we can use the `OPENAQ_API_KEY` environment
+client as shown above. Alternatively, we can use the `OPENAQ_API_KEY` environment
 variable to set the api_key value without directly setting the value on client
 instantiation. e.g.:
 
@@ -90,7 +90,7 @@ network resources by maintaining an open connection.
         loop.run_until_complete(main())
     ```
 
-Alternatively we can use a context manager to handle closing the connection for
+Alternatively, we can use a context manager to handle closing the connection for
 us:
 
 === "Sync"
@@ -118,13 +118,13 @@ us:
         loop.run_until_complete(main())
     ```
 
-### API key
+## API key
 
 An API Key is required to make requests with the OpenAQ API.
 
 We can add an API Key to OpenAQ Python one of two ways. As shown above, the API
 key string can be directly passed when instantiating the `OpenAQ` or
-`AsyncOpenAQ` class via the `api_key` argument. Alternatively if a key is not
+`AsyncOpenAQ` class via the `api_key` argument. Alternatively, if a key is not
 passed to the constructor `OpenAQ` and `AsyncOpenAQ` will automatically look for
 a system environment variable named `OPENAQ-API-KEY` and set the value of that
 to the `api_key` argument. Directly passing a value to the `api_key` argument in

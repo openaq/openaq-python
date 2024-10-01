@@ -11,6 +11,9 @@ and 3.12
 
 Features:
 
-- Synchronous and Asynchronous client options.
-- Deserialized response classes.
-- Comprehensive Type Annotations.
+- Synchronous and Asynchronous client options - clients to support standard
+  synchronous function calls or asynchronous event loop with async/await.
+- Comprehensive type annotations - type hinting for improve text editor hints
+  and autocomplete.
+- Deserialized response classes - Python object for easier attribute access,
+  with options for json and dictionary representations.

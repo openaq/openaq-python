@@ -5,10 +5,10 @@ provide access to these query parameters through keyword arguments. These values
 default to `page=1` and `limit=100`. The `limit` parameter has a maximum value
 of 1,000.
 
-We can use the `found` value from the response `meta` object to find the total
+For small result sets, we can use the `found` value from the response `meta` object to find the total
 number of pages to loop through.
 
-```py hl_lines="9"
+```py hl_lines="13"
 from math import ceil
 
 from openaq import OpenAQ
@@ -21,8 +21,12 @@ found = meta.found
 
 limit = 1000
 
-for i in range(found/limit):
-    locations.client.list(limit=limit, page=i)
+pages = ceil(found/limit)
+
+for page in pages:
+    locations.client.list(limit=limit, page=page)
+
+client.close()
 ```
 
 We can then divide the value in `found` by the chosen `limit` value and round up
@@ -44,8 +48,10 @@ limit = 1000
 
 pages = ceil(found/limit)
 
-for i in pages:
-    client.locations.list(limit=limit, page=i)
+for page in pages:
+    client.locations.list(limit=limit, page=page)
+
+client.close()
 ```
 
 For large result sets such as in measurements the `meta` `found` value will
@@ -53,7 +59,7 @@ provide an estimate, not the actual number of results. For this we can use a
 different pattern, looping through the pages until we encounter a page with no
 results.
 
-```py hl_lines="13-17"
+```py hl_lines="15-17"
 from openaq import OpenAQ
 
 client = OpenAQ(api_key='replace-with-a-valid-openaq-api-key')
@@ -71,4 +77,6 @@ while results:
     if len(measurements.results) == 0:
         results = False
     page_num += 1
+
+client.close()
 ```
