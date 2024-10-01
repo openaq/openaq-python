@@ -19,8 +19,8 @@ class Providers(SyncResourceBase):
         Raises:
             See the 'Raises' section of the 'list' method for potential exceptions.
         """
-        provider = self._client._get(f"/providers/{providers_id}")
-        return ProvidersResponse.load(provider.json())
+        provider_response = self._client._get(f"/providers/{providers_id}")
+        return ProvidersResponse.read_response(provider_response)
 
     def list(
         self,
@@ -92,5 +92,5 @@ class Providers(SyncResourceBase):
             countries_id=countries_id,
         )
 
-        providers = self._client._get("/providers", params=params)
-        return ProvidersResponse.load(providers.json())
+        providers_response = self._client._get("/providers", params=params)
+        return ProvidersResponse.read_response(providers_response)

@@ -27,7 +27,7 @@ class Instruments(AsyncResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         instrument = await self._client._get(f"/instruments/{providers_id}")
-        return InstrumentsResponse.load(instrument.json())
+        return InstrumentsResponse.read_response(instrument)
 
     async def list(
         self,
@@ -69,4 +69,4 @@ class Instruments(AsyncResourceBase):
         )
 
         instruments = await self._client._get("/instruments", params=params)
-        return InstrumentsResponse.load(instruments.json())
+        return InstrumentsResponse.read_response(instruments)

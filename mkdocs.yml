@@ -1,4 +1,4 @@
-site_name: OpenAQ Python API Wrapper
+site_name: OpenAQ Python SDK
 
 repo_url: https://github.com/openaq/openaq-python
 repo_name: openaq/openaq-python
@@ -6,6 +6,7 @@ repo_name: openaq/openaq-python
 theme:
   name: "material"
   logo: assets/logo.svg
+  favicon: assets/favicon.ico
   palette:
     primary: custom
   features:
@@ -16,6 +17,21 @@ theme:
     - navigation.top
   icon:
     repo: fontawesome/brands/github
+  custom_dir: docs/overrides
+
+extra:
+  analytics:
+    provider: plausible
+    property: python.openaq.org
+  social:
+    - icon: fontawesome/brands/slack 
+      link: https://join.slack.com/t/openaq/shared_invite/zt-yzqlgsva-v6McumTjy2BZnegIK9XCVw
+    - icon: fontawesome/brands/x-twitter 
+      link: https://x.com/@openaq
+    - icon: fontawesome/brands/github 
+      link: https://github.com/openaq
+    - icon: fontawesome/brands/medium 
+      link: https://openaq.medium.com
 
 extra_css:
   - stylesheets/extra.css
@@ -23,6 +39,8 @@ extra_css:
 plugins:
   - mkdocstrings
   - search
+  - social
+  - privacy
 
 markdown_extensions:
   - admonition
@@ -42,13 +60,13 @@ markdown_extensions:
       title: On this page
 
 nav:
-  - OpenAQ Python: index.md
+  - About OpenAQ Python: index.md
   - Tutorial:
     - tutorial/getting-started.md
   - How-To Guides:
     - Working with the client: how-to-guides/working-with-the-client.md
-    - Working with pagination: how-to-guides/working-with-pagination.md
-    - Integrating with Pandas: how-to-guides/integrating-with-pandas.md
+    - Paging results: how-to-guides/paging-results.md
+    - Query locations near a point: how-to-guides/query-locations-near-a-point.md
   - Reference:
     - OpenAQ: reference/openaq.md
     - AsyncOpenAQ: reference/asyncopenaq.md

@@ -4,16 +4,18 @@ from typing import Any, Mapping, Union
 
 from openaq._async.models.countries import Countries
 from openaq._async.models.instruments import Instruments
+from openaq._async.models.licenses import Licenses
 from openaq._async.models.locations import Locations
 from openaq._async.models.manufacturers import Manufacturers
 from openaq._async.models.measurements import Measurements
 from openaq._async.models.owners import Owners
 from openaq._async.models.parameters import Parameters
 from openaq._async.models.providers import Providers
+from openaq._async.models.sensors import Sensors
 from openaq.shared.client import (
     DEFAULT_USER_AGENT,
+    DEFAULT_BASE_URL,
     BaseClient,
-    resolve_headers,
 )
 
 from .transport import AsyncTransport
@@ -29,6 +31,12 @@ class AsyncOpenAQ(BaseClient):
         base_url: The base URL for the API endpoint.
 
     Note:
+        An API key can either be passed directly to the OpenAQ client class at
+        instantiation or can be accessed from a system environment variable
+        name `OPENAQ-API-KEY`. An API key added at instantiation will always
+        override one set in the environment variable.
+
+    Warning:
         Although the `api_key` parameter is not required for instantiating the
         OpenAQ client, an API Key is required for using the OpenAQ API.
 
@@ -48,28 +56,23 @@ class AsyncOpenAQ(BaseClient):
     def __init__(
         self,
         api_key: Union[str, None] = None,
-        user_agent: str = DEFAULT_USER_AGENT,
         headers: Mapping[str, str] = {},
-        base_url: str = "https://api.openaq.org/v3/",
-        _transport: AsyncTransport = AsyncTransport(),
+        base_url: str = DEFAULT_BASE_URL,
+        user_agent: str = DEFAULT_USER_AGENT,
+        transport: AsyncTransport = AsyncTransport(),
     ) -> AsyncOpenAQ:
-        super().__init__(_transport, headers, base_url)
-        if headers:
-            self._headers.update(headers)
-        self._headers = resolve_headers(
-            self._headers,
-            api_key=api_key,
-            user_agent=user_agent,
-        )
+        super().__init__(transport, user_agent, headers, api_key, base_url)
 
-        self.locations = Locations(self)
-        self.providers = Providers(self)
-        self.parameters = Parameters(self)
         self.countries = Countries(self)
         self.instruments = Instruments(self)
+        self.licenses = Licenses(self)
+        self.locations = Locations(self)
         self.manufacturers = Manufacturers(self)
         self.measurements = Measurements(self)
         self.owners = Owners(self)
+        self.providers = Providers(self)
+        self.parameters = Parameters(self)
+        self.sensors = Sensors(self)
 
     @property
     def transport(self) -> AsyncTransport:
@@ -83,11 +86,7 @@ class AsyncOpenAQ(BaseClient):
         params: Union[Mapping[str, Any], None] = None,
         headers: Union[Mapping[str, str], None] = None,
     ):
-        if headers:
-            request_headers = self._headers.copy()
-            request_headers.update(headers)
-        else:
-            request_headers = self._headers
+        request_headers = self.build_request_headers(headers)
         try:
             url = self._base_url + path
             data = await self.transport.send_request(

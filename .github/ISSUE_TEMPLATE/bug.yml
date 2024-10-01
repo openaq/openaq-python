@@ -1,5 +1,5 @@
 name: OpenAQ python bug
-description: Report a bug or unexpected behavior in OpenAQ python wrapper
+description: Report a bug or unexpected behavior in OpenAQ Python SDK
 labels: [bug, pending]
 
 body:

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Tuple, Union
 
 from openaq.shared.models import build_query_params
-from openaq.shared.responses import LocationsResponse
+from openaq.shared.responses import LatestResponse, LocationsResponse, SensorsResponse
 
 from .base import SyncResourceBase
 
@@ -30,19 +30,42 @@ class Locations(SyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        location = self._client._get(f"/locations/{locations_id}")
-        return LocationsResponse.load(location.json())
+        location_response = self._client._get(f"/locations/{locations_id}")
+        return LocationsResponse.read_response(location_response)
+
+    def latest(self, locations_id: int) -> LatestResponse:
+        """Retrieve latest measurements from a location.
+
+        Args:
+            locations_id: The locations ID of the location to retrieve.
+
+        Returns:
+            LatestResponse: An instance representing the retrieved latest results.
+
+        Raises:
+            BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
+            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
+        """
+        latest = self._client._get(f"/locations/{locations_id}/latest")
+        return LatestResponse.read_response(latest)
 
     def list(
         self,
         page: int = 1,
-        limit: int = 1000,
+        limit: int = 100,
         radius: Union[int, None] = None,
         coordinates: Union[Tuple[float, float], None] = None,
         bbox: Union[Tuple[float, float, float, float], None] = None,
         providers_id: Union[int, List[int], None] = None,
         countries_id: Union[int, List[int], None] = None,
         parameters_id: Union[int, List[int], None] = None,
+        licenses_id: Union[int, List[int], None] = None,
         iso: Union[str, None] = None,
         monitor: Union[bool, None] = None,
         mobile: Union[bool, None] = None,
@@ -61,6 +84,7 @@ class Locations(SyncResourceBase):
         * `providers_id` - Filters results by selected providers ID(s)
         * `countries_id` - Filters results by selected countries ID(s)
         * `parameters_id` - Filters results by selected parameters ID(s)
+        * `licenses_id` - Filters results by selected licenses ID(s)
         * `iso` - Filters results by selected country code
         * `monitor` - Filters results by reference grade monitors (`true`), air sensors (`false`), or both if not used
         * `mobile` - Filters results for mobile sensors (`true`), non-mobile sensors (`false`), or both if not used
@@ -76,7 +100,8 @@ class Locations(SyncResourceBase):
             providers_id: Single providers ID or an array of IDs.
             countries_id: Single countries ID or an array of IDs.
             parameters_id: Single parameters ID or an array of IDs.
-            iso:  2 letter ISO 3166-alpha-2 country code.
+            licenses_id: Single licenses ID or an array of IDs.
+            iso: 2 letter ISO 3166-alpha-2 country code.
             monitor: Boolean for reference grade monitors (true) or air sensors (false)
             mobile: Boolean mobile locations (true) or not mobile locations (false).
             order_by: Order by operators for results.
@@ -104,6 +129,7 @@ class Locations(SyncResourceBase):
             providers_id=providers_id,
             countries_id=countries_id,
             parameters_id=parameters_id,
+            licenses_id=licenses_id,
             iso=iso,
             monitor=monitor,
             mobile=mobile,
@@ -111,5 +137,27 @@ class Locations(SyncResourceBase):
             sort_order=sort_order,
         )
 
-        locations = self._client._get("/locations", params=params)
-        return LocationsResponse.load(locations.json())
+        locations_response = self._client._get("/locations", params=params)
+        return LocationsResponse.read_response(locations_response)
+
+    def sensors(self, locations_id: int) -> SensorsResponse:
+        """Retrieve sensors from a location.
+
+        Args:
+            locations_id: The locations ID of the location to retrieve.
+
+        Returns:
+            SensorsResponse: An instance representing the retrieved latest results.
+
+        Raises:
+            BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
+            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
+        """
+        sensors = self._client._get(f"/locations/{locations_id}/sensors")
+        return SensorsResponse.read_response(sensors)

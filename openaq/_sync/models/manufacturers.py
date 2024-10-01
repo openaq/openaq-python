@@ -1,5 +1,5 @@
 from openaq.shared.models import build_query_params
-from openaq.shared.responses import ManufacturersResponse
+from openaq.shared.responses import InstrumentsResponse, ManufacturersResponse
 
 from .base import SyncResourceBase
 
@@ -26,8 +26,8 @@ class Manufacturers(SyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        manufacturer = self._client._get(f"/manufacturers/{manufacturers_id}")
-        return ManufacturersResponse.load(manufacturer.json())
+        manufacturer_response = self._client._get(f"/manufacturers/{manufacturers_id}")
+        return ManufacturersResponse.read_response(manufacturer_response)
 
     def list(
         self,
@@ -68,5 +68,29 @@ class Manufacturers(SyncResourceBase):
             page=page, limit=limit, order_by=order_by, sort_order=sort_order
         )
 
-        manufacturers = self._client._get("/manufacturers", params=params)
-        return ManufacturersResponse.load(manufacturers.json())
+        manufacturer_response = self._client._get("/manufacturers", params=params)
+        return ManufacturersResponse.read_response(manufacturer_response)
+
+    def instruments(self, manufacturers_id: int) -> InstrumentsResponse:
+        """Retrieve instruments of a manufacturer by ID.
+
+        Args:
+            manufacturers_id: The manufacturers ID of the manufacturer to retrieve.
+
+        Returns:
+            InstrumentsResponse: An instance representing the retrieved instruments.
+
+        Raises:
+            BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
+            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
+        """
+        instruments_response = self._client._get(
+            f"/manufacturers/{manufacturers_id}/instruments"
+        )
+        return InstrumentsResponse.read_response(instruments_response)

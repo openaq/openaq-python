@@ -1,5 +1,5 @@
 from openaq.shared.models import build_query_params
-from openaq.shared.responses import ParametersResponse
+from openaq.shared.responses import LatestResponse, ParametersResponse
 
 from .base import SyncResourceBase
 
@@ -26,8 +26,30 @@ class Parameters(SyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        parameter = self._client._get(f"/parameters/{parameters_id}")
-        return ParametersResponse.load(parameter.json())
+        parameter_response = self._client._get(f"/parameters/{parameters_id}")
+        return ParametersResponse.read_response(parameter_response)
+
+    def latest(self, parameters_id: int) -> LatestResponse:
+        """Retrieve latest measurements from a location.
+
+        Args:
+            parameters_id: The locations ID of the location to retrieve.
+
+        Returns:
+            LatestResponse: An instance representing the retrieved latest results.
+
+        Raises:
+            BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
+            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
+        """
+        latest = self._client._get(f"/parameters/{parameters_id}/latest")
+        return LatestResponse.read_response(latest)
 
     def list(
         self,
@@ -95,5 +117,5 @@ class Parameters(SyncResourceBase):
             countries_id=countries_id,
         )
 
-        parameters = self._client._get("/parameters", params=params)
-        return ParametersResponse.load(parameters.json())
+        parameters_response = self._client._get("/parameters", params=params)
+        return ParametersResponse.read_response(parameters_response)

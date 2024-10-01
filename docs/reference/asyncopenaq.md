@@ -5,7 +5,6 @@
       show_root_heading: false
       show_source: true
 
-
 __Locations__
 
 ::: openaq._async.models.locations.Locations
@@ -42,6 +41,15 @@ __Instruments__
       show_root_heading: false
       show_source: true
 
+__Licenses__
+
+::: openaq._async.models.licenses.Licenses
+    options:
+      heading_level: 3
+      show_bases: false
+      show_root_heading: false
+      show_source: true
+
 __Manufacturers__
 
 ::: openaq._async.models.manufacturers.Manufacturers
@@ -72,6 +80,15 @@ __Parameters__
 __Providers__
 
 ::: openaq._async.models.providers.Providers
+    options:
+      heading_level: 3
+      show_bases: false
+      show_root_heading: false
+      show_source: true
+
+__Sensors__
+
+::: openaq._async.models.sensors.Sensors
     options:
       heading_level: 3
       show_bases: false
