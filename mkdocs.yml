@@ -1,5 +1,5 @@
 site_name: OpenAQ Python SDK
-
+site_url: https://python.openaq.org
 repo_url: https://github.com/openaq/openaq-python
 repo_name: openaq/openaq-python
 
