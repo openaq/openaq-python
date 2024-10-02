@@ -22,7 +22,21 @@ theme:
 extra:
   analytics:
     provider: plausible
-    property: python.openaq.org
+    domain: python.openaq.org
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: good
+          note: >-
+            Thanks for your feedback!
+
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: bad
+          note: >-
+            Thanks for your feedback!
   social:
     - icon: fontawesome/brands/slack 
       link: https://join.slack.com/t/openaq/shared_invite/zt-yzqlgsva-v6McumTjy2BZnegIK9XCVw
@@ -41,6 +55,7 @@ plugins:
   - search
   - social
   - privacy
+  - material-plausible
 
 markdown_extensions:
   - admonition

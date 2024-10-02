@@ -64,7 +64,7 @@ check = ["ruff .", "black --check --diff .", "isort --check-only --diff ."]
 fmt = ["isort .", "black .", "check"]
 
 [tool.hatch.envs.docs]
-dependencies = ["mkdocs", "mkdocstrings[python]", "mkdocs-material[imaging]"]
+dependencies = ["mkdocs", "mkdocstrings[python]", "mkdocs-material[imaging]", "material-plausible-plugin"]
 
 [tool.hatch.envs.docs.scripts]
 build = ["mkdocs build -c"]
