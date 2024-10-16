@@ -18,7 +18,7 @@ class Measurements(SyncResourceBase):
         sensors_id: int,
         data: Union[Data, None] = None,
         rollup: Union[Rollup, None] = None,
-        datetime_from: Union[datetime.datetime, str, None] = "2016-10-10",
+        datetime_from: Union[datetime.datetime, str, None] = "2016-10-10T00:00:00Z",
         datetime_to: Union[datetime.datetime, str, None] = None,
         page: int = 1,
         limit: int = 1000,
