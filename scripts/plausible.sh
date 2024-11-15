@@ -7,12 +7,12 @@ NEW_STRING="https://plausible.io/js/plausible.js"
 
 PRECONNECT_LINK='<link rel="preconnect" href="https://plausible.io">'
 
-find "$SEARCH_DIR" -type f -name "*.html" | while read -r html_file; do
-    if grep -q "$OLD_STRING" "$html_file"; then
-        echo "Updating $html_file"
+find "$SEARCH_DIR" -type f -name "*.html" | while read -r file; do
+  file_content=$(cat "$file")
 
-        sed -i "s~src=\"\([^\"']*\)$OLD_STRING~src=\"$NEW_STRING~g" "$html_file"
+  file_content=$(sed "s|$OLD_STRING|$NEW_STRING|g" <<< "$file_content")
+  
+  file_content=$(sed '/<script/i '$PRECONNECT_LINK' <<< "$file_content")
 
-        sed -i "/<script[^>]*src=\"$NEW_STRING\"/i $PRECONNECT_LINK" "$html_file"
-    fi
+  echo "$file_content" > "$file"
 done
