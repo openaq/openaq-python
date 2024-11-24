@@ -13,15 +13,15 @@ from openaq._sync.models.parameters import Parameters
 from openaq._sync.models.providers import Providers
 from openaq._sync.models.sensors import Sensors
 from openaq.shared.client import (
-    DEFAULT_USER_AGENT,
     DEFAULT_BASE_URL,
+    DEFAULT_USER_AGENT,
     BaseClient,
 )
 
 from .transport import Transport
 
 
-class OpenAQ(BaseClient):
+class OpenAQ(BaseClient[Transport]):
     """OpenAQ syncronous client.
 
     Args:
@@ -60,7 +60,7 @@ class OpenAQ(BaseClient):
         base_url: str = DEFAULT_BASE_URL,
         user_agent: str = DEFAULT_USER_AGENT,
         _transport: Transport = Transport(),
-    ) -> OpenAQ:
+    ) -> None:
         super().__init__(_transport, user_agent, headers, api_key, base_url)
 
         self.countries = Countries(self)

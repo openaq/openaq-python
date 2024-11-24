@@ -1,6 +1,6 @@
-from openaq._async.models.base import AsyncResourceBase
-
 from unittest.mock import MagicMock
+
+from openaq._async.models.base import AsyncResourceBase
 
 
 def test_sync_resource_base_init():

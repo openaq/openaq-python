@@ -13,15 +13,15 @@ from openaq._async.models.parameters import Parameters
 from openaq._async.models.providers import Providers
 from openaq._async.models.sensors import Sensors
 from openaq.shared.client import (
-    DEFAULT_USER_AGENT,
     DEFAULT_BASE_URL,
+    DEFAULT_USER_AGENT,
     BaseClient,
 )
 
 from .transport import AsyncTransport
 
 
-class AsyncOpenAQ(BaseClient):
+class AsyncOpenAQ(BaseClient[AsyncTransport]):
     """OpenAQ asynchronous client.
 
     Args:
@@ -60,7 +60,7 @@ class AsyncOpenAQ(BaseClient):
         base_url: str = DEFAULT_BASE_URL,
         user_agent: str = DEFAULT_USER_AGENT,
         transport: AsyncTransport = AsyncTransport(),
-    ) -> AsyncOpenAQ:
+    ) -> None:
         super().__init__(transport, user_agent, headers, api_key, base_url)
 
         self.countries = Countries(self)

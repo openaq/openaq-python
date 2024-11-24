@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from .types import Rollup, Data
-from .exceptions import NotFoundError
-
-
 import datetime
 from typing import Any, Mapping, Union
+
+from .exceptions import NotFoundError
+from .types import Data, Rollup
 
 
 def build_query_params(**kwargs) -> Mapping[str, Any]:

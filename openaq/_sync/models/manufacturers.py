@@ -1,3 +1,5 @@
+from typing import Union
+
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import InstrumentsResponse, ManufacturersResponse
 
@@ -33,8 +35,8 @@ class Manufacturers(SyncResourceBase):
         self,
         page: int = 1,
         limit: int = 1000,
-        order_by: str = None,
-        sort_order: str = None,
+        order_by: Union[str, None] = None,
+        sort_order: Union[str, None] = None,
     ) -> ManufacturersResponse:
         """List manufacturers based on provided filters.
 

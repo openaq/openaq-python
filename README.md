@@ -8,6 +8,10 @@ Python SDK for the OpenAQ Version 3 API.
 
 [![PyPI - Version](https://img.shields.io/pypi/v/openaq.svg)](https://pypi.org/project/openaq)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/openaq.svg)](https://pypi.org/project/openaq)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![slack](https://img.shields.io/badge/Slack-OpenAQ-blue?logo=slack&color=%23198cff
+)](https://join.slack.com/t/openaq/shared_invite/zt-yzqlgsva-v6McumTjy2BZnegIK9XCVw)
 
 -----
 
@@ -49,6 +53,12 @@ style can be checked with:
 
 ```console
 hatch run style:check
+```
+
+[mypy](https://mypy-lang.org/) static type checking: 
+
+```console
+hatch run types:check
 ```
 
 Testing uses [pytest](https://docs.pytest.org/en/7.4.x/).

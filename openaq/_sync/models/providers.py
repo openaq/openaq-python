@@ -1,3 +1,5 @@
+from typing import Union
+
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import ProvidersResponse
 
@@ -26,15 +28,15 @@ class Providers(SyncResourceBase):
         self,
         page: int = 1,
         limit: int = 1000,
-        order_by: str = None,
-        sort_order: str = None,
-        parameters_id: int = None,
-        monitor: bool = None,
-        coordinates: tuple = None,
-        radius: int = None,
-        bbox: tuple = None,
-        iso: str = None,
-        countries_id: int = None,
+        order_by: Union[str, None] = None,
+        sort_order: Union[str, None] = None,
+        parameters_id: Union[int, None] = None,
+        monitor: Union[bool, None] = None,
+        coordinates: Union[tuple, None] = None,
+        radius: Union[int, None] = None,
+        bbox: Union[tuple, None] = None,
+        iso: Union[str, None] = None,
+        countries_id: Union[int, None] = None,
     ) -> ProvidersResponse:
         """List providers based on provided filters.
 

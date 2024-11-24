@@ -1,14 +1,14 @@
 """Base class and utilities to for shared client code."""
 
+import logging
 import os
 import platform
 from abc import ABC, abstractmethod
-import logging
 from pathlib import Path
-from typing import Any, Mapping, Union
+from typing import Any, Generic, Mapping, TypeVar, Union
 
-from openaq._sync.transport import Transport
 from openaq._async.transport import AsyncTransport
+from openaq._sync.transport import Transport
 
 logger = logging.getLogger('openaq')
 
@@ -27,8 +27,10 @@ DEFAULT_USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
 
 DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 
+TTransport = TypeVar('TTransport')
 
-class BaseClient(ABC):
+
+class BaseClient(ABC, Generic[TTransport]):
     """Abstract class for OpenAQ clients.
 
     This class provides the basic structure and attributes for OpenAQ clients. It includes methods to
@@ -49,9 +51,11 @@ class BaseClient(ABC):
         base_url: The base URL for the OpenAQ API. Defaults to "https://api.openaq.org/v3/".
     """
 
+    _api_key: Union[str, None]
+
     def __init__(
         self,
-        transport: Union[AsyncTransport, Transport],
+        transport: TTransport,
         user_agent: str,
         headers: Mapping[str, str] = {},
         api_key: Union[str, None] = None,
@@ -82,7 +86,7 @@ class BaseClient(ABC):
                 "API key not set: An API key is required when using the OpenAQ API"
             )
 
-    def _get_api_key(self) -> str:
+    def _get_api_key(self) -> Union[str, None]:
         """Gets API key value from env or openaq config file.
 
         Returns:
@@ -98,9 +102,10 @@ class BaseClient(ABC):
         config = _get_openaq_config()
         if config:
             return config.get('api-key')
+        return None
 
     @property
-    def api_key(self) -> str:
+    def api_key(self) -> Union[str, None]:
         """Accessor for private _api_key field.
 
         Returns:
@@ -109,7 +114,7 @@ class BaseClient(ABC):
         return self._api_key
 
     @property
-    def transport(self) -> Union[AsyncTransport, Transport]:
+    def transport(self) -> TTransport:
         """Get the transport mechanism used by the client.
 
         Provides access to the transport instance that the client uses to
@@ -131,7 +136,7 @@ class BaseClient(ABC):
 
     def build_request_headers(
         self, headers: Union[Mapping[str, str], None] = None
-    ) -> Mapping[str, str]:
+    ) -> dict:
         """Copies and updates headers based on input.
 
         Args:
@@ -141,10 +146,11 @@ class BaseClient(ABC):
             A mapping of headers for the request
         """
         if headers:
-            request_headers = self._headers.copy()
+            request_headers = {k: v for k, v in self._headers.items()}
+            request_headers = request_headers.copy()
             request_headers.update(headers)
         else:
-            request_headers = self._headers
+            request_headers = {k: v for k, v in self._headers.items()}
         return request_headers
 
     @property

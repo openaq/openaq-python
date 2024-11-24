@@ -1,3 +1,5 @@
+from typing import Union
+
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import CountriesResponse
 
@@ -33,10 +35,10 @@ class Countries(AsyncResourceBase):
         self,
         page: int = 1,
         limit: int = 1000,
-        order_by: str = None,
-        sort_order: str = None,
-        parameters_id: int = None,
-        providers_id: int = None,
+        order_by: Union[str, None] = None,
+        sort_order: Union[str, None] = None,
+        parameters_id: Union[int, None] = None,
+        providers_id: Union[int, None] = None,
     ) -> CountriesResponse:
         """List countries based on provided filters.
 

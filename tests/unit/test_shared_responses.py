@@ -22,10 +22,10 @@ from openaq.shared.responses import (
     ParametersResponse,
     Provider,
     ProvidersResponse,
-    _ResourceBase,
-    _ResponseBase,
     Sensor,
     SensorsResponse,
+    _ResourceBase,
+    _ResponseBase,
 )
 
 RATE_LIMIT_HEADERS = {

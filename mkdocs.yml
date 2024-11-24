@@ -81,7 +81,8 @@ nav:
   - How-To Guides:
     - Working with the client: how-to-guides/working-with-the-client.md
     - Paging results: how-to-guides/paging-results.md
-    - Query locations near a point: how-to-guides/query-locations-near-a-point.md
+    - Geospatial queries: how-to-guides/geospatial-queries.md
+    - Working with rate limits: how-to-guides/working-with-rate-limits.md
   - Reference:
     - OpenAQ: reference/openaq.md
     - AsyncOpenAQ: reference/asyncopenaq.md

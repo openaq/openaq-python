@@ -1,3 +1,5 @@
+# Paging results
+
 The OpenAQ API supports pagination to allow fetching of large amounts of data
 through smaller pages of results. Pagination is controlled through the `page`
 and `limit` query parameters. All resource `list()` methods in OpenAQ Python
@@ -5,8 +7,8 @@ provide access to these query parameters through keyword arguments. These values
 default to `page=1` and `limit=100`. The `limit` parameter has a maximum value
 of 1,000.
 
-For small result sets, we can use the `found` value from the response `meta` object to find the total
-number of pages to loop through.
+For small result sets, we can use the `found` value from the response `meta`
+object to find the total number of pages to loop through.
 
 ```py hl_lines="13"
 from math import ceil

@@ -1,7 +1,6 @@
 import os
-from pathlib import Path
 import platform
-
+from pathlib import Path
 from unittest import mock
 from unittest.mock import mock_open, patch
 
@@ -40,7 +39,6 @@ def test__get_openaq_config_file_exists():
 
 
 class SharedClient(BaseClient):
-
     def close():
         pass
 
@@ -62,7 +60,6 @@ def mock_config_file():
 
 
 class TestSharedClient:
-
     @pytest.fixture(autouse=True)
     def setup(self):
         self.instance = SharedClient(

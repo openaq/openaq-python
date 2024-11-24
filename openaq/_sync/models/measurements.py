@@ -5,7 +5,7 @@ from typing import Union
 
 from openaq.shared.models import build_measurements_path, build_query_params
 from openaq.shared.responses import MeasurementsResponse
-from openaq.shared.types import Rollup, Data
+from openaq.shared.types import Data, Rollup
 
 from .base import SyncResourceBase
 
@@ -40,8 +40,8 @@ class Measurements(SyncResourceBase):
             sensors_id: The ID of the sensor for which measurements should be retrieved.
             data: The base measurement unit to query
             rollup: The period by which to rollup the base measurement data.
-            date_from: Starting date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
-            date_to: Ending date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
+            datetime_from: Starting date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
+            datetime_to: Ending date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
             page: The page number to fetch. Page count is determined by total measurements found divided by the limit.
             limit: The number of results returned per page.
 

@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 from openaq._sync.client import OpenAQ

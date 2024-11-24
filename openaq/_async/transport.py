@@ -1,4 +1,4 @@
-from typing import Any, Mapping
+from typing import Any, Mapping, Union
 
 import httpx
 
@@ -13,7 +13,7 @@ class AsyncTransport(BaseTransport):
         self,
         method: str,
         url: str,
-        params: Mapping[str, str],
+        params: Union[Mapping[str, str], None],
         headers: Mapping[str, Any],
     ):
         request = httpx.Request(

@@ -3,7 +3,11 @@ from __future__ import annotations
 from typing import List, Tuple, Union
 
 from openaq.shared.models import build_query_params
-from openaq.shared.responses import LatestResponse, LocationsResponse, SensorsResponse
+from openaq.shared.responses import (
+    LatestResponse,
+    LocationsResponse,
+    SensorsResponse,
+)
 
 from .base import AsyncResourceBase
 

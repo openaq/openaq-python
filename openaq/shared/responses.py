@@ -13,7 +13,7 @@ from httpx import Response
 from openaq.vendor.humps import camelize, decamelize
 
 try:
-    import orjson
+    import orjson  # type: ignore
 except ImportError:
     orjson = None
 
@@ -49,7 +49,7 @@ class _ResourceBase:
         return out
 
     @classmethod
-    def load(cls, results: Mapping[str, any]) -> _ResponseBase:
+    def load(cls, results: Mapping[str, Any]) -> _ResourceBase:
         """Deserializes JSON response from API into response object.
 
         Args:
@@ -103,7 +103,7 @@ class _ResponseBase:
         if isinstance(self.meta, dict):
             self.meta = Meta.load(self.meta)
 
-    def _serialize(self, data: Mapping):
+    def _serialize(self, data: Union[Mapping, List]):
         """Serializes data and convert keys to camel case.
 
         Args:
@@ -154,10 +154,10 @@ class Headers:
         x_ratelimit_reset: The X-RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
     """
 
-    x_ratelimit_limit: int = None
-    x_ratelimit_remaining: int = None
-    x_ratelimit_used: int = None
-    x_ratelimit_reset: int = None
+    x_ratelimit_limit: Union[int, None] = None
+    x_ratelimit_remaining: Union[int, None] = None
+    x_ratelimit_used: Union[int, None] = None
+    x_ratelimit_reset: Union[int, None] = None
 
     def __post_init__(self):
         """Coerces attribute values to correct types."""

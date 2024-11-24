@@ -53,7 +53,18 @@ test-integration = 'pytest tests/integration/ -s -vv'
 cov = 'pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=openaq'
 
 [[tool.hatch.envs.test.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+[tool.hatch.envs.types]
+detached = true
+dependencies = ["mypy"]
+
+[[tool.mypy.overrides]]
+module = "openaq"
+ignore_missing_imports = true
+
+[tool.hatch.envs.types.scripts]
+check = "mypy -p openaq --install-types --non-interactive"
 
 [tool.hatch.envs.style]
 detached = true
@@ -68,7 +79,7 @@ dependencies = ["mkdocs", "mkdocstrings[python]", "mkdocs-material[imaging]", "m
 
 [tool.hatch.envs.docs.scripts]
 build = ["mkdocs build -c"]
-serve = ["mkdocs serve -a localhost:8080"]
+serve = ["mkdocs serve -a localhost:8090"]
 
 [tool.coverage.run]
 branch = true
@@ -88,6 +99,7 @@ extend-exclude = ["tests"]
 
 ignore = [
   "E501", # line too long, handled by black
+  "D104"
 ]
 select = ["D"]
 
