@@ -24,7 +24,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["httpx==0.25.0"]
+dependencies = ["httpx==0.28.1"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
