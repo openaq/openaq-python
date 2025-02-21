@@ -1,0 +1,23 @@
+on:
+    release:
+      types: [published]
+    workflow_dispatch:
+    
+name: release-bot.yaml   
+
+permissions: read-all
+
+jobs:
+    release-bot:
+      runs-on: ubuntu-latest
+      env:
+        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      steps: 
+      - name: Post a message in a channel
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "*New OpenAQ Python SDK Release ${{ github.event.release.tag_name }}*: Read the changelog at https://github.com/openaq/openaq-python/releases/tag/${{ github.event.release.tag_name }}"
+                  
