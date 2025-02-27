@@ -14,7 +14,6 @@ from openaq._async.models.providers import Providers
 from openaq._async.models.sensors import Sensors
 from openaq.shared.client import (
     DEFAULT_BASE_URL,
-    DEFAULT_USER_AGENT,
     BaseClient,
 )
 
@@ -58,10 +57,9 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
         api_key: Union[str, None] = None,
         headers: Mapping[str, str] = {},
         base_url: str = DEFAULT_BASE_URL,
-        user_agent: str = DEFAULT_USER_AGENT,
         transport: AsyncTransport = AsyncTransport(),
     ) -> None:
-        super().__init__(transport, user_agent, headers, api_key, base_url)
+        super().__init__(transport, headers, api_key, base_url)
 
         self.countries = Countries(self)
         self.instruments = Instruments(self)
@@ -86,15 +84,13 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
         params: Union[Mapping[str, Any], None] = None,
         headers: Union[Mapping[str, str], None] = None,
     ):
+        self._check_rate_limit()
         request_headers = self.build_request_headers(headers)
-        try:
-            url = self._base_url + path
-            data = await self.transport.send_request(
-                method=method, url=url, params=params, headers=request_headers
-            )
-            return data
-        except Exception as e:
-            raise e
+        url = self._base_url + path
+        data = await self.transport.send_request(
+            method=method, url=url, params=params, headers=request_headers
+        )
+        return data
 
     async def _get(
         self,

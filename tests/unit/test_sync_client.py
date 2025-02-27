@@ -52,11 +52,9 @@ class TestClient:
         self.client = OpenAQ(
             api_key="abc123-def456-ghi789",
             base_url="https://mycustom.openaq.org",
-            user_agent="my-custom-useragent",
             _transport=MockTransport(),
         )
         assert self.client.headers["X-API-Key"] == "abc123-def456-ghi789"
-        assert self.client.headers["User-Agent"] == "my-custom-useragent"
 
     def test_client_params(self, setup):
         self.client = OpenAQ(

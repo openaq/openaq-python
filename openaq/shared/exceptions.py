@@ -23,7 +23,7 @@ class BadRequestError(ClientError):
     status: int = 400
 
 
-class NotAuthorized(AuthError):
+class NotAuthorizedError(AuthError):
     """HTTP 401- Not authorized.
 
     Attributes:
@@ -33,7 +33,7 @@ class NotAuthorized(AuthError):
     status: int = 401
 
 
-class Forbidden(AuthError):
+class ForbiddenError(AuthError):
     """HTTP 403 - Forbidden.
 
     Attributes:
@@ -63,7 +63,18 @@ class ValidationError(BadRequestError):
     status: int = 422
 
 
-class RateLimit(ClientError):
+class RateLimitError(ClientError):
+    """Exception for catching rate limit exceedances from client.
+
+    Attributes:
+        message:
+    """
+
+    def __init__(self, time_remaining: int):
+        self.message = f"Rate limit exceeded. Limit resets in {time_remaining} seconds"
+
+
+class HTTPRateLimitError(ClientError):
     """HTTP 429 - Client request exceeds rate limits.
 
     Attributes:

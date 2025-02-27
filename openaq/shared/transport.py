@@ -11,11 +11,11 @@ from httpx import Response
 
 from openaq.shared.exceptions import (
     BadRequestError,
-    Forbidden,
+    ForbiddenError,
     GatewayTimeoutError,
-    NotAuthorized,
+    HTTPRateLimitError,
+    NotAuthorizedError,
     NotFoundError,
-    RateLimit,
     ServerError,
     ValidationError,
 )
@@ -63,10 +63,11 @@ def check_response(res: Response) -> Union[Response, None]:
     Raises:
         BadRequestError:
         NotFoundError:
+        ForbiddenError:
         ValidationError:
         RateLimitError:
-        NotAuthorized:
-        RateLimitError:
+        NotAuthorizedError:
+        HTTPRateLimitError:
         GatewayTimeoutError:
     """
     if res.status_code >= HTTPStatus.OK and res.status_code < HTTPStatus.BAD_REQUEST:
@@ -79,16 +80,16 @@ def check_response(res: Response) -> Union[Response, None]:
         raise NotFoundError(res.text)
     elif res.status_code == HTTPStatus.FORBIDDEN:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise Forbidden(res.text)
+        raise ForbiddenError(res.text)
     elif res.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise ValidationError(res.text)
     elif res.status_code == HTTPStatus.TOO_MANY_REQUESTS:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise RateLimit(res.text)
+        raise HTTPRateLimitError(res.text)
     elif res.status_code == HTTPStatus.UNAUTHORIZED:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise NotAuthorized(res.text)
+        raise NotAuthorizedError(res.text)
     elif res.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise ServerError(res.text)

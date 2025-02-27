@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "openaq"
 description = ''
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "MIT"
 keywords = []
 authors = [
@@ -21,6 +21,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
@@ -40,7 +41,7 @@ path = "openaq/__init__.py"
 
 
 [tool.hatch.envs.test]
-dependencies = ["coverage[toml]", "pytest", "pytest-asyncio", "pytest-cov","pytest-mock", "respx"]
+dependencies = ["coverage[toml]", "pytest", "pytest-asyncio", "pytest-cov","pytest-mock", "respx", "freezegun"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
@@ -71,8 +72,8 @@ detached = true
 dependencies = ["ruff", "black", "isort", "pydocstyle"]
 
 [tool.hatch.envs.style.scripts]
-check = ["ruff .", "black --check --diff .", "isort --check-only --diff ."]
-fmt = ["isort .", "black .", "check"]
+check = ["ruff check", "black --check --diff .", "isort --check-only --diff ."]
+fmt = ["isort format", "black .", "check"]
 
 [tool.hatch.envs.docs]
 dependencies = ["mkdocs", "mkdocstrings[python]", "mkdocs-material[imaging]", "material-plausible-plugin"]
@@ -107,7 +108,7 @@ select = ["D"]
 convention = "google"
 
 [tool.black]
-target-version = ['py311']
+target-version = ['py313']
 skip-string-normalization = true
 
 [tool.isort]

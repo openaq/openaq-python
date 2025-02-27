@@ -76,4 +76,3 @@ hatch run test:cov
 ## Acknowledgements
 
 For many years [py-openaq](https://github.com/dhhagan/py-openaq) by David Hagan filled the gap for a Python API SDK for the OpenAQ API. Thank you to David for many years of maintaining py-openaq and for taking the original step to develop a Python tool for OpenAQ.
-

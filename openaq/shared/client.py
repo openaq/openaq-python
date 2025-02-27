@@ -1,14 +1,17 @@
 """Base class and utilities to for shared client code."""
 
 import logging
+import math
 import os
 import platform
 from abc import ABC, abstractmethod
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Generic, Mapping, TypeVar, Union
 
-from openaq._async.transport import AsyncTransport
-from openaq._sync.transport import Transport
+import httpx
+
+from openaq.shared.exceptions import RateLimitError
 
 logger = logging.getLogger('openaq')
 
@@ -56,7 +59,6 @@ class BaseClient(ABC, Generic[TTransport]):
     def __init__(
         self,
         transport: TTransport,
-        user_agent: str,
         headers: Mapping[str, str] = {},
         api_key: Union[str, None] = None,
         base_url: str = "https://api.openaq.org/v3/",
@@ -77,8 +79,10 @@ class BaseClient(ABC, Generic[TTransport]):
         self._headers = headers
         self._transport = transport
         self._base_url = base_url
-        self._user_agent = user_agent
+        self._user_agent = DEFAULT_USER_AGENT
         self.resolve_headers()
+        self._rate_limit_reset_datetime = datetime.min
+        self._rate_limit_remaining = math.inf
 
     def _check_api_key_url(self):
         if not self.api_key and self.base_url == DEFAULT_BASE_URL:
@@ -203,6 +207,30 @@ class BaseClient(ABC, Generic[TTransport]):
         headers: Union[Mapping[str, Any], None] = None,
     ):
         raise NotImplementedError
+
+    def _is_rate_limited(self) -> bool:
+        return (
+            self._rate_limit_remaining == 0
+            and self._rate_limit_reset_datetime < datetime.now()
+        )
+
+    def _check_rate_limit(self):
+        if self._is_rate_limited():
+            logger.exception(f"Rate limit exceeded")
+            raise RateLimitError(self._rate_limit_reset)
+
+    @property
+    def _rate_limit_reset_seconds(self):
+        return int((self._rate_limit_reset_datetime - datetime.now()).total_seconds())
+
+    def _set_rate_limit(self, headers: httpx.Headers):
+        rate_limit_remaining = int(headers.get('x-ratelimit-remaining', 0))
+        rate_limit_reset_seconds = int(headers.get('x-ratelimit-reset', 60))
+        rate_limit_reset_datetime = datetime.now() + timedelta(
+            seconds=rate_limit_reset_seconds
+        )
+        self._rate_limit_remaining = rate_limit_remaining
+        self._rate_limit_reset_datetime = rate_limit_reset_datetime
 
 
 def _get_openaq_config() -> Union[Mapping[str, str], None]:

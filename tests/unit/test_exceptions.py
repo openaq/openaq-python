@@ -3,11 +3,11 @@ import pytest
 
 from openaq.shared.exceptions import (
     BadRequestError,
-    Forbidden,
+    ForbiddenError,
     GatewayTimeoutError,
-    NotAuthorized,
+    HTTPRateLimitError,
+    NotAuthorizedError,
     NotFoundError,
-    RateLimit,
     ServerError,
     ValidationError,
 )
@@ -19,12 +19,12 @@ from openaq.shared.transport import check_response
     [
         (400, BadRequestError),
         (422, ValidationError),
-        (429, RateLimit),
+        (429, HTTPRateLimitError),
         (404, NotFoundError),
         (500, ServerError),
         (504, GatewayTimeoutError),
-        (401, NotAuthorized),
-        (403, Forbidden),
+        (401, NotAuthorizedError),
+        (403, ForbiddenError),
     ],
 )
 def test_check_response(http_code, exception):

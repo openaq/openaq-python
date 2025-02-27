@@ -3,11 +3,12 @@
       heading_level: 2
       members:
         - BadRequestError
-        - NotAuthorized
-        - Forbidden
+        - NotAuthorizedError
+        - ForbiddenError
         - NotFoundError
         - ValidationError
-        - RateLimit
+        - RateLimitError
+        - HTTPRateLimitError
         - ServerError
         - GatewayTimeoutError
       show_root_heading: false

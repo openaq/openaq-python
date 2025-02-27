@@ -14,9 +14,9 @@ from openaq._sync.models.providers import Providers
 from openaq._sync.models.sensors import Sensors
 from openaq.shared.client import (
     DEFAULT_BASE_URL,
-    DEFAULT_USER_AGENT,
     BaseClient,
 )
+from openaq.shared.exceptions import RateLimitError
 
 from .transport import Transport
 
@@ -58,10 +58,9 @@ class OpenAQ(BaseClient[Transport]):
         api_key: Union[str, None] = None,
         headers: Mapping[str, str] = {},
         base_url: str = DEFAULT_BASE_URL,
-        user_agent: str = DEFAULT_USER_AGENT,
         _transport: Transport = Transport(),
     ) -> None:
-        super().__init__(_transport, user_agent, headers, api_key, base_url)
+        super().__init__(_transport, headers, api_key, base_url)
 
         self.countries = Countries(self)
         self.instruments = Instruments(self)
@@ -86,15 +85,14 @@ class OpenAQ(BaseClient[Transport]):
         params: Union[Mapping[str, Any], None] = None,
         headers: Union[Mapping[str, str], None] = None,
     ):
+        self._check_rate_limit()
         request_headers = self.build_request_headers(headers)
-        try:
-            url = self._base_url + path
-            data = self.transport.send_request(
-                method=method, url=url, params=params, headers=request_headers
-            )
-            return data
-        except Exception as e:
-            raise e
+        url = self._base_url + path
+        data = self.transport.send_request(
+            method=method, url=url, params=params, headers=request_headers
+        )
+        self._set_rate_limit(data.headers)
+        return data
 
     def _get(
         self,

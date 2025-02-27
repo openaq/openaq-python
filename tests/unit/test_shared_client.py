@@ -1,12 +1,20 @@
+from http import HTTPStatus
+from freezegun import freeze_time
 import os
 import platform
 from pathlib import Path
 from unittest import mock
 from unittest.mock import mock_open, patch
 
+import httpx
 import pytest
 
-from openaq.shared.client import BaseClient, _get_openaq_config, _has_toml
+from openaq.shared.client import (
+    DEFAULT_USER_AGENT,
+    BaseClient,
+    _get_openaq_config,
+    _has_toml,
+)
 from tests.unit.mocks import MockTransport
 
 
@@ -65,7 +73,6 @@ class TestSharedClient:
         self.instance = SharedClient(
             MockTransport,
             api_key='abc123-def456-ghi789',
-            user_agent='openaq-python',
             headers={'this': 'that'},
         )
 
@@ -128,7 +135,7 @@ class TestSharedClient:
         assert self.instance.headers == {
             'this': 'that',
             'Accept': 'application/json',
-            'User-Agent': 'openaq-python',
+            'User-Agent': DEFAULT_USER_AGENT,
             'X-API-Key': 'abc123-def456-ghi789',
         }
         with pytest.raises(AttributeError):
@@ -142,7 +149,7 @@ class TestSharedClient:
             'this': 'that',
             'Accept': 'application/json',
             'Accept-Language': 'en-US,en;q=0.5',
-            'User-Agent': 'openaq-python',
+            'User-Agent': DEFAULT_USER_AGENT,
             'X-API-Key': 'abc123-def456-ghi789',
         }
 
@@ -151,6 +158,43 @@ class TestSharedClient:
         assert request_headers == {
             'this': 'that',
             'Accept': 'application/json',
-            'User-Agent': 'openaq-python',
+            'User-Agent': DEFAULT_USER_AGENT,
             'X-API-Key': 'abc123-def456-ghi789',
         }
+
+    @freeze_time("2025-02-27T01:00:00")
+    def test__is_rate_limited(self):
+        mock_response = httpx.Response(
+            HTTPStatus.OK,
+            content="Test content",
+            headers={
+                'X-RateLimit-Used': '0',
+                'X-RateLimit-Reset': '60',
+                'X-RateLimit-Remaining': '59',
+                'X-RateLimit-Limit': '60',
+            },
+        )
+        self.instance._set_rate_limit(mock_response.headers)
+        assert self.instance._rate_limit_reset_seconds == 60
+        assert self.instance._is_rate_limited() == False
+        with freeze_time("2025-02-27T01:00:59"):
+            assert self.instance._is_rate_limited() == False
+            assert self.instance._rate_limit_reset_seconds == 1
+
+    @freeze_time("2025-02-27T01:00:00")
+    def test__is_rate_limited_true(self):
+        mock_response = httpx.Response(
+            HTTPStatus.OK,
+            content="Test content",
+            headers={
+                'X-RateLimit-Used': '0',
+                'X-RateLimit-Reset': '30',
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Limit': '60',
+            },
+        )
+        self.instance._set_rate_limit(mock_response.headers)
+        with freeze_time("2025-02-27T01:00:31"):
+            assert self.instance._rate_limit_remaining == 0
+            assert self.instance._rate_limit_reset_seconds == -1
+            assert self.instance._is_rate_limited()
