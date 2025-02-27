@@ -73,7 +73,6 @@ To demonstrate this technique we will list locations that measurement PM<sub>2.5
         loop.run_until_complete(main())
     ```
 
-asdfasdfasd
 
 === "Sync"
 
@@ -126,7 +125,6 @@ asdfasdfasd
         loop.run_until_complete(main())
     ```
 
-asdfasdfasd
 
 
 === "Sync"
@@ -179,11 +177,6 @@ asdfasdfasd
         loop = asyncio.get_event_loop()
         loop.run_until_complete(main())
     ```
-
-
-
-
-
 
 
 The example above demonstrates just one method managing API call rate with the

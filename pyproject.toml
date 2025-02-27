@@ -16,7 +16,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -61,11 +60,11 @@ detached = true
 dependencies = ["mypy"]
 
 [[tool.mypy.overrides]]
-module = "openaq"
+module = ["httpx.*", "openaq"]
 ignore_missing_imports = true
 
 [tool.hatch.envs.types.scripts]
-check = "mypy -p openaq --install-types --non-interactive"
+check = "mypy -p openaq --install-types --strict --non-interactive"
 
 [tool.hatch.envs.style]
 detached = true
