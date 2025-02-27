@@ -98,7 +98,7 @@ class _ResponseBase:
             response.json()['results'],
         )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.meta, dict):
             self.meta = Meta.load(self.meta)
@@ -159,7 +159,7 @@ class Headers:
     x_ratelimit_used: Union[int, None] = None
     x_ratelimit_reset: Union[int, None] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Coerces attribute values to correct types."""
         self.x_ratelimit_limit = int(self.x_ratelimit_limit or 0)
         self.x_ratelimit_remaining = int(self.x_ratelimit_remaining or 0)

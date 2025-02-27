@@ -1,4 +1,4 @@
-"""Shared customs types."""
+"""Shared custom types."""
 
 from typing import Literal
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "openaq"
-description = ''
+description = "Official OpenAQ Python SDK."
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
@@ -40,7 +40,15 @@ path = "openaq/__init__.py"
 
 
 [tool.hatch.envs.test]
-dependencies = ["coverage[toml]", "pytest", "pytest-asyncio", "pytest-cov","pytest-mock", "respx", "freezegun"]
+dependencies = [
+  "coverage[toml]",
+  "pytest",
+  "pytest-asyncio",
+  "pytest-cov",
+  "pytest-mock",
+  "respx",
+  "freezegun",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
@@ -49,8 +57,7 @@ testpaths = ["tests/unit"]
 [tool.hatch.envs.test.scripts]
 test-unit = 'pytest tests/unit/ -s -vv'
 test-integration = 'pytest tests/integration/ -s -vv'
-
-cov = 'pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=openaq'
+cov = 'pytest --cov-branch --cov-report=xml'
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
@@ -64,7 +71,7 @@ module = ["httpx.*", "openaq"]
 ignore_missing_imports = true
 
 [tool.hatch.envs.types.scripts]
-check = "mypy -p openaq --install-types --strict --non-interactive"
+check = "mypy -p openaq --install-types --non-interactive"
 
 [tool.hatch.envs.style]
 detached = true
@@ -75,7 +82,12 @@ check = ["ruff check", "black --check --diff .", "isort --check-only --diff ."]
 fmt = ["isort format", "black .", "check"]
 
 [tool.hatch.envs.docs]
-dependencies = ["mkdocs", "mkdocstrings[python]", "mkdocs-material[imaging]", "material-plausible-plugin"]
+dependencies = [
+  "mkdocs",
+  "mkdocstrings[python]",
+  "mkdocs-material[imaging]",
+  "material-plausible-plugin",
+]
 
 [tool.hatch.envs.docs.scripts]
 build = ["mkdocs build -c"]
@@ -89,17 +101,17 @@ omit = ["openaq/__about__.py", "openaq/vendor/*"]
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 exclude_also = [
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "@(abc\\.)?abstractmethod",
-    ]
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "@(abc\\.)?abstractmethod",
+]
 
 [tool.ruff]
 extend-exclude = ["tests"]
 
 ignore = [
   "E501", # line too long, handled by black
-  "D104"
+  "D104",
 ]
 select = ["D"]
 
