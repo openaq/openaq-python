@@ -54,6 +54,7 @@ dependencies = [
 testpaths = ["tests/unit"]
 
 
+
 [tool.hatch.envs.test.scripts]
 test-unit = 'pytest tests/unit/ -s -vv'
 test-integration = 'pytest tests/integration/ -s -vv'
@@ -96,7 +97,7 @@ serve = ["mkdocs serve -a localhost:8090"]
 [tool.coverage.run]
 branch = true
 parallel = true
-omit = ["openaq/__about__.py", "openaq/vendor/*"]
+omit = ["openaq/__about__.py", "openaq/vendor/*", "tests/*"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
