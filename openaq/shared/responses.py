@@ -49,7 +49,7 @@ class _ResourceBase:
         return out
 
     @classmethod
-    def load(cls, results: Mapping[str, Any]) -> _ResourceBase:
+    def load(cls, results: Mapping[str, Any]):
         """Deserializes JSON response from API into response object.
 
         Args:

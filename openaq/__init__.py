@@ -19,6 +19,8 @@ from .shared.exceptions import (
     NotAuthorizedError,
     NotFoundError,
     RateLimitError,
+    BadGatewayError,
+    ServiceUnavailableError,
     ServerError,
     ValidationError,
 )
@@ -36,4 +38,6 @@ __all__ = [
     "BadRequestError",
     "ForbiddenError",
     "ServerError",
+    "ServiceUnavailableError",
+    "BadGatewayError",
 ]

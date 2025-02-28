@@ -11,7 +11,7 @@ from typing import Any, Generic, Mapping, TypeVar, Union
 
 import httpx
 
-from openaq.shared.exceptions import RateLimitError
+from openaq.shared.exceptions import ApiKeyMissingError, RateLimitError
 
 logger = logging.getLogger('openaq')
 
@@ -83,10 +83,14 @@ class BaseClient(ABC, Generic[TTransport]):
         self.resolve_headers()
         self._rate_limit_reset_datetime = datetime.min
         self._rate_limit_remaining = math.inf
+        self._check_api_key_url()
 
     def _check_api_key_url(self):
         if not self.api_key and self.base_url == DEFAULT_BASE_URL:
-            logger.warning(
+            logger.error(
+                "API key not set: An API key is required when using the OpenAQ API"
+            )
+            raise ApiKeyMissingError(
                 "API key not set: An API key is required when using the OpenAQ API"
             )
 

@@ -10,6 +10,7 @@ from typing import Any, Mapping, Union
 from httpx import Response
 
 from openaq.shared.exceptions import (
+    BadGatewayError,
     BadRequestError,
     ForbiddenError,
     GatewayTimeoutError,
@@ -17,6 +18,7 @@ from openaq.shared.exceptions import (
     NotAuthorizedError,
     NotFoundError,
     ServerError,
+    ServiceUnavailableError,
     ValidationError,
 )
 
@@ -93,6 +95,12 @@ def check_response(res: Response) -> Union[Response, None]:
     elif res.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise ServerError(res.text)
+    elif res.status_code == HTTPStatus.BAD_GATEWAY:
+        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        raise BadGatewayError(res.text)
+    elif res.status_code == HTTPStatus.SERVICE_UNAVAILABLE:
+        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        raise ServiceUnavailableError(res.text)
     elif res.status_code == HTTPStatus.GATEWAY_TIMEOUT:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise GatewayTimeoutError(
@@ -100,4 +108,5 @@ def check_response(res: Response) -> Union[Response, None]:
             "Consider reducing the complexity of your request."
         )
     else:
+        logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise Exception

@@ -7,6 +7,7 @@ import pytest
 
 from openaq import __version__
 from openaq._sync.client import OpenAQ
+from openaq.shared.exceptions import ApiKeyMissingError
 
 from .mocks import MockTransport
 
@@ -73,11 +74,12 @@ class TestClient:
 
     @pytest.mark.usefixtures("mock_config_file")
     def test_api_key_from_config(self):
-        client = OpenAQ(_transport=MockTransport)
         if int(platform.python_version_tuple()[1]) >= 11:
+            client = OpenAQ(_transport=MockTransport)
             assert client.api_key == "test_api_key"
         else:
-            assert client.api_key == None
+            with pytest.raises(ApiKeyMissingError):
+                client = OpenAQ(_transport=MockTransport)
 
     def test_api_key_arg_override_env_var(self, setup, mock_openaq_api_key_env_vars):
         """

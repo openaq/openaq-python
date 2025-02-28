@@ -1,13 +1,12 @@
-# openaq-python
+# OpenAQ Python SDK
 
 The official Python SDK for the OpenAQ API.
 
 > :warning: OpenAQ python is still under active development and may be unstable until a v1.0.0 release
 
-Python SDK for the OpenAQ Version 3 API.
-
 [![PyPI - Version](https://img.shields.io/pypi/v/openaq.svg)](https://pypi.org/project/openaq)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/openaq.svg)](https://pypi.org/project/openaq)
+![Static Badge](https://img.shields.io/badge/type%20checked-mypy-039dfc)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![slack](https://img.shields.io/badge/Slack-OpenAQ-blue?logo=slack&color=%23198cff
@@ -65,12 +64,6 @@ Testing uses [pytest](https://docs.pytest.org/en/7.4.x/).
 
 ```console
 hatch run test:test
-```
-
-Code coverage can be viewed with:
-
-```console
-hatch run test:cov
 ```
 
 ## Acknowledgements

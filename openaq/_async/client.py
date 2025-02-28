@@ -25,7 +25,6 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
 
     Args:
         api_key: The API key for accessing the service.
-        user_agent: The user agent string to be used in requests.
         headers: Additional headers to be sent with the request.
         base_url: The base URL for the API endpoint.
 
@@ -46,8 +45,11 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
         Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
         NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
         ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
-        RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+        RateLimit: Raised when managed client exceeds rate limit.
+        HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
         ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+        BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+        ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
         GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
 
     """
