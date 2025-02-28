@@ -1,4 +1,4 @@
-from typing import Union
+from __future__ import annotations
 
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import CountriesResponse
@@ -39,10 +39,10 @@ class Countries(SyncResourceBase):
         self,
         page: int = 1,
         limit: int = 1000,
-        order_by: Union[str, None] = None,
-        sort_order: Union[str, None] = None,
-        parameters_id: Union[int, None] = None,
-        providers_id: Union[int, None] = None,
+        order_by: str | None = None,
+        sort_order: str | None = None,
+        parameters_id: int | None = None,
+        providers_id: int | None = None,
     ) -> CountriesResponse:
         """List countries based on provided filters.
 

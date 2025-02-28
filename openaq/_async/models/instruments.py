@@ -1,4 +1,4 @@
-from typing import Union
+from __future__ import annotations
 
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import InstrumentsResponse
@@ -39,8 +39,8 @@ class Instruments(AsyncResourceBase):
         self,
         page: int = 1,
         limit: int = 1000,
-        order_by: Union[str, None] = None,
-        sort_order: Union[str, None] = None,
+        order_by: str | None = None,
+        sort_order: str | None = None,
     ) -> InstrumentsResponse:
         """List instruments based on provided filters.
 

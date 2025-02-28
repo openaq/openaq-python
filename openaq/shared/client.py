@@ -1,5 +1,7 @@
 """Base class and utilities to for shared client code."""
 
+from __future__ import annotations
+
 import logging
 import math
 import os
@@ -7,7 +9,7 @@ import platform
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Generic, Mapping, TypeVar, Union
+from typing import Any, Generic, Mapping, TypeVar
 
 import httpx
 
@@ -54,13 +56,13 @@ class BaseClient(ABC, Generic[TTransport]):
         base_url: The base URL for the OpenAQ API. Defaults to "https://api.openaq.org/v3/".
     """
 
-    _api_key: Union[str, None]
+    _api_key: str | None
 
     def __init__(
         self,
         transport: TTransport,
         headers: Mapping[str, str] = {},
-        api_key: Union[str, None] = None,
+        api_key: str | None = None,
         base_url: str = "https://api.openaq.org/v3/",
     ) -> None:
         """Initialize a new instance of BaseClient.
@@ -94,7 +96,7 @@ class BaseClient(ABC, Generic[TTransport]):
                 "API key not set: An API key is required when using the OpenAQ API"
             )
 
-    def _get_api_key(self) -> Union[str, None]:
+    def _get_api_key(self) -> str | None:
         """Gets API key value from env or openaq config file.
 
         Returns:
@@ -113,7 +115,7 @@ class BaseClient(ABC, Generic[TTransport]):
         return None
 
     @property
-    def api_key(self) -> Union[str, None]:
+    def api_key(self) -> str | None:
         """Accessor for private _api_key field.
 
         Returns:
@@ -142,9 +144,7 @@ class BaseClient(ABC, Generic[TTransport]):
         """
         return self._headers
 
-    def build_request_headers(
-        self, headers: Union[Mapping[str, str], None] = None
-    ) -> dict:
+    def build_request_headers(self, headers: Mapping[str, str] | None = None) -> dict:
         """Copies and updates headers based on input.
 
         Args:
@@ -197,8 +197,8 @@ class BaseClient(ABC, Generic[TTransport]):
         method: str,
         path: str,
         *,
-        params: Union[Mapping[str, Any], None] = None,
-        headers: Union[Mapping[str, str], None] = None,
+        params: Mapping[str, Any] | None = None,
+        headers: Mapping[str, str] | None = None,
     ):
         raise NotImplementedError
 
@@ -207,8 +207,8 @@ class BaseClient(ABC, Generic[TTransport]):
         self,
         path: str,
         *,
-        params: Union[Mapping[str, str], None] = None,
-        headers: Union[Mapping[str, Any], None] = None,
+        params: Mapping[str, str] | None = None,
+        headers: Mapping[str, Any] | None = None,
     ):
         raise NotImplementedError
 
@@ -237,7 +237,7 @@ class BaseClient(ABC, Generic[TTransport]):
         self._rate_limit_reset_datetime = rate_limit_reset_datetime
 
 
-def _get_openaq_config() -> Union[Mapping[str, str], None]:
+def _get_openaq_config() -> Mapping[str, str] | None:
     """Reads .openaq.toml configuration file.
 
     Depends on tomllib so only available in Python >3.11.

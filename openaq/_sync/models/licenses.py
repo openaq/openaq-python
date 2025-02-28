@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Union
-
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import LicensesResponse
 
@@ -41,8 +39,8 @@ class Licenses(SyncResourceBase):
         self,
         page: int = 1,
         limit: int = 1000,
-        order_by: Union[str, None] = None,
-        sort_order: Union[str, None] = None,
+        order_by: str | None = None,
+        sort_order: str | None = None,
     ) -> LicensesResponse:
         """List licenses based on provided filters.
 

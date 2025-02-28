@@ -1,4 +1,4 @@
-from typing import Union
+from __future__ import annotations
 
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import LatestResponse, ParametersResponse
@@ -61,14 +61,14 @@ class Parameters(SyncResourceBase):
         self,
         page: int = 1,
         limit: int = 1000,
-        order_by: Union[str, None] = None,
-        sort_order: Union[str, None] = None,
-        parameter_type: Union[str, None] = None,
-        coordinates: Union[tuple, None] = None,
-        radius: Union[int, None] = None,
-        bbox: Union[tuple, None] = None,
-        iso: Union[str, None] = None,
-        countries_id: Union[int, None] = None,
+        order_by: str | None = None,
+        sort_order: str | None = None,
+        parameter_type: str | None = None,
+        coordinates: tuple | None = None,
+        radius: int | None = None,
+        bbox: tuple | None = None,
+        iso: str | None = None,
+        countries_id: int | None = None,
     ) -> ParametersResponse:
         """List parameters based on provided filters.
 

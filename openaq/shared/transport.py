@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Any, Mapping, Union
+from typing import Any, Mapping
 
 from httpx import Response
 
@@ -52,7 +52,7 @@ class BaseTransport(ABC):
         raise NotImplementedError
 
 
-def check_response(res: Response) -> Union[Response, None]:
+def check_response(res: Response) -> Response | None:
     """Checks the HTTP response of the request.
 
     Args:
@@ -82,7 +82,7 @@ def check_response(res: Response) -> Union[Response, None]:
     elif res.status_code == HTTPStatus.NOT_FOUND:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise NotFoundError(res.text)
-    elif res.status_code == HTTPStatus.ForbiddenError:
+    elif res.status_code == HTTPStatus.FORBIDDEN:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise ForbiddenError(res.text)
     elif res.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:

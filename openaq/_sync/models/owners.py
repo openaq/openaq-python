@@ -1,4 +1,4 @@
-from typing import Union
+from __future__ import annotations
 
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import OwnersResponse
@@ -39,8 +39,8 @@ class Owners(SyncResourceBase):
         self,
         page: int = 1,
         limit: int = 1000,
-        order_by: Union[str, None] = None,
-        sort_order: Union[str, None] = None,
+        order_by: str | None = None,
+        sort_order: str | None = None,
     ) -> OwnersResponse:
         """List owners based on provided filters.
 

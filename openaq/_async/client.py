@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Mapping, Union
+from typing import Any, Mapping
 
 from openaq._async.models.countries import Countries
 from openaq._async.models.instruments import Instruments
@@ -56,7 +56,7 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
 
     def __init__(
         self,
-        api_key: Union[str, None] = None,
+        api_key: str | None = None,
         headers: Mapping[str, str] = {},
         base_url: str = DEFAULT_BASE_URL,
         transport: AsyncTransport = AsyncTransport(),
@@ -83,8 +83,8 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
         method: str,
         path: str,
         *,
-        params: Union[Mapping[str, Any], None] = None,
-        headers: Union[Mapping[str, str], None] = None,
+        params: Mapping[str, Any] | None = None,
+        headers: Mapping[str, str] | None = None,
     ):
         self._check_rate_limit()
         request_headers = self.build_request_headers(headers)
@@ -98,8 +98,8 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
         self,
         path: str,
         *,
-        params: Union[Mapping[str, str], None] = None,
-        headers: Union[Mapping[str, Any], None] = None,
+        params: Mapping[str, str] | None = None,
+        headers: Mapping[str, Any] | None = None,
     ):
         return await self._do("get", path, params=params, headers=headers)
 

@@ -1,4 +1,6 @@
-from typing import Any, Mapping, Union
+from __future__ import annotations
+
+from typing import Any, Mapping
 
 import httpx
 
@@ -13,7 +15,7 @@ class Transport:
         self,
         method: str,
         url: str,
-        params: Union[Mapping[str, str], None],
+        params: Mapping[str, str] | None,
         headers: Mapping[str, Any],
     ):
         """Sends an HTTP request using the provided method, URL, parameters, and headers."""

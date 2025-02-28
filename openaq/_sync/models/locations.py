@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Tuple, Union
+from typing import Tuple
 
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import (
@@ -71,18 +71,18 @@ class Locations(SyncResourceBase):
         self,
         page: int = 1,
         limit: int = 100,
-        radius: Union[int, None] = None,
-        coordinates: Union[Tuple[float, float], None] = None,
-        bbox: Union[Tuple[float, float, float, float], None] = None,
-        providers_id: Union[int, List[int], None] = None,
-        countries_id: Union[int, List[int], None] = None,
-        parameters_id: Union[int, List[int], None] = None,
-        licenses_id: Union[int, List[int], None] = None,
-        iso: Union[str, None] = None,
-        monitor: Union[bool, None] = None,
-        mobile: Union[bool, None] = None,
-        order_by: Union[str, None] = None,
-        sort_order: Union[str, None] = None,
+        radius: int | None = None,
+        coordinates: Tuple[float, float] | None = None,
+        bbox: Tuple[float, float, float, float] | None = None,
+        providers_id: int | list[int] | None = None,
+        countries_id: int | list[int] | None = None,
+        parameters_id: int | list[int] | None = None,
+        licenses_id: int | list[int] | None = None,
+        iso: str | None = None,
+        monitor: bool | None = None,
+        mobile: bool | None = None,
+        order_by: str | None = None,
+        sort_order: str | None = None,
     ) -> LocationsResponse:
         """List locations based on provided filters.
 

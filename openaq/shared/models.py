@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Any, Mapping, Union
+from typing import Any, Mapping
 
 from .exceptions import NotFoundError
 from .types import Data, Rollup
@@ -36,7 +36,7 @@ def build_query_params(**kwargs) -> Mapping[str, Any]:
 
 
 def build_measurements_path(
-    sensors_id: int, data: Union[Data, None] = None, rollup: Union[Rollup, None] = None
+    sensors_id: int, data: Data | None = None, rollup: Rollup | None = None
 ):
     """Prepares and builds the path for measurements endpoint using data and rollup parameters.
 

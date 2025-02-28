@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-from typing import List, Union
 
 from openaq.shared.models import build_measurements_path, build_query_params
 from openaq.shared.responses import MeasurementsResponse
@@ -16,10 +15,10 @@ class Measurements(AsyncResourceBase):
     async def list(
         self,
         sensors_id: int,
-        data: Union[Data, None] = None,
-        rollup: Union[Rollup, None] = None,
-        date_from: Union[datetime.datetime, str, None] = "2016-10-10",
-        date_to: Union[datetime.datetime, str, None] = None,
+        data: Data | None = None,
+        rollup: Rollup | None = None,
+        date_from: datetime.datetime | str | None = "2016-10-10",
+        date_to: datetime.datetime | str | None = None,
         page: int = 1,
         limit: int = 1000,
     ) -> MeasurementsResponse:

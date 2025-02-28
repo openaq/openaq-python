@@ -6,7 +6,7 @@ import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, fields
 from types import ModuleType
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Tuple
 
 from httpx import Response
 
@@ -81,7 +81,7 @@ class _ResponseBase:
 
     headers: Headers
     meta: Meta
-    results: List[Any]
+    results: list[Any]
 
     @classmethod
     def read_response(cls, response: Response):
@@ -103,7 +103,7 @@ class _ResponseBase:
         if isinstance(self.meta, dict):
             self.meta = Meta.load(self.meta)
 
-    def _serialize(self, data: Union[Mapping, List]):
+    def _serialize(self, data: Mapping | list):
         """Serializes data and convert keys to camel case.
 
         Args:
@@ -119,7 +119,7 @@ class _ResponseBase:
             for k, v in data.items()
         }
 
-    def dict(self) -> Dict:
+    def dict(self) -> dict:
         """Serializes response data to Python dictionary.
 
         Returns:
@@ -154,10 +154,10 @@ class Headers:
         x_ratelimit_reset: The X-RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
     """
 
-    x_ratelimit_limit: Union[int, None] = None
-    x_ratelimit_remaining: Union[int, None] = None
-    x_ratelimit_used: Union[int, None] = None
-    x_ratelimit_reset: Union[int, None] = None
+    x_ratelimit_limit: int | None = None
+    x_ratelimit_remaining: int | None = None
+    x_ratelimit_used: int | None = None
+    x_ratelimit_reset: int | None = None
 
     def __post_init__(self) -> None:
         """Coerces attribute values to correct types."""
@@ -252,7 +252,7 @@ class ParameterBase(_ResourceBase):
     id: int
     name: str
     units: str
-    display_name: Union[str, None]
+    display_name: str | None
 
 
 @dataclass
@@ -342,18 +342,18 @@ class Location(_ResourceBase):
 
     id: int
     name: str
-    locality: Union[str, None]
+    locality: str | None
     timezone: str
     country: CountryBase
     owner: OwnerBase
     provider: ProviderBase
     is_mobile: bool
     is_monitor: bool
-    instruments: List[InstrumentBase]
-    sensors: List[SensorBase]
+    instruments: list[InstrumentBase]
+    sensors: list[SensorBase]
     coordinates: Coordinates
     bounds: Tuple[float, float, float, float]
-    distance: Union[float, None]
+    distance: float | None
     datetime_first: Datetime
     datetime_last: Datetime
 
@@ -388,7 +388,7 @@ class LocationsResponse(_ResponseBase):
 
     """
 
-    results: List[Location]
+    results: list[Location]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -424,9 +424,11 @@ class Bbox(_ResourceBase):
     """
 
     type: str
-    coordinates: Union[
-        List[List[Tuple[float, float]]], List[Tuple[float, float]], Tuple[float, float]
-    ]
+    coordinates: (
+        list[list[Tuple[float, float]]]
+        | list[Tuple[float, float]]
+        | Tuple[float, float]
+    )
 
 
 @dataclass
@@ -453,8 +455,8 @@ class Provider(_ResourceBase):
     datetime_first: str
     datetime_last: str
     entities_id: int
-    parameters: List[ParameterBase]
-    bbox: Union[Bbox, None]
+    parameters: list[ParameterBase]
+    bbox: Bbox | None
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -473,7 +475,7 @@ class ProvidersResponse(_ResponseBase):
         results: a list of provider records.
     """
 
-    results: List[Provider]
+    results: list[Provider]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -501,8 +503,8 @@ class Parameter(_ResourceBase):
     id: int
     name: str
     units: str
-    display_name: Union[str, None] = None
-    description: Union[str, None] = None
+    display_name: str | None = None
+    description: str | None = None
 
 
 @dataclass
@@ -514,7 +516,7 @@ class ParametersResponse(_ResponseBase):
         results: a list of parameter records.
     """
 
-    results: List[Parameter]
+    results: list[Parameter]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -545,7 +547,7 @@ class Country(_ResourceBase):
     name: str
     datetime_first: str
     datetime_last: str
-    parameters: List[ParameterBase]
+    parameters: list[ParameterBase]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -562,7 +564,7 @@ class CountriesResponse(_ResponseBase):
         results: a list of country records.
     """
 
-    results: List[Country]
+    results: list[Country]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -604,7 +606,7 @@ class InstrumentsResponse(_ResponseBase):
         results: a list of instrument records.
     """
 
-    results: List[Instrument]
+    results: list[Instrument]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -639,7 +641,7 @@ class License(_ResourceBase):
     share_alike_required: bool
     modification_allowed: bool
     redistribution_allowed: bool
-    source_url: Union[str, None] = None
+    source_url: str | None = None
 
 
 @dataclass
@@ -651,7 +653,7 @@ class LicensesResponse(_ResponseBase):
         results: a list of license records.
     """
 
-    results: List[License]
+    results: list[License]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -676,7 +678,7 @@ class Manufacturer(_ResourceBase):
 
     id: int
     name: str
-    instruments: List[InstrumentBase]
+    instruments: list[InstrumentBase]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -693,7 +695,7 @@ class ManufacturersResponse(_ResponseBase):
         results: a list of manufacturer records.
     """
 
-    results: List[Manufacturer]
+    results: list[Manufacturer]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -728,7 +730,7 @@ class Summary(_ResourceBase):
     q75: float
     q98: float
     max: float
-    sd: Union[float, None]
+    sd: float | None
 
 
 @dataclass
@@ -804,7 +806,7 @@ class Measurement(_ResourceBase):
     period: Period
     value: float
     parameter: ParameterBase
-    coordinates: Union[Coordinates, None]
+    coordinates: Coordinates | None
     summary: Summary
     coverage: Coverage
 
@@ -831,7 +833,7 @@ class MeasurementsResponse(_ResponseBase):
         results: a list of measurement records.
     """
 
-    results: List[Measurement]
+    results: list[Measurement]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -866,7 +868,7 @@ class OwnersResponse(_ResponseBase):
         results: a list of owner records.
     """
 
-    results: List[Owner]
+    results: list[Owner]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -912,11 +914,11 @@ class Sensor(_ResourceBase):
     id: int
     name: str
     parameter: Parameter
-    datetime_first: Union[Datetime, None] = None
-    datetime_last: Union[Datetime, None] = None
-    coverage: Union[Coverage, None] = None
-    latest: Union[LatestBase, None] = None
-    summary: Union[Summary, None] = None
+    datetime_first: Datetime | None = None
+    datetime_last: Datetime | None = None
+    coverage: Coverage | None = None
+    latest: LatestBase | None = None
+    summary: Summary | None = None
 
 
 @dataclass
@@ -928,7 +930,7 @@ class SensorsResponse(_ResponseBase):
         results: a list of sensor records.
     """
 
-    results: List[Sensor]
+    results: list[Sensor]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
@@ -966,7 +968,7 @@ class LatestResponse(_ResponseBase):
         results: a list of latest records.
     """
 
-    results: List[Latest]
+    results: list[Latest]
 
     def __post_init__(self):
         """Sets class attributes to correct type after checking input type."""
