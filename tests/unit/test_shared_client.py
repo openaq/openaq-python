@@ -16,6 +16,7 @@ from openaq.shared.client import (
     _get_openaq_config,
     _has_toml,
 )
+from openaq.shared.exceptions import ApiKeyMissingError, RateLimitError
 from tests.unit.mocks import MockTransport
 
 
@@ -83,6 +84,10 @@ class TestSharedClient:
             assert self.instance._get_api_key() == 'test_api_key'
         else:
             assert self.instance._get_api_key() == None
+
+    def test_no_api_key_throws(self):
+        with pytest.raises(ApiKeyMissingError):
+            instance = SharedClient(MockTransport)
 
     @pytest.fixture()
     def mock_openaq_api_key_env_vars(self):
@@ -162,6 +167,21 @@ class TestSharedClient:
             'User-Agent': DEFAULT_USER_AGENT,
             'X-API-Key': 'abc123-def456-ghi789',
         }
+
+    def test___check_rate_limit(self):
+        mock_response = httpx.Response(
+            HTTPStatus.OK,
+            content="Test content",
+            headers={
+                'X-RateLimit-Used': '0',
+                'X-RateLimit-Reset': '60',
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Limit': '60',
+            },
+        )
+        self.instance._set_rate_limit(mock_response.headers)
+        with pytest.raises(RateLimitError):
+            self.instance._check_rate_limit()
 
     @freeze_time("2025-02-27T01:00:00")
     def test__is_rate_limited(self):
