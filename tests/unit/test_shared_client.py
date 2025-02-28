@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from datetime import datetime
 from freezegun import freeze_time
 import os
 import platform
@@ -194,7 +195,31 @@ class TestSharedClient:
             },
         )
         self.instance._set_rate_limit(mock_response.headers)
-        with freeze_time("2025-02-27T01:00:31"):
+        with freeze_time("2025-02-27T01:00:29"):
             assert self.instance._rate_limit_remaining == 0
-            assert self.instance._rate_limit_reset_seconds == -1
+            assert self.instance._rate_limit_reset_seconds == 1
+            assert self.instance._rate_limit_reset_datetime == datetime(
+                year=2025, month=2, day=27, hour=1, minute=0, second=30
+            )
             assert self.instance._is_rate_limited()
+
+    @freeze_time("2025-02-27T01:00:00")
+    def test__is_rate_limited_false(self):
+        mock_response = httpx.Response(
+            HTTPStatus.OK,
+            content="Test content",
+            headers={
+                'X-RateLimit-Used': '0',
+                'X-RateLimit-Reset': '30',
+                'X-RateLimit-Remaining': '60',
+                'X-RateLimit-Limit': '60',
+            },
+        )
+        self.instance._set_rate_limit(mock_response.headers)
+        with freeze_time("2025-02-27T01:00:31"):
+            assert self.instance._rate_limit_remaining == 60
+            assert self.instance._rate_limit_reset_seconds == -1
+            assert self.instance._rate_limit_reset_datetime == datetime(
+                year=2025, month=2, day=27, hour=1, minute=0, second=30
+            )
+            assert self.instance._is_rate_limited() == False

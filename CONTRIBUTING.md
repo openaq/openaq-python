@@ -17,7 +17,7 @@ Please review and adhere to our Code of Conduct:
    - Bug Report: Clearly describe the bug, including steps to reproduce it.
    - Feature Request: Explain the desired feature and its benefits.
 
-### For General Questions:
+### For General Questions
 
 The issue tracker is primarily for reporting bugs and requesting features. For
 general questions, discussions, or seeking help, please visit the project

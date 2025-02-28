@@ -7,7 +7,7 @@ from .base import SyncResourceBase
 
 
 class Parameters(SyncResourceBase):
-    """This provides methods to retrieve parameter data from the OpenAQ API."""
+    """Provides methods to retrieve the parameter resource from the OpenAQ API."""
 
     def get(self, parameters_id: int) -> ParametersResponse:
         """Retrieve specific parameter data by its parameters ID.
@@ -20,11 +20,11 @@ class Parameters(SyncResourceBase):
 
         Raises:
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
-            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
-            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+            ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
-            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            RateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
@@ -41,13 +41,17 @@ class Parameters(SyncResourceBase):
             LatestResponse: An instance representing the retrieved latest results.
 
         Raises:
+            AuthError: Authentication error, improperly supplied credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
-            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
-            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+            ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
-            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            RateLimitError: Raised when managed client exceeds rate limit.
+            HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+            ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         latest = self._client._get(f"/parameters/{parameters_id}/latest")
@@ -97,13 +101,17 @@ class Parameters(SyncResourceBase):
             ParametersResponse: An instance representing the list of retrieved parameters.
 
         Raises:
+            AuthError: Authentication error, improperly supplied credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
-            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
-            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+            ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
-            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            RateLimitError: Raised when managed client exceeds rate limit.
+            HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+            ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         params = build_query_params(

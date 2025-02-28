@@ -215,13 +215,14 @@ class BaseClient(ABC, Generic[TTransport]):
     def _is_rate_limited(self) -> bool:
         return (
             self._rate_limit_remaining == 0
-            and self._rate_limit_reset_datetime < datetime.now()
+            and self._rate_limit_reset_datetime > datetime.now()
         )
 
     def _check_rate_limit(self):
         if self._is_rate_limited():
             logger.exception(f"Rate limit exceeded")
-            raise RateLimitError(self._rate_limit_reset)
+            message = f"Rate limit exceeded. Limit resets in {self._rate_limit_reset_seconds} seconds"
+            raise RateLimitError(message)
 
     @property
     def _rate_limit_reset_seconds(self):
@@ -230,9 +231,8 @@ class BaseClient(ABC, Generic[TTransport]):
     def _set_rate_limit(self, headers: httpx.Headers):
         rate_limit_remaining = int(headers.get('x-ratelimit-remaining', 0))
         rate_limit_reset_seconds = int(headers.get('x-ratelimit-reset', 60))
-        rate_limit_reset_datetime = datetime.now() + timedelta(
-            seconds=rate_limit_reset_seconds
-        )
+        now = (datetime.now() + timedelta(seconds=0.5)).replace(microsecond=0)
+        rate_limit_reset_datetime = now + timedelta(seconds=rate_limit_reset_seconds)
         self._rate_limit_remaining = rate_limit_remaining
         self._rate_limit_reset_datetime = rate_limit_reset_datetime
 

@@ -57,7 +57,6 @@ latitude, longitude (Y,X).
 
 This will print a list of locations (up to 1,000 per page) within a 10 kilometer radius of the point 13.74433,100.54365, a point in central Bangkok, Thailand.
 
-
 ## Bounding box
 
 The `locations.list()` function also exposes the bounding box parameter through a

@@ -72,14 +72,7 @@ class ValidationError(BadRequestError):
 
 
 class RateLimitError(ClientError):
-    """Exception for catching rate limit exceedances from client.
-
-    Attributes:
-        message:
-    """
-
-    def __init__(self, time_remaining: int):
-        self.message = f"Rate limit exceeded. Limit resets in {time_remaining} seconds"
+    """Exception for catching rate limit exceedances from client."""
 
 
 class HTTPRateLimitError(ClientError):

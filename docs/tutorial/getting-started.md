@@ -63,7 +63,7 @@ client.close()
 print(location)
 ```
 
-Here the `client` variable will be an "instance" of the class `OpenAQ`.
+Here the `client` variable will be an instance of the class `OpenAQ`.
 
 This will be the main variable we will use to interact with API.
 
@@ -125,4 +125,4 @@ LocationsResponse(meta=Meta(name='openaq-api', website='/', page=1, limit=100, f
 
 ## Conclusion
 
-You have now successfully requested and downloaded data from the OpenAQ API with the OpenAQ Python SDK. To learn more check out the [how-to guides](/how-to-guides/working-with-the-client/) and [reference](/reference/openaq/) documentation.
+You have now successfully requested and downloaded data from the OpenAQ API with the OpenAQ Python SDK. To learn more check out the [how-to guides](../how-to-guides/working-with-the-client.md) and [reference](../reference/openaq.md) documentation.

@@ -12,14 +12,16 @@ logger.addHandler(logging.NullHandler())
 from ._async.client import AsyncOpenAQ as AsyncOpenAQ
 from ._sync.client import OpenAQ as OpenAQ
 from .shared.exceptions import (
+    ApiKeyMissingError,
     AuthError,
+    BadGatewayError,
     BadRequestError,
     ForbiddenError,
     GatewayTimeoutError,
+    HTTPRateLimitError,
     NotAuthorizedError,
     NotFoundError,
     RateLimitError,
-    BadGatewayError,
     ServiceUnavailableError,
     ServerError,
     ValidationError,
@@ -28,6 +30,7 @@ from .shared.exceptions import (
 __all__ = [
     "OpenAQ",
     "AsyncOpenAQ",
+    "ApiKeyMissingError",
     "AuthError",
     "NotAuthorizedError",
     "NotFoundError",
