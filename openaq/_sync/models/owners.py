@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import OwnersResponse
 
@@ -5,7 +7,7 @@ from .base import SyncResourceBase
 
 
 class Owners(SyncResourceBase):
-    """This provides methods to retrieve owner data from the OpenAQ API."""
+    """Provides methods to retrieve the owner resource from the OpenAQ API."""
 
     def get(self, owners_id: int) -> OwnersResponse:
         """Retrieve specific owner data by its owners ID.
@@ -17,13 +19,17 @@ class Owners(SyncResourceBase):
             OwnersResponse: An instance representing the retrieved owner.
 
         Raises:
+            AuthError: Authentication error, improperly supplied credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
-            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
-            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+            ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
-            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            RateLimitError: Raised when managed client exceeds rate limit.
+            HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+            ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         owner_response = self._client._get(f"/owners/{owners_id}")
@@ -33,8 +39,8 @@ class Owners(SyncResourceBase):
         self,
         page: int = 1,
         limit: int = 1000,
-        order_by: str = None,
-        sort_order: str = None,
+        order_by: str | None = None,
+        sort_order: str | None = None,
     ) -> OwnersResponse:
         """List owners based on provided filters.
 
@@ -55,13 +61,17 @@ class Owners(SyncResourceBase):
             OwnersResponse: An instance representing the list of retrieved owners.
 
         Raises:
+            AuthError: Authentication error, improperly supplied credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
-            NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
-            Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+            ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
-            RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+            RateLimitError: Raised when managed client exceeds rate limit.
+            HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+            ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         params = build_query_params(

@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "openaq"
-description = ''
+description = "Official OpenAQ Python SDK."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "MIT"
 keywords = []
 authors = [
@@ -16,15 +16,15 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["httpx==0.25.0"]
+dependencies = ["httpx==0.28.1"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
@@ -40,54 +40,79 @@ path = "openaq/__init__.py"
 
 
 [tool.hatch.envs.test]
-dependencies = ["coverage[toml]", "pytest", "pytest-asyncio", "pytest-cov","pytest-mock", "respx"]
+dependencies = [
+  "coverage[toml]",
+  "pytest",
+  "pytest-asyncio",
+  "pytest-cov",
+  "pytest-mock",
+  "respx",
+  "freezegun",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
 
 
+
 [tool.hatch.envs.test.scripts]
 test-unit = 'pytest tests/unit/ -s -vv'
 test-integration = 'pytest tests/integration/ -s -vv'
-
-cov = 'pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=openaq'
+cov = 'pytest --cov --cov-branch --cov-report=xml'
 
 [[tool.hatch.envs.test.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+[tool.hatch.envs.types]
+detached = true
+dependencies = ["mypy"]
+
+[[tool.mypy.overrides]]
+module = ["httpx.*", "openaq"]
+ignore_missing_imports = true
+
+[tool.hatch.envs.types.scripts]
+check = "mypy -p openaq --install-types --non-interactive"
 
 [tool.hatch.envs.style]
 detached = true
 dependencies = ["ruff", "black", "isort", "pydocstyle"]
 
 [tool.hatch.envs.style.scripts]
-check = ["ruff .", "black --check --diff .", "isort --check-only --diff ."]
-fmt = ["isort .", "black .", "check"]
+check = ["ruff check", "black --check --diff .", "isort --check-only --diff ."]
+fmt = ["isort format", "black .", "check"]
 
 [tool.hatch.envs.docs]
-dependencies = ["mkdocs", "mkdocstrings[python]", "mkdocs-material[imaging]", "material-plausible-plugin"]
+dependencies = [
+  "mkdocs",
+  "mkdocstrings[python]",
+  "mkdocs-material[imaging]",
+  "material-plausible-plugin",
+]
 
 [tool.hatch.envs.docs.scripts]
 build = ["mkdocs build -c"]
-serve = ["mkdocs serve -a localhost:8080"]
+serve = ["mkdocs serve -a localhost:8090"]
 
 [tool.coverage.run]
 branch = true
 parallel = true
-omit = ["openaq/__about__.py", "openaq/vendor/*"]
+omit = ["openaq/__about__.py", "openaq/vendor/*", "tests/*"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 exclude_also = [
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "@(abc\\.)?abstractmethod",
-    ]
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "@(abc\\.)?abstractmethod",
+]
 
 [tool.ruff]
 extend-exclude = ["tests"]
 
 ignore = [
   "E501", # line too long, handled by black
+  "D104",
 ]
 select = ["D"]
 
@@ -95,7 +120,7 @@ select = ["D"]
 convention = "google"
 
 [tool.black]
-target-version = ['py311']
+target-version = ['py313']
 skip-string-normalization = true
 
 [tool.isort]

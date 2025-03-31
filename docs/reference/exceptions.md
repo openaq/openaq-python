@@ -2,13 +2,18 @@
     options:
       heading_level: 2
       members:
+        - ApiKeyMissingError
+        - AuthError
         - BadRequestError
-        - NotAuthorized
-        - Forbidden
-        - NotFoundError
-        - ValidationError
-        - RateLimit
-        - ServerError
+        - BadGatewayError
+        - ForbiddenError
         - GatewayTimeoutError
+        - HTTPRateLimitError
+        - NotAuthorizedError
+        - NotFoundError
+        - RateLimitError
+        - ServerError
+        - ServiceUnavailableError
+        - ValidationError
       show_root_heading: false
       show_source: false

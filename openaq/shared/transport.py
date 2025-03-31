@@ -5,18 +5,20 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Any, Mapping, Union
+from typing import Any, Mapping
 
 from httpx import Response
 
 from openaq.shared.exceptions import (
+    BadGatewayError,
     BadRequestError,
-    Forbidden,
+    ForbiddenError,
     GatewayTimeoutError,
-    NotAuthorized,
+    HTTPRateLimitError,
+    NotAuthorizedError,
     NotFoundError,
-    RateLimit,
     ServerError,
+    ServiceUnavailableError,
     ValidationError,
 )
 
@@ -50,24 +52,27 @@ class BaseTransport(ABC):
         raise NotImplementedError
 
 
-def check_response(res: Response) -> Union[Response, None]:
+def check_response(res: Response) -> Response | None:
     """Checks the HTTP response of the request.
 
     Args:
         res: an httpx.Response object
 
-
     Returns:
         httpx.Response
 
     Raises:
-        BadRequestError:
-        NotFoundError:
-        ValidationError:
-        RateLimitError:
-        NotAuthorized:
-        RateLimitError:
-        GatewayTimeoutError:
+        AuthError: Authentication error, improperly supplied credentials.
+        BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+        NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+        ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
+        NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+        ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+        HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
+        ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+        BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+        ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
+        GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
     """
     if res.status_code >= HTTPStatus.OK and res.status_code < HTTPStatus.BAD_REQUEST:
         return res
@@ -79,19 +84,25 @@ def check_response(res: Response) -> Union[Response, None]:
         raise NotFoundError(res.text)
     elif res.status_code == HTTPStatus.FORBIDDEN:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise Forbidden(res.text)
+        raise ForbiddenError(res.text)
     elif res.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise ValidationError(res.text)
     elif res.status_code == HTTPStatus.TOO_MANY_REQUESTS:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise RateLimit(res.text)
+        raise HTTPRateLimitError(res.text)
     elif res.status_code == HTTPStatus.UNAUTHORIZED:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise NotAuthorized(res.text)
+        raise NotAuthorizedError(res.text)
     elif res.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise ServerError(res.text)
+    elif res.status_code == HTTPStatus.BAD_GATEWAY:
+        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        raise BadGatewayError(res.text)
+    elif res.status_code == HTTPStatus.SERVICE_UNAVAILABLE:
+        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        raise ServiceUnavailableError(res.text)
     elif res.status_code == HTTPStatus.GATEWAY_TIMEOUT:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise GatewayTimeoutError(
@@ -99,4 +110,5 @@ def check_response(res: Response) -> Union[Response, None]:
             "Consider reducing the complexity of your request."
         )
     else:
+        logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise Exception

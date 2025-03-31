@@ -34,11 +34,6 @@ jobs:
       - name: Build docs
         run: hatch run docs:build
 
-      - name: fix plausible
-        run: |
-          chmod +x scripts/plausible.sh
-          ./scripts/plausible.sh
-
       - name: s3 sync
         uses: jakejarvis/s3-sync-action@master
         with:

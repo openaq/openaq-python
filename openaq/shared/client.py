@@ -1,14 +1,19 @@
 """Base class and utilities to for shared client code."""
 
+from __future__ import annotations
+
+import logging
+import math
 import os
 import platform
 from abc import ABC, abstractmethod
-import logging
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Mapping, Union
+from typing import Any, Generic, Mapping, TypeVar
 
-from openaq._sync.transport import Transport
-from openaq._async.transport import AsyncTransport
+import httpx
+
+from openaq.shared.exceptions import ApiKeyMissingError, RateLimitError
 
 logger = logging.getLogger('openaq')
 
@@ -27,8 +32,10 @@ DEFAULT_USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
 
 DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 
+TTransport = TypeVar('TTransport')
 
-class BaseClient(ABC):
+
+class BaseClient(ABC, Generic[TTransport]):
     """Abstract class for OpenAQ clients.
 
     This class provides the basic structure and attributes for OpenAQ clients. It includes methods to
@@ -49,12 +56,13 @@ class BaseClient(ABC):
         base_url: The base URL for the OpenAQ API. Defaults to "https://api.openaq.org/v3/".
     """
 
+    _api_key: str | None
+
     def __init__(
         self,
-        transport: Union[AsyncTransport, Transport],
-        user_agent: str,
+        transport: TTransport,
         headers: Mapping[str, str] = {},
-        api_key: Union[str, None] = None,
+        api_key: str | None = None,
         base_url: str = "https://api.openaq.org/v3/",
     ) -> None:
         """Initialize a new instance of BaseClient.
@@ -73,16 +81,22 @@ class BaseClient(ABC):
         self._headers = headers
         self._transport = transport
         self._base_url = base_url
-        self._user_agent = user_agent
+        self._user_agent = DEFAULT_USER_AGENT
         self.resolve_headers()
+        self._rate_limit_reset_datetime = datetime.min
+        self._rate_limit_remaining = math.inf
+        self._check_api_key_url()
 
     def _check_api_key_url(self):
         if not self.api_key and self.base_url == DEFAULT_BASE_URL:
-            logger.warning(
+            logger.error(
+                "API key not set: An API key is required when using the OpenAQ API"
+            )
+            raise ApiKeyMissingError(
                 "API key not set: An API key is required when using the OpenAQ API"
             )
 
-    def _get_api_key(self) -> str:
+    def _get_api_key(self) -> str | None:
         """Gets API key value from env or openaq config file.
 
         Returns:
@@ -98,9 +112,10 @@ class BaseClient(ABC):
         config = _get_openaq_config()
         if config:
             return config.get('api-key')
+        return None
 
     @property
-    def api_key(self) -> str:
+    def api_key(self) -> str | None:
         """Accessor for private _api_key field.
 
         Returns:
@@ -109,7 +124,7 @@ class BaseClient(ABC):
         return self._api_key
 
     @property
-    def transport(self) -> Union[AsyncTransport, Transport]:
+    def transport(self) -> TTransport:
         """Get the transport mechanism used by the client.
 
         Provides access to the transport instance that the client uses to
@@ -129,9 +144,7 @@ class BaseClient(ABC):
         """
         return self._headers
 
-    def build_request_headers(
-        self, headers: Union[Mapping[str, str], None] = None
-    ) -> Mapping[str, str]:
+    def build_request_headers(self, headers: Mapping[str, str] | None = None) -> dict:
         """Copies and updates headers based on input.
 
         Args:
@@ -141,10 +154,11 @@ class BaseClient(ABC):
             A mapping of headers for the request
         """
         if headers:
-            request_headers = self._headers.copy()
+            request_headers = {k: v for k, v in self._headers.items()}
+            request_headers = request_headers.copy()
             request_headers.update(headers)
         else:
-            request_headers = self._headers
+            request_headers = {k: v for k, v in self._headers.items()}
         return request_headers
 
     @property
@@ -183,8 +197,8 @@ class BaseClient(ABC):
         method: str,
         path: str,
         *,
-        params: Union[Mapping[str, Any], None] = None,
-        headers: Union[Mapping[str, str], None] = None,
+        params: Mapping[str, Any] | None = None,
+        headers: Mapping[str, str] | None = None,
     ):
         raise NotImplementedError
 
@@ -193,13 +207,37 @@ class BaseClient(ABC):
         self,
         path: str,
         *,
-        params: Union[Mapping[str, str], None] = None,
-        headers: Union[Mapping[str, Any], None] = None,
+        params: Mapping[str, str] | None = None,
+        headers: Mapping[str, Any] | None = None,
     ):
         raise NotImplementedError
 
+    def _is_rate_limited(self) -> bool:
+        return (
+            self._rate_limit_remaining == 0
+            and self._rate_limit_reset_datetime > datetime.now()
+        )
 
-def _get_openaq_config() -> Union[Mapping[str, str], None]:
+    def _check_rate_limit(self):
+        if self._is_rate_limited():
+            logger.exception(f"Rate limit exceeded")
+            message = f"Rate limit exceeded. Limit resets in {self._rate_limit_reset_seconds} seconds"
+            raise RateLimitError(message)
+
+    @property
+    def _rate_limit_reset_seconds(self):
+        return int((self._rate_limit_reset_datetime - datetime.now()).total_seconds())
+
+    def _set_rate_limit(self, headers: httpx.Headers):
+        rate_limit_remaining = int(headers.get('x-ratelimit-remaining', 0))
+        rate_limit_reset_seconds = int(headers.get('x-ratelimit-reset', 60))
+        now = (datetime.now() + timedelta(seconds=0.5)).replace(microsecond=0)
+        rate_limit_reset_datetime = now + timedelta(seconds=rate_limit_reset_seconds)
+        self._rate_limit_remaining = rate_limit_remaining
+        self._rate_limit_reset_datetime = rate_limit_reset_datetime
+
+
+def _get_openaq_config() -> Mapping[str, str] | None:
     """Reads .openaq.toml configuration file.
 
     Depends on tomllib so only available in Python >3.11.

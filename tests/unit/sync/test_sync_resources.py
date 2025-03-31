@@ -1,5 +1,6 @@
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
 
 from openaq._sync.models.base import SyncResourceBase
 from openaq._sync.models.measurements import Measurements

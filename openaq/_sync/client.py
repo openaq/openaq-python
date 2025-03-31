@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Mapping, Union
+from typing import Any, Mapping
 
 from openaq._sync.models.countries import Countries
 from openaq._sync.models.instruments import Instruments
@@ -13,20 +13,19 @@ from openaq._sync.models.parameters import Parameters
 from openaq._sync.models.providers import Providers
 from openaq._sync.models.sensors import Sensors
 from openaq.shared.client import (
-    DEFAULT_USER_AGENT,
     DEFAULT_BASE_URL,
     BaseClient,
 )
+from openaq.shared.exceptions import RateLimitError
 
 from .transport import Transport
 
 
-class OpenAQ(BaseClient):
+class OpenAQ(BaseClient[Transport]):
     """OpenAQ syncronous client.
 
     Args:
         api_key: The API key for accessing the service.
-        user_agent: The user agent string to be used in requests.
         headers: Additional headers to be sent with the request.
         base_url: The base URL for the API endpoint.
 
@@ -43,25 +42,27 @@ class OpenAQ(BaseClient):
     Raises:
         AuthError: Authentication error, improperly supplied credentials.
         BadRequestError: Raised for HTTP 400 error, indicating a client request error.
-        NotAuthorized: Raised for HTTP 401 error, indicating the client is not authorized.
-        Forbidden: Raised for HTTP 403 error, indicating the request is forbidden.
+        NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+        ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
         NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
         ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
-        RateLimit: Raised for HTTP 429 error, indicating rate limit exceeded.
+        RateLimitError: Raised when managed client exceeds rate limit.
+        HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
         ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+        BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+        ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
         GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
 
     """
 
     def __init__(
         self,
-        api_key: Union[str, None] = None,
+        api_key: str | None = None,
         headers: Mapping[str, str] = {},
         base_url: str = DEFAULT_BASE_URL,
-        user_agent: str = DEFAULT_USER_AGENT,
         _transport: Transport = Transport(),
-    ) -> OpenAQ:
-        super().__init__(_transport, user_agent, headers, api_key, base_url)
+    ) -> None:
+        super().__init__(_transport, headers, api_key, base_url)
 
         self.countries = Countries(self)
         self.instruments = Instruments(self)
@@ -83,25 +84,24 @@ class OpenAQ(BaseClient):
         method: str,
         path: str,
         *,
-        params: Union[Mapping[str, Any], None] = None,
-        headers: Union[Mapping[str, str], None] = None,
+        params: Mapping[str, Any] | None = None,
+        headers: Mapping[str, str] | None = None,
     ):
+        self._check_rate_limit()
         request_headers = self.build_request_headers(headers)
-        try:
-            url = self._base_url + path
-            data = self.transport.send_request(
-                method=method, url=url, params=params, headers=request_headers
-            )
-            return data
-        except Exception as e:
-            raise e
+        url = self._base_url + path
+        data = self.transport.send_request(
+            method=method, url=url, params=params, headers=request_headers
+        )
+        self._set_rate_limit(data.headers)
+        return data
 
     def _get(
         self,
         path: str,
         *,
-        params: Union[Mapping[str, str], None] = None,
-        headers: Union[Mapping[str, Any], None] = None,
+        params: Mapping[str, str] | None = None,
+        headers: Mapping[str, Any] | None = None,
     ):
         return self._do("get", path, params=params, headers=headers)
 

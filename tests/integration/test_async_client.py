@@ -1,7 +1,8 @@
+import asyncio
 import os
+
 import pytest
 
-import asyncio
 from openaq._async.client import AsyncOpenAQ
 
 

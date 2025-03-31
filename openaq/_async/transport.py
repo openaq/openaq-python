@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Mapping
 
 import httpx
@@ -13,7 +15,7 @@ class AsyncTransport(BaseTransport):
         self,
         method: str,
         url: str,
-        params: Mapping[str, str],
+        params: Mapping[str, str] | None,
         headers: Mapping[str, Any],
     ):
         request = httpx.Request(
