@@ -11,7 +11,7 @@ The API documentation describes these methods in detail at:
 
 !!! warning
 
-    The query parameters for `coordiantes` and `radius` cannot be used with the `bbox`, only one method can be used in a single call. Mixing method will result in a `ValidationError` exception.
+    The query parameters for `coordiantes` and `radius` cannot be used with the `bbox`, only one method can be used in a single call. Mixing methods will result in a [`ValidationError`](../reference/exceptions.md#openaq.shared.exceptions.ValidationError) exception.
 
 ## Point and radius
 
@@ -31,7 +31,11 @@ latitude, longitude (Y,X).
 
 
     client = OpenAQ(api_key='replace-with-a-valid-openaq-api-key')
-    locations = client.locations.list(coordinates=(13.74433,100.54365), radius=10_000, limit=1000)
+    locations = client.locations.list(
+        coordinates=(13.74433, 100.54365),
+        radius=10_000,
+        limit=1000
+    )
     pprint.pp(locations)
     client.close()
     ```
@@ -72,7 +76,7 @@ function parameters named `bbox`. A bounding box represented a rectangular area 
 
     client = OpenAQ(api_key="replace-with-a-valid-openaq-api-key")
     locations = client.locations.list(
-        coordinates=(5.488869, -0.396881, 5.732144, -0.021973), limit=1000
+        bbox=(5.488869, -0.396881, 5.732144, -0.021973), limit=1000
     )
     pprint.pp(locations)
     client.close()
@@ -103,7 +107,7 @@ function parameters named `bbox`. A bounding box represented a rectangular area 
 
 ### Generating a bounding box from a polygon
 
-We can generate a bounding box from an aribtrary polygon from a file, such as a GeoJSON or Shapefile. 
+We can generate a bounding box from an aribtrary polygon from a file, such as GeoJSON or Shapefile.
 
 ```sh
 pip install shapely
@@ -113,17 +117,24 @@ pip install shapely
 
     For this example we use `shapely` but there are many libraries that can provide similar functionality to read and process geospatial data in Python.
 
+For this example
+
 === "Sync"
 
     ```py
-    import pprint
-
     from openaq import OpenAQ
+    import httpx
+    import shapely
 
 
     client = OpenAQ(api_key="replace-with-a-valid-openaq-api-key")
+
+    res = httpx.get("https://maps.lacity.org/lahub/rest/services/Boundaries/MapServer/7/query?outFields=*&where=1%3D1&f=geojson")
+
+    los_angeles = shapely.from_geojson(res.text)
+
     locations = client.locations.list(
-        coordinates=(5.488869, -0.396881, 5.732144, -0.021973), limit=1000
+        bbox=los_angles.bounds, limit=1000
     )
     pprint.pp(locations)
     client.close()

@@ -23,6 +23,7 @@ from openaq.shared.transport import check_response
         (401, NotAuthorizedError),
         (403, ForbiddenError),
         (404, NotFoundError),
+        (418, Exception),
         (422, ValidationError),
         (429, HTTPRateLimitError),
         (500, ServerError),

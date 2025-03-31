@@ -7,7 +7,7 @@
 
 The OpenAQ Python SDK provides a Python interface for interacting the with
 OpenAQ API. The library is compatible with Python versions 3.9, 3.10, 3.11
-and 3.12
+,3.12 and 3.13.
 
 Features:
 

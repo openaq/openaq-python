@@ -12,14 +12,18 @@ With each response the OpenAQ API returns HTTP headers with rate limit
 information. The OpenAQ Python SDK also exposes these values through the
 `headers` field in the response object.
 
-```py  hl_lines="6"
-    from openaq import OpenAQ
-
-    client = OpenAQ()
-    locations = client.locations.list()
-
-    locations.headers
-
+```pycon hl_lines="5"
+>>> from openaq import OpenAQ
+...
+>>> client = OpenAQ()
+>>> locations = client.locations.list()
+>>> print(locations.headers)
+Headers(
+    x_ratelimit_limit=60,
+    x_ratelimit_remaining=59,
+    x_ratelimit_used=1,
+    x_ratelimit_reset=58
+)
 ```
 
 The OpenAQ Python SDK automatically tracks these headers internally. If the rate

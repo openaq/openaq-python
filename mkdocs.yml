@@ -5,6 +5,7 @@ repo_name: openaq/openaq-python
 
 theme:
   name: "material"
+  font: false
   logo: assets/logo.svg
   favicon: assets/favicon.ico
   palette:
@@ -42,6 +43,8 @@ extra:
       link: https://join.slack.com/t/openaq/shared_invite/zt-yzqlgsva-v6McumTjy2BZnegIK9XCVw
     - icon: fontawesome/brands/x-twitter 
       link: https://x.com/@openaq
+    - icon: fontawesome/brands/bluesky 
+      link: https://bsky.app/profile/openaq.org
     - icon: fontawesome/brands/github 
       link: https://github.com/openaq
     - icon: fontawesome/brands/medium 
@@ -57,8 +60,11 @@ plugins:
   - privacy
   - material-plausible
 
+
 markdown_extensions:
   - admonition
+  - codehilite:
+      css_class: highlight
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.highlight:
@@ -83,6 +89,7 @@ nav:
     - Paging results: how-to-guides/paging-results.md
     - Geospatial queries: how-to-guides/geospatial-queries.md
     - Working with rate limits: how-to-guides/working-with-rate-limits.md
+    - Integrating with Pandas: how-to-guides/integrating-with-pandas.md
   - Reference:
     - OpenAQ: reference/openaq.md
     - AsyncOpenAQ: reference/asyncopenaq.md
