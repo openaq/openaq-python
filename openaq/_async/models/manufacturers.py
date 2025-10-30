@@ -109,6 +109,7 @@ class Manufacturers(AsyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        manufacturers_id = validate_integer_id(manufacturers_id)
         instruments_response = await self._client._get(
             f"/manufacturers/{manufacturers_id}/instruments"
         )

@@ -136,5 +136,6 @@ class Parameters(AsyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        parameters_id = validate_integer_id(parameters_id)
         latest = await self._client._get(f"/parameters/{parameters_id}/latest")
         return LatestResponse.read_response(latest)

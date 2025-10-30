@@ -49,6 +49,7 @@ class Locations(AsyncResourceBase):
             LatestResponse: An instance representing the retrieved latest results.
 
         Raises:
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
@@ -58,6 +59,7 @@ class Locations(AsyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        locations_id = validate_integer_id(locations_id)
         latest = await self._client._get(f"/locations/{locations_id}/latest")
         return LatestResponse.read_response(latest)
 
