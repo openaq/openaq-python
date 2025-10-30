@@ -33,3 +33,11 @@ def test_integer_id_check(id: int, valid: bool):
 def test_validate_integer_id_throws(id: int):
     with pytest.raises(IdentifierOutOfBoundsError):
         validate_integer_id(id)
+
+
+@pytest.mark.parametrize(
+    "id",
+    [(1), (42), (9999), (2_147_483_647)],
+)
+def test_validate_integer_id_passes(id: int):
+    assert validate_integer_id(id) == id
