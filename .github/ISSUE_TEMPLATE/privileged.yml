@@ -1,0 +1,16 @@
+name: Privileged
+description: You are @russbiggs or he asked you directly to create an issue here. If not, check the other options.
+body:
+  - type: checkboxes
+    id: privileged
+    attributes:
+      label: Privileged issue
+      description: Confirm that you are allowed to create an issue here.
+      options:
+        - label: I'm @russbiggs or he asked me directly to create an issue here.
+          required: true
+  - type: textarea
+    id: content
+    attributes:
+      label: Issue Content
+      description: Add the content of the issue here.
