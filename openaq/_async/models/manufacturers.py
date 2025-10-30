@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import InstrumentsResponse, ManufacturersResponse
+from openaq.shared.utils import validate_integer_id
 
 from .base import AsyncResourceBase
 
@@ -19,7 +20,8 @@ class Manufacturers(AsyncResourceBase):
             ManufacturersResponse: An instance representing the retrieved manufacturer.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
@@ -32,6 +34,7 @@ class Manufacturers(AsyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        manufacturers_id = validate_integer_id(manufacturers_id)
         manufacturer = await self._client._get(f"/manufacturers/{manufacturers_id}")
         return ManufacturersResponse.read_response(manufacturer)
 
@@ -61,7 +64,8 @@ class Manufacturers(AsyncResourceBase):
             ManufacturersResponse: An instance representing the list of retrieved manufacturers.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
@@ -91,7 +95,8 @@ class Manufacturers(AsyncResourceBase):
             InstrumentsResponse: An instance representing the retrieved instruments.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import CountriesResponse
+from openaq.shared.utils import validate_integer_id
 
 from .base import AsyncResourceBase
 
@@ -19,7 +20,8 @@ class Countries(AsyncResourceBase):
             CountriesResponse: An instance representing the retrieved country.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
@@ -32,6 +34,7 @@ class Countries(AsyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        countries_id = validate_integer_id(countries_id)
         country = await self._client._get(f"/countries/{countries_id}")
         return CountriesResponse.read_response(country)
 
@@ -67,7 +70,8 @@ class Countries(AsyncResourceBase):
             CountriesResponse: An instance representing the list of retrieved countries.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.

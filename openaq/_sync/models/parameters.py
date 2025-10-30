@@ -41,7 +41,8 @@ class Parameters(SyncResourceBase):
             LatestResponse: An instance representing the retrieved latest results.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
@@ -101,7 +102,8 @@ class Parameters(SyncResourceBase):
             ParametersResponse: An instance representing the list of retrieved parameters.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.

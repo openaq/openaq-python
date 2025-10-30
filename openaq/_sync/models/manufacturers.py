@@ -19,7 +19,8 @@ class Manufacturers(SyncResourceBase):
             ManufacturersResponse: An instance representing the retrieved manufacturer.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
@@ -61,7 +62,8 @@ class Manufacturers(SyncResourceBase):
             ManufacturersResponse: An instance representing the list of retrieved manufacturers.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.

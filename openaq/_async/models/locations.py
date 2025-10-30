@@ -8,6 +8,7 @@ from openaq.shared.responses import (
     LocationsResponse,
     SensorsResponse,
 )
+from openaq.shared.utils import validate_integer_id
 
 from .base import AsyncResourceBase
 
@@ -34,6 +35,7 @@ class Locations(AsyncResourceBase):
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        locations_id = validate_integer_id(locations_id)
         location = await self._client._get(f"/locations/{locations_id}")
         return LocationsResponse.read_response(location)
 
@@ -115,7 +117,8 @@ class Locations(AsyncResourceBase):
             LocationsResponse: An instance representing the list of retrieved locations.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
@@ -158,7 +161,8 @@ class Locations(AsyncResourceBase):
             SensorsResponse: An instance representing the retrieved latest results.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.

@@ -24,34 +24,35 @@ from .transport import Transport
 class OpenAQ(BaseClient[Transport]):
     """OpenAQ syncronous client.
 
-    Args:
-        api_key: The API key for accessing the service.
-        headers: Additional headers to be sent with the request.
-        base_url: The base URL for the API endpoint.
+        Args:
+            api_key: The API key for accessing the service.
+            headers: Additional headers to be sent with the request.
+            base_url: The base URL for the API endpoint.
 
-    Note:
-        An API key can either be passed directly to the OpenAQ client class at
-        instantiation or can be accessed from a system environment variable
-        name `OPENAQ-API-KEY`. An API key added at instantiation will always
-        override one set in the environment variable.
+        Note:
+            An API key can either be passed directly to the OpenAQ client class at
+            instantiation or can be accessed from a system environment variable
+            name `OPENAQ-API-KEY`. An API key added at instantiation will always
+            override one set in the environment variable.
 
-    Warning:
-        Although the `api_key` parameter is not required for instantiating the
-        OpenAQ client, an API Key is required for using the OpenAQ API.
+        Warning:
+            Although the `api_key` parameter is not required for instantiating the
+            OpenAQ client, an API Key is required for using the OpenAQ API.
 
-    Raises:
-        AuthError: Authentication error, improperly supplied credentials.
-        BadRequestError: Raised for HTTP 400 error, indicating a client request error.
-        NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
-        ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
-        NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
-        ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
-        RateLimitError: Raised when managed client exceeds rate limit.
-        HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
-        ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
-        BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
-        ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
-        GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
+        Raises:
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+    ApiKeyMissingError: Authentication error, missing API Key credentials.
+            BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+            NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+            ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
+            NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+            RateLimitError: Raised when managed client exceeds rate limit.
+            HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
+            ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+            BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+            ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
+            GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
 
     """
 

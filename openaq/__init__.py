@@ -13,7 +13,7 @@ from ._async.client import AsyncOpenAQ as AsyncOpenAQ
 from ._sync.client import OpenAQ as OpenAQ
 from .shared.exceptions import (
     ApiKeyMissingError,
-    AuthError,
+    IdentifierOutOfBoundsError,
     BadGatewayError,
     BadRequestError,
     ForbiddenError,
@@ -30,8 +30,8 @@ from .shared.exceptions import (
 __all__ = [
     "OpenAQ",
     "AsyncOpenAQ",
+    "IdentifierOutOfBoundsError",
     "ApiKeyMissingError",
-    "AuthError",
     "NotAuthorizedError",
     "NotFoundError",
     "ValidationError",
