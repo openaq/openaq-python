@@ -1,4 +1,5 @@
 from openaq.shared.responses import SensorsResponse
+from openaq.shared.utils import validate_integer_id
 
 from .base import AsyncResourceBase
 
@@ -16,7 +17,8 @@ class Sensors(AsyncResourceBase):
             SensorsResponse: An instance representing the retrieved sensor.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
@@ -29,5 +31,6 @@ class Sensors(AsyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        sensors_id = validate_integer_id(sensors_id)
         sensor_response = await self._client._get(f"/sensors/{sensors_id}")
         return SensorsResponse.read_response(sensor_response)

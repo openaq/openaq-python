@@ -3,7 +3,6 @@
       heading_level: 2
       members:
         - ApiKeyMissingError
-        - AuthError
         - BadRequestError
         - BadGatewayError
         - ForbiddenError

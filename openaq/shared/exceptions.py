@@ -3,25 +3,43 @@
 from typing import Literal
 
 
-class ClientError(Exception):
-    """Base class for all client exceptions."""
+class OpenAQError(Exception):
+    """Base exception for OpenAQ SDK."""
 
     pass
 
 
-class AuthError(ClientError):
-    """Authentication error, improperly supplied credentials."""
+class ValidationError(OpenAQError):
+    """Raised when input validation fails before making a request."""
 
     pass
 
 
-class ApiKeyMissingError(AuthError):
+class IdentifierOutOfBoundsError(ValidationError):
+    """Raised when id field is outside valid range [1, 2_147_483_647]."""
+
+    pass
+
+
+class APIError(Exception):
+    """Base class for all API exceptions."""
+
+    pass
+
+
+class HTTPClientError(APIError):
+    """Base class for all HTTP client exceptions HTTP 4xx."""
+
+    pass
+
+
+class ApiKeyMissingError(OpenAQError):
     """API Key missing error."""
 
     pass
 
 
-class BadRequestError(ClientError):
+class BadRequestError(HTTPClientError):
     """HTTP 400 - Client request error.
 
     Attributes:
@@ -31,7 +49,7 @@ class BadRequestError(ClientError):
     status_code: int = 400
 
 
-class NotAuthorizedError(AuthError):
+class NotAuthorizedError(HTTPClientError):
     """HTTP 401- Not authorized.
 
     Attributes:
@@ -41,7 +59,7 @@ class NotAuthorizedError(AuthError):
     status_code: Literal[401] = 401
 
 
-class ForbiddenError(AuthError):
+class ForbiddenError(HTTPClientError):
     """HTTP 403 - Forbidden.
 
     Attributes:
@@ -51,7 +69,7 @@ class ForbiddenError(AuthError):
     status_code: Literal[403] = 403
 
 
-class NotFoundError(ClientError):
+class NotFoundError(HTTPClientError):
     """HTTP 404 - Resource not found.
 
     Attributes:
@@ -61,7 +79,7 @@ class NotFoundError(ClientError):
     status_code: Literal[404] = 404
 
 
-class ValidationError(BadRequestError):
+class ValidationError(HTTPClientError):
     """HTTP 422 - Client request with invalid parameters.
 
     Attributes:
@@ -71,11 +89,11 @@ class ValidationError(BadRequestError):
     status_code: Literal[422] = 422
 
 
-class RateLimitError(ClientError):
+class RateLimitError(OpenAQError):
     """Exception for catching rate limit exceedances from client."""
 
 
-class HTTPRateLimitError(ClientError):
+class HTTPRateLimitError(HTTPClientError):
     """HTTP 429 - Client request exceeds rate limits.
 
     Attributes:
@@ -85,7 +103,7 @@ class HTTPRateLimitError(ClientError):
     status_code: Literal[429] = 429
 
 
-class ServerError(Exception):
+class ServerError(APIError):
     """HTTP 500 - Server or service failure.
 
     Attributes:
