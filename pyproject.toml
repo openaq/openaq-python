@@ -58,6 +58,7 @@ testpaths = ["tests/unit"]
 [tool.hatch.envs.test.scripts]
 test-unit = 'pytest tests/unit/ -s -vv'
 test-integration = 'pytest tests/integration/ -s -vv'
+test = 'pytest tests/ -s -vv'
 cov = 'pytest --cov --cov-branch --cov-report=xml'
 
 [[tool.hatch.envs.test.matrix]]
