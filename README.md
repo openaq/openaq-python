@@ -54,7 +54,7 @@ style can be checked with:
 hatch run style:check
 ```
 
-[mypy](https://mypy-lang.org/) static type checking: 
+[mypy](https://mypy-lang.org/) static type checking:
 
 ```console
 hatch run types:check

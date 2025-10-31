@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.5.0] - Unreleased
+
+### Updated
+
+- Drop support for Python 3.9
+- Added support for Python 3.14
+
+### Added
+
+- Additional checks to prevent out of range identifiers.
+- `TimeoutError` HTTP error exception.
+
 ## [0.4.0] - 2025-03-31
 
 ### Updated
@@ -28,7 +40,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added new methods for passing API key value through environment variable.
 - Added new v3 `locations.latest()` and `parameters.latest()` methods.
 - Updated `measurements.list()` methods to match new v3 measurements endpoints.
-
 
 ## [0.2.1] - 2024-02-15
 
