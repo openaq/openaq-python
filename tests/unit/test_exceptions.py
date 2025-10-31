@@ -11,6 +11,7 @@ from openaq.shared.exceptions import (
     NotFoundError,
     ServerError,
     ServiceUnavailableError,
+    TimeoutError,
     ValidationError,
 )
 from openaq.shared.transport import check_response
@@ -22,6 +23,7 @@ from openaq.shared.transport import check_response
         (400, BadRequestError),
         (401, NotAuthorizedError),
         (403, ForbiddenError),
+        (408, TimeoutError),
         (404, NotFoundError),
         (418, Exception),
         (422, ValidationError),

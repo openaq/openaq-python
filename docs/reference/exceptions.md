@@ -10,6 +10,7 @@
         - HTTPRateLimitError
         - NotAuthorizedError
         - NotFoundError
+        - TimeoutError
         - RateLimitError
         - ServerError
         - ServiceUnavailableError

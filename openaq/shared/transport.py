@@ -14,6 +14,7 @@ from openaq.shared.exceptions import (
     BadRequestError,
     ForbiddenError,
     GatewayTimeoutError,
+    TimeoutError,
     HTTPRateLimitError,
     NotAuthorizedError,
     NotFoundError,
@@ -68,6 +69,7 @@ def check_response(res: Response) -> Response | None:
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
@@ -83,6 +85,9 @@ def check_response(res: Response) -> Response | None:
     elif res.status_code == HTTPStatus.NOT_FOUND:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise NotFoundError(res.text)
+    elif res.status_code == HTTPStatus.REQUEST_TIMEOUT:
+        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        raise TimeoutError(res.text)
     elif res.status_code == HTTPStatus.FORBIDDEN:
         logger.exception(f"HTTP {res.status_code} - {res.text}")
         raise ForbiddenError(res.text)

@@ -182,7 +182,8 @@ class BaseClient(ABC, Generic[TTransport]):
         Returns:
             Updated headers with the added API key and User Agent.
         """
-        self._headers["X-API-Key"] = self.api_key
+        if self.api_key is not None:
+            self._headers["X-API-Key"] = self.api_key
         self._headers["User-Agent"] = self._user_agent
         self._headers["Accept"] = ACCEPT_HEADER
 

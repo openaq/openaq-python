@@ -79,6 +79,16 @@ class NotFoundError(HTTPClientError):
     status_code: Literal[404] = 404
 
 
+class TimeoutError(HTTPClientError):
+    """HTTP 408 - Request Timeout.
+
+    Attributes:
+        status_code: HTTP status code
+    """
+
+    status_code: Literal[404] = 408
+
+
 class ValidationError(HTTPClientError):
     """HTTP 422 - Client request with invalid parameters.
 
