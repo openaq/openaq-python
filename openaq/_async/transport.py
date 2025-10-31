@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Mapping
 
 import httpx
@@ -9,7 +7,7 @@ from ..shared.transport import BaseTransport, check_response
 
 class AsyncTransport(BaseTransport):
     def __init__(self):
-        self.client = httpx.AsyncClient()
+        self.client = httpx.AsyncClient(timeout=15.0)
 
     async def send_request(
         self,

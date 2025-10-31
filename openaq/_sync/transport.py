@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Mapping
 
 import httpx
@@ -9,7 +7,7 @@ from openaq.shared.transport import check_response
 
 class Transport:
     def __init__(self):
-        self.client = httpx.Client()
+        self.client = httpx.Client(timeout=15.0)
 
     def send_request(
         self,

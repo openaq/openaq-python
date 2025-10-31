@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import CountriesResponse
 from openaq.shared.utils import validate_integer_id

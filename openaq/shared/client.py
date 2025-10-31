@@ -1,7 +1,5 @@
 """Base class and utilities to for shared client code."""
 
-from __future__ import annotations
-
 import logging
 import math
 import os

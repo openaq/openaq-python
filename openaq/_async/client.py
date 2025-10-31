@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Mapping
 
 from openaq._async.models.countries import Countries

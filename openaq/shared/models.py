@@ -1,7 +1,5 @@
 """Shared utility functions for working with query parameter models."""
 
-from __future__ import annotations
-
 import datetime
 from typing import Any, Mapping
 
