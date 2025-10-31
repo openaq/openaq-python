@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import LicensesResponse
+from openaq.shared.utils import validate_integer_id
 
 from .base import AsyncResourceBase
 
@@ -19,11 +18,13 @@ class Licenses(AsyncResourceBase):
             LicensesReponse: An instance representing the retrieved license.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised when managed client exceeds rate limit.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
@@ -32,6 +33,7 @@ class Licenses(AsyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        licenses_id = validate_integer_id(licenses_id)
         license = await self._client._get(f"/licenses/{licenses_id}")
         return LicensesResponse.read_response(license)
 
@@ -61,11 +63,13 @@ class Licenses(AsyncResourceBase):
             LicensesReponse: An instance representing the list of retrieved licenses.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised when managed client exceeds rate limit.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.

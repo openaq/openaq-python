@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Tuple
 
 from openaq.shared.models import build_query_params
@@ -8,6 +6,7 @@ from openaq.shared.responses import (
     LocationsResponse,
     SensorsResponse,
 )
+from openaq.shared.utils import validate_integer_id
 
 from .base import AsyncResourceBase
 
@@ -29,11 +28,13 @@ class Locations(AsyncResourceBase):
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        locations_id = validate_integer_id(locations_id)
         location = await self._client._get(f"/locations/{locations_id}")
         return LocationsResponse.read_response(location)
 
@@ -47,15 +48,18 @@ class Locations(AsyncResourceBase):
             LatestResponse: An instance representing the retrieved latest results.
 
         Raises:
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        locations_id = validate_integer_id(locations_id)
         latest = await self._client._get(f"/locations/{locations_id}/latest")
         return LatestResponse.read_response(latest)
 
@@ -115,11 +119,13 @@ class Locations(AsyncResourceBase):
             LocationsResponse: An instance representing the list of retrieved locations.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised when managed client exceeds rate limit.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
@@ -158,11 +164,13 @@ class Locations(AsyncResourceBase):
             SensorsResponse: An instance representing the retrieved latest results.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised when managed client exceeds rate limit.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.

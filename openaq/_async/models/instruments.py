@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import InstrumentsResponse
+from openaq.shared.utils import validate_integer_id
 
 from .base import AsyncResourceBase
 
@@ -9,21 +8,23 @@ from .base import AsyncResourceBase
 class Instruments(AsyncResourceBase):
     """This provides methods to retrieve instrument data from the OpenAQ API."""
 
-    async def get(self, providers_id: int) -> InstrumentsResponse:
+    async def get(self, instruments_id: int) -> InstrumentsResponse:
         """Retrieve specific instrument data by its providers ID.
 
         Args:
-            providers_id: The providers ID of the instrument to retrieve.
+            instruments_id: The providers ID of the instrument to retrieve.
 
         Returns:
             InstrumentsResponse: An instance representing the retrieved instrument.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised when managed client exceeds rate limit.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
@@ -32,7 +33,8 @@ class Instruments(AsyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
-        instrument = await self._client._get(f"/instruments/{providers_id}")
+        instruments_id = validate_integer_id(instruments_id)
+        instrument = await self._client._get(f"/instruments/{instruments_id}")
         return InstrumentsResponse.read_response(instrument)
 
     async def list(
@@ -61,11 +63,13 @@ class Instruments(AsyncResourceBase):
             InstrumentsResponse: An instance representing the list of retrieved instruments.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised when managed client exceeds rate limit.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.

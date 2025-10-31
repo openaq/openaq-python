@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import LatestResponse, ParametersResponse
 
@@ -23,6 +21,7 @@ class Parameters(SyncResourceBase):
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
@@ -41,11 +40,13 @@ class Parameters(SyncResourceBase):
             LatestResponse: An instance representing the retrieved latest results.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised when managed client exceeds rate limit.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
@@ -101,11 +102,13 @@ class Parameters(SyncResourceBase):
             ParametersResponse: An instance representing the list of retrieved parameters.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised when managed client exceeds rate limit.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.

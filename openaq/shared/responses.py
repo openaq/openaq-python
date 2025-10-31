@@ -1,7 +1,5 @@
 """Response models to represent the resources returned from the OpenAQ API."""
 
-from __future__ import annotations
-
 import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, fields
@@ -65,6 +63,49 @@ class _ResourceBase:
             k: v for k, v in deserialized_data.items() if k in cls.__annotations__
         }
         return cls(**expected_fields)
+
+
+@dataclass
+class Headers:
+    """API response headers.
+
+    Attributes:
+        x_ratelimit_limit: The X-RateLimit-Limit header indicates the maximum number of requests for rate limit policy
+        x_ratelimit_remaining: The X-RateLimit-Remaining header indicates the remaining number of requests for the period
+        x_ratelimit_used: The X-RateLimit-Remaining header indicates the number of requests used for the period
+        x_ratelimit_reset: The X-RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
+    """
+
+    x_ratelimit_limit: int | None = None
+    x_ratelimit_remaining: int | None = None
+    x_ratelimit_used: int | None = None
+    x_ratelimit_reset: int | None = None
+
+    def __post_init__(self) -> None:
+        """Coerces attribute values to correct types."""
+        self.x_ratelimit_limit = int(self.x_ratelimit_limit or 0)
+        self.x_ratelimit_remaining = int(self.x_ratelimit_remaining or 0)
+        self.x_ratelimit_used = int(self.x_ratelimit_used or 0)
+        self.x_ratelimit_reset = int(self.x_ratelimit_reset or 0)
+
+
+@dataclass
+class Meta(_ResourceBase):
+    """API response metadata.
+
+    Attributes:
+        name: API name
+        website: API URL
+        page: the page number for paginated results.
+        limit: the limit number of records per page.
+        found: a count of the total number of records.
+    """
+
+    name: str
+    website: str
+    page: int
+    limit: int
+    found: int
 
 
 @dataclass
@@ -141,49 +182,6 @@ class _ResponseBase:
         if encoder == orjson:
             assert orjson is not None, "orjson must be installed."
         return encoder.dumps(self._serialize(self.dict()), ensure_ascii=False)
-
-
-@dataclass
-class Headers:
-    """API response headers.
-
-    Attributes:
-        x_ratelimit_limit: The X-RateLimit-Limit header indicates the maximum number of requests for rate limit policy
-        x_ratelimit_remaining: The X-RateLimit-Remaining header indicates the remaining number of requests for the period
-        x_ratelimit_used: The X-RateLimit-Remaining header indicates the number of requests used for the period
-        x_ratelimit_reset: The X-RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
-    """
-
-    x_ratelimit_limit: int | None = None
-    x_ratelimit_remaining: int | None = None
-    x_ratelimit_used: int | None = None
-    x_ratelimit_reset: int | None = None
-
-    def __post_init__(self) -> None:
-        """Coerces attribute values to correct types."""
-        self.x_ratelimit_limit = int(self.x_ratelimit_limit or 0)
-        self.x_ratelimit_remaining = int(self.x_ratelimit_remaining or 0)
-        self.x_ratelimit_used = int(self.x_ratelimit_used or 0)
-        self.x_ratelimit_reset = int(self.x_ratelimit_reset or 0)
-
-
-@dataclass
-class Meta(_ResourceBase):
-    """API response metadata.
-
-    Attributes:
-        name: API name
-        website: API URL
-        page: the page number for paginated results.
-        limit: the limit number of records per page.
-        found: a count of the total number of records.
-    """
-
-    name: str
-    website: str
-    page: int
-    limit: int
-    found: int
 
 
 @dataclass

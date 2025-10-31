@@ -40,11 +40,13 @@ class OpenAQ(BaseClient[Transport]):
         OpenAQ client, an API Key is required for using the OpenAQ API.
 
     Raises:
-        AuthError: Authentication error, improperly supplied credentials.
+        IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+        ApiKeyMissingError: Authentication error, missing API Key credentials.
         BadRequestError: Raised for HTTP 400 error, indicating a client request error.
         NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
         ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
         NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+        TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
         ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
         RateLimitError: Raised when managed client exceeds rate limit.
         HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.

@@ -1,10 +1,9 @@
-from __future__ import annotations
-
 import datetime
 
 from openaq.shared.models import build_measurements_path, build_query_params
 from openaq.shared.responses import MeasurementsResponse
 from openaq.shared.types import Data, Rollup
+from openaq.shared.utils import validate_integer_id
 
 from .base import AsyncResourceBase
 
@@ -48,11 +47,13 @@ class Measurements(AsyncResourceBase):
             MeasurementsResponse: An instance representing the list of retrieved air quality measurements.
 
         Raises:
-            AuthError: Authentication error, improperly supplied credentials.
+            IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+            ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+            TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             RateLimitError: Raised when managed client exceeds rate limit.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
@@ -61,10 +62,10 @@ class Measurements(AsyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        sensors_id = validate_integer_id(sensors_id)
         params = build_query_params(
             page=page, limit=limit, date_from=date_from, date_to=date_to
         )
         path = build_measurements_path(sensors_id, data, rollup)
-
         measurements = await self._client._get(path, params=params)
         return MeasurementsResponse.read_response(measurements)
