@@ -9,13 +9,13 @@ class OpenAQError(Exception):
     pass
 
 
-class ValidationError(OpenAQError):
+class ClientValidationError(OpenAQError):
     """Raised when input validation fails before making a request."""
 
     pass
 
 
-class IdentifierOutOfBoundsError(ValidationError):
+class IdentifierOutOfBoundsError(ClientValidationError):
     """Raised when id field is outside valid range [1, 2_147_483_647]."""
 
     pass
@@ -86,7 +86,7 @@ class TimeoutError(HTTPClientError):
         status_code: HTTP status code
     """
 
-    status_code: Literal[404] = 408
+    status_code: Literal[408] = 408
 
 
 class ValidationError(HTTPClientError):

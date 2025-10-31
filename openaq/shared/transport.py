@@ -1,7 +1,5 @@
 """Base class and utlity functions for working with client transport."""
 
-from __future__ import annotations
-
 import logging
 from abc import ABC, abstractmethod
 from http import HTTPStatus

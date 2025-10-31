@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import datetime
 
 from openaq.shared.models import build_measurements_path, build_query_params

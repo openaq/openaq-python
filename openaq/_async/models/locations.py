@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Tuple
 
 from openaq.shared.models import build_query_params
