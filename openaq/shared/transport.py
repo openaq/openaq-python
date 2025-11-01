@@ -67,7 +67,10 @@ def check_response(res: Response) -> Response | None:
             NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
             ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
             NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+<<<<<<< HEAD
             TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
+=======
+>>>>>>> fab3cb4 (check identifiers for int32 range before http request (#45))
             ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
             HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
             ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
