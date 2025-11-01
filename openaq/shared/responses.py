@@ -4,9 +4,10 @@ import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, fields
 from types import ModuleType
-from typing import Any, Tuple
+from typing import Any, Tuple, TYPE_CHECKING
 
-from httpx import Response
+if TYPE_CHECKING:
+    from httpx import Response
 
 from openaq.vendor.humps import camelize, decamelize
 

@@ -17,7 +17,7 @@ class AsyncResourceBase:
 
     def __init__(
         self,
-        client: "AsyncOpenAQ",
+        client: AsyncOpenAQ,
     ):
         """Initialize the SyncResourceBase.
 

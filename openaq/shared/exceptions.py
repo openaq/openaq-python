@@ -21,6 +21,12 @@ class IdentifierOutOfBoundsError(ClientValidationError):
     pass
 
 
+class InvalidQueryParameterError(ClientValidationError):
+    """Raised when query parameter is invalid."""
+
+    pass
+
+
 class APIError(Exception):
     """Base class for all API exceptions."""
 
