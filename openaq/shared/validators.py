@@ -629,7 +629,7 @@ def parameter_type_check(parameter_type: object) -> TypeGuard[ParameterType]:
     return parameter_type in _PARAMETER_TYPE_VALUES
 
 
-def validate_parameter_type(parameter_type: object) -> TypeGuard[ParameterType]:
+def validate_parameter_type(parameter_type: object) -> ParameterType:
     """Validate parameter_type query parameter and raise error if invalid.
 
     Args:
