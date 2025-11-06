@@ -548,8 +548,11 @@ def iso8601_check(value: object) -> TypeGuard[str]:
     """
     if not isinstance(value, str):
         return False
+
     try:
-        datetime.datetime.fromisoformat(str(value))
+        # Replace 'Z' with '+00:00' for Python 3.10
+        # https://docs.python.org/3/whatsnew/3.11.html#datetime
+        datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
         return True
     except ValueError:
         return False

@@ -921,7 +921,7 @@ def test_validate_rollup_returns_rollup(rollup: object):
         pytest.param(
             "2024-01-01T12:30:45-05:00", True, id="valid-datetime-with-negative-offset"
         ),
-        pytest.param("2024-01-01T12:30:45Z", False, id="invalid-zulu-time"),
+        pytest.param("2024-01-01T12:30:45Z", True, id="invalid-zulu-time"),
         pytest.param("2024-13-01", False, id="invalid-month"),
         pytest.param("2024-01-32", False, id="invalid-day"),
         pytest.param("2024-02-30", False, id="invalid-feb-30"),
