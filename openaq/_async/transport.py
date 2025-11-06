@@ -1,22 +1,22 @@
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Mapping
 
-import httpx
+from httpx import AsyncClient, Request, Headers, Response
 
 from ..shared.transport import BaseTransport, check_response
 
 
 class AsyncTransport(BaseTransport):
-    def __init__(self):
-        self.client = httpx.AsyncClient(timeout=15.0)
+    def __init__(self) -> None:
+        self.client = AsyncClient(timeout=15.0)
 
     async def send_request(
         self,
         method: str,
         url: str,
         params: Mapping[str, str] | None,
-        headers: Mapping[str, Any],
-    ):
-        request = httpx.Request(
+        headers: Headers | Mapping[str, str],
+    ) -> Response:
+        request = Request(
             method=method,
             url=url,
             params=params,
@@ -25,5 +25,5 @@ class AsyncTransport(BaseTransport):
         res = await self.client.send(request)
         return check_response(res)
 
-    async def close(self):
+    async def close(self) -> None:
         await self.client.aclose()

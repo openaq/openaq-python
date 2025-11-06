@@ -1,10 +1,12 @@
 """Response models to represent the resources returned from the OpenAQ API."""
 
+from __future__ import annotations
+
 import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, fields
 from types import ModuleType
-from typing import Any, Tuple
+from typing import Any, Tuple, TYPE_CHECKING
 
 from httpx import Response
 
@@ -130,7 +132,7 @@ class _ResponseBase:
         return cls(
             Headers(
                 **{
-                    k.replace('-', '_'): v
+                    k.replace('-', '_'): int(v) if v.isdigit() else None
                     for k, v in response.headers.items()
                     if k.replace('-', '_') in valid_headers
                 }

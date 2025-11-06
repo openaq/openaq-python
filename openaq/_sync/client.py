@@ -16,7 +16,6 @@ from openaq.shared.client import (
     DEFAULT_BASE_URL,
     BaseClient,
 )
-from openaq.shared.exceptions import RateLimitError
 
 from .transport import Transport
 
@@ -38,6 +37,7 @@ class OpenAQ(BaseClient[Transport]):
     Warning:
         Although the `api_key` parameter is not required for instantiating the
         OpenAQ client, an API Key is required for using the OpenAQ API.
+
 
     Raises:
         IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
