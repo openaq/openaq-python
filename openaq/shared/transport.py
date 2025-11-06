@@ -1,12 +1,13 @@
 """Base class and utlity functions for working with client transport."""
 
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Any, Mapping, TYPE_CHECKING
+from typing import Mapping
 
-if TYPE_CHECKING:
-    from httpx import Response
+from httpx import Headers, Response
 
 
 from openaq.shared.exceptions import (
@@ -34,26 +35,26 @@ class BaseTransport(ABC):
         self,
         method: str,
         url: str,
-        params: Mapping[str, str],
-        headers: Mapping[str, Any],
-    ):
+        params: Mapping[str, str] | None,
+        headers: Headers | Mapping[str, str],
+    ) -> Response:
         """Sends request using transport. To be overridden in subclass.
 
         Args:
             method: HTTP method name
             url: URL to send requestion to
             params: query parameters to add to URL
-            headers: HTTP headers to include wiht request
+            headers: HTTP headers to include with request
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def close(self):
+    async def close(self) -> None:
         """Closes transport connection. To be overridden in subclass."""
         raise NotImplementedError
 
 
-def check_response(res: Response) -> Response | None:
+def check_response(res: Response) -> Response:
     """Checks the HTTP response of the request.
 
     Args:

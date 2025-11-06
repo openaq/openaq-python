@@ -53,8 +53,6 @@ dependencies = [
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
 
-
-
 [tool.hatch.envs.test.scripts]
 test-unit = 'pytest tests/unit/ -s -vv'
 test-integration = 'pytest tests/integration/ -s -vv'
@@ -66,7 +64,7 @@ python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.hatch.envs.types]
 detached = true
-dependencies = ["mypy"]
+dependencies = ["mypy", "lxml","httpx"]
 
 [[tool.mypy.overrides]]
 module = ["httpx.*", "openaq"]
@@ -74,6 +72,8 @@ ignore_missing_imports = true
 
 [tool.hatch.envs.types.scripts]
 check = "mypy -p openaq --install-types --non-interactive"
+cov = "mypy -p openaq --install-types --html-report mypy-report"
+
 
 [tool.hatch.envs.style]
 detached = true
@@ -111,14 +111,13 @@ exclude_also = [
 [tool.ruff]
 extend-exclude = ["tests"]
 
+[tool.ruff.lint]
 ignore = [
   "E501", # line too long, handled by black
   "D104",
 ]
 select = ["D"]
-
-[tool.ruff.pydocstyle]
-convention = "google"
+pydocstyle.convention = "google"
 
 [tool.black]
 target-version = ['py313']
