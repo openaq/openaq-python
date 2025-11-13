@@ -89,6 +89,14 @@ dependencies = ["mypy", "lxml","httpx"]
 module = ["httpx.*", "openaq"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ["orjson"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tomllib"]
+ignore_missing_imports = true
+
 [tool.hatch.envs.types.scripts]
 check = "mypy -p openaq --install-types --non-interactive"
 ci = "mypy -p openaq"
