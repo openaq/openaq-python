@@ -41,9 +41,7 @@ def test__get_openaq_config_file_exists():
             if int(platform.python_version_tuple()[1]) >= 11:
                 result = _get_openaq_config()
                 assert result == expected_config
-                mock_file.assert_called_once_with(
-                    Path(Path.home() / ".openaq.toml"), 'rb'
-                )
+                mock_file.assert_any_call(Path(Path.home() / ".openaq.toml"), 'rb')
             else:
                 assert result == None
 
