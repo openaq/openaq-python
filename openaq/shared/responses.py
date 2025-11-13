@@ -18,11 +18,10 @@ import httpx
 
 from openaq.vendor.humps import camelize, decamelize
 
-orjson: ModuleType | None
 try:
     import orjson
 except ImportError:
-    orjson = None
+    orjson = None  # type: ignore[assignment]
 
 T = TypeVar("T", bound="_ResourceBase")
 
