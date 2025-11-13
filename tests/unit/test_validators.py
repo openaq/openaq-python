@@ -1,6 +1,7 @@
 import datetime
 from openaq.shared.exceptions import IdentifierOutOfBoundsError, InvalidParameterError
 import pytest
+from hypothesis import given, strategies as st
 
 
 from openaq.shared.validators import (
@@ -968,6 +969,49 @@ def test_iso8601_check(value: object, valid: bool):
 )
 def test_datetime_check(value: object, valid: bool):
     assert datetime_check(value) == valid
+
+
+@given(st.datetimes())
+def test_datetime_check_accepts_datetime_objects(dt: datetime.datetime):
+    """Any datetime object should be valid."""
+    assert datetime_check(dt) is True
+
+
+@given(st.dates())
+def test_datetime_check_accepts_date_objects(d: datetime.date):
+    """Any date object should be valid."""
+    dt = datetime.datetime.combine(d, datetime.time())
+    assert datetime_check(dt) is True
+
+
+@given(st.datetimes())
+def test_datetime_check_accepts_iso_format_strings(dt: datetime.datetime):
+    """ISO format datetime strings should be valid."""
+    iso_string = dt.isoformat()
+    assert datetime_check(iso_string) is True
+
+
+@given(st.dates())
+def test_datetime_check_accepts_date_strings(d: datetime.date):
+    """ISO format date strings (YYYY-MM-DD) should be valid."""
+    date_string = d.isoformat()
+    assert datetime_check(date_string) is True
+
+
+@given(
+    st.one_of(
+        st.integers(),
+        st.floats(allow_nan=False, allow_infinity=False),
+        st.booleans(),
+        st.none(),
+        st.lists(st.integers()),
+        st.dictionaries(st.text(), st.integers()),
+        st.tuples(),
+    )
+)
+def test_datetime_check_rejects_non_datetime_types(value):
+    """Non-datetime types should be rejected."""
+    assert datetime_check(value) is False
 
 
 @pytest.mark.parametrize(

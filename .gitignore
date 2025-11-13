@@ -7,3 +7,4 @@ __pycache__
 site
 .vscode
 coverage.xml
+.hypothesis
