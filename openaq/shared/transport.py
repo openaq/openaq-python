@@ -7,8 +7,7 @@ from abc import ABC, abstractmethod
 from http import HTTPStatus
 from typing import Mapping
 
-from httpx import Headers, Response
-
+import httpx
 
 from openaq.shared.exceptions import (
     BadGatewayError,
@@ -27,34 +26,7 @@ from openaq.shared.exceptions import (
 logger = logging.getLogger("transport")
 
 
-class BaseTransport(ABC):
-    """Base class for client transport classes."""
-
-    @abstractmethod
-    async def send_request(
-        self,
-        method: str,
-        url: str,
-        params: Mapping[str, str] | None,
-        headers: Headers | Mapping[str, str],
-    ) -> Response:
-        """Sends request using transport. To be overridden in subclass.
-
-        Args:
-            method: HTTP method name
-            url: URL to send requestion to
-            params: query parameters to add to URL
-            headers: HTTP headers to include with request
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    async def close(self) -> None:
-        """Closes transport connection. To be overridden in subclass."""
-        raise NotImplementedError
-
-
-def check_response(res: Response) -> Response:
+def check_response(res: httpx.Response) -> httpx.Response:
     """Checks the HTTP response of the request.
 
     Args:

@@ -59,7 +59,7 @@ class Parameters(AsyncResourceBase):
         radius: int | None = None,
         bbox: tuple[float, float, float, float] | None = None,
         iso: str | None = None,
-        countries_id: int | None = None,
+        countries_id: int | list[int] | None = None,
     ) -> ParametersResponse:
         """List parameters based on provided filters.
 

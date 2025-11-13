@@ -53,13 +53,13 @@ class Providers(AsyncResourceBase):
         limit: int = 1000,
         order_by: str | None = None,
         sort_order: SortOrder | None = None,
-        parameters_id: int | None = None,
+        parameters_id: int | list[int] | None = None,
         monitor: bool | None = None,
         coordinates: tuple[float, float] | None = None,
         radius: int | None = None,
         bbox: tuple[float, float, float, float] | None = None,
         iso: str | None = None,
-        countries_id: int | None = None,
+        countries_id: int | list[int] | None = None,
     ) -> ProvidersResponse:
         """List providers based on provided filters.
 

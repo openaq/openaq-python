@@ -34,8 +34,8 @@ class Measurements(SyncResourceBase):
             sensors_id: The ID of the sensor for which measurements should be retrieved.
             data: The base measurement unit to query
             rollup: The period by which to rollup the base measurement data.
-            date_from: Starting date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
-            date_to: Ending date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
+            datetime_from: Starting date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
+            datetime_to: Ending date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
             page: The page number, must be greater than zero. Page count is measurements found / limit.
             limit: The number of results returned per page. Must be between 1 and 1,000.
 
