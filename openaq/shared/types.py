@@ -1,6 +1,6 @@
 """Shared custom types."""
 
-from typing import Literal, TypeAlias
+from typing import Literal, TypeAlias, TypedDict
 
 _ROLLUP_VALUES = (
     'hourly',
@@ -27,3 +27,9 @@ SortOrder: TypeAlias = Literal['ASC', 'DESC', 'asc', 'desc']
 CoordinatesRadius: TypeAlias = tuple[tuple[float, float], int, None]
 
 BboxOnly: TypeAlias = tuple[None, None, tuple[float, float, float, float]]
+
+
+class OpenAQConfig(TypedDict):
+    """Type definition for .openaq.toml configuration file."""
+
+    api_key: str

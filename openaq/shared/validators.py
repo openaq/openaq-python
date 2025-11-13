@@ -1,7 +1,7 @@
 """Validator functions for type checking and runtime validation."""
 
 import datetime
-from typing import Tuple, TypeGuard, cast
+from typing import TypeGuard, cast
 from openaq.shared.constants import ISO_CODES, MAX_LIMIT
 from openaq.shared.exceptions import (
     IdentifierOutOfBoundsError,
@@ -90,7 +90,7 @@ def validate_radius(radius: object) -> int:
     return radius
 
 
-def validate_coordinates(coordinates: object) -> Tuple[float, float]:
+def validate_coordinates(coordinates: object) -> tuple[float, float]:
     """Validate coordinates query parameter and raise error if invalid.
 
     Args:
@@ -128,7 +128,7 @@ def validate_coordinates(coordinates: object) -> Tuple[float, float]:
     return coordinates
 
 
-def validate_bbox(bbox: object) -> Tuple[float, float, float, float]:
+def validate_bbox(bbox: object) -> tuple[float, float, float, float]:
     """Validate bounding box query parameter and raise error if invalid.
 
     Args:

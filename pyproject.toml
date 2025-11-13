@@ -72,7 +72,7 @@ ignore_missing_imports = true
 
 [tool.hatch.envs.types.scripts]
 check = "mypy -p openaq --install-types --non-interactive"
-cov = "mypy -p openaq --install-types --html-report mypy-report"
+cov = "mypy -p openaq --exclude 'openaq/vendor/.*' --install-types --html-report mypy-report"
 
 
 [tool.hatch.envs.style]

@@ -6,16 +6,25 @@ import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, fields
 from types import ModuleType
-from typing import Any, Tuple, TYPE_CHECKING
+from typing import (
+    Any,
+    Generic,
+    TypeVar,
+    cast,
+    get_args,
+)
 
-from httpx import Response
+import httpx
 
 from openaq.vendor.humps import camelize, decamelize
 
+orjson: ModuleType | None
 try:
-    import orjson  # type: ignore
+    import orjson
 except ImportError:
     orjson = None
+
+T = TypeVar("T", bound="_ResourceBase")
 
 
 class _ResourceBase:
@@ -27,29 +36,27 @@ class _ResourceBase:
     """
 
     @classmethod
-    def _deserialize(cls, data: Mapping):
+    def _deserialize(cls: type[T], data: Mapping[str, Any]) -> dict[str, Any]:
         """Deserializes data and convert keys from camel case to snake case.
 
         Args:
             data: input dictionary of API response data to be deserialized.
         """
-        out = {}
+        out: dict[str, Any] = {}
         for k, v in data.items():
+            key = cast(str, decamelize(k))
             if isinstance(v, dict):
-                out[decamelize(k)] = cls._deserialize(v)
-            if isinstance(v, list):
-                out[decamelize(k)] = []
-                for x in v:
-                    if isinstance(x, dict):
-                        out[decamelize(k)].append(cls._deserialize(x))
-                    else:
-                        out[decamelize(k)].append(x)
+                out[key] = cls._deserialize(v)
+            elif isinstance(v, list):
+                out[key] = [
+                    cls._deserialize(x) if isinstance(x, dict) else x for x in v
+                ]
             else:
-                out[decamelize(k)] = v
+                out[key] = v
         return out
 
     @classmethod
-    def load(cls, results: Mapping[str, Any]):
+    def load(cls: type[T], results: Mapping[str, Any]) -> T:
         """Deserializes JSON response from API into response object.
 
         Args:
@@ -110,8 +117,13 @@ class Meta(_ResourceBase):
     found: int
 
 
+R = TypeVar("R", bound="_ResponseBase")
+
+TResult = TypeVar("TResult")
+
+
 @dataclass
-class _ResponseBase:
+class _ResponseBase(Generic[TResult]):
     """Base clase for all response classes.
 
     Handles serialization and deserialization of JSON data and setting of
@@ -124,11 +136,12 @@ class _ResponseBase:
 
     headers: Headers
     meta: Meta
-    results: list[Any]
+    results: list[TResult]
 
     @classmethod
-    def read_response(cls, response: Response):
+    def read_response(cls: type[R], response: httpx.Response) -> R:
         valid_headers = [field.name for field in fields(Headers)]
+        json_data = response.json()
         return cls(
             Headers(
                 **{
@@ -137,16 +150,25 @@ class _ResponseBase:
                     if k.replace('-', '_') in valid_headers
                 }
             ),
-            response.json()['meta'],
-            response.json()['results'],
+            json_data['meta'],
+            json_data['results'],
         )
 
     def __post_init__(self) -> None:
-        """Sets class attributes to correct type after checking input type."""
+        """Automatically convert meta and results based on type hints."""
         if isinstance(self.meta, dict):
             self.meta = Meta.load(self.meta)
 
-    def _serialize(self, data: Mapping | list):
+        if hasattr(self.__class__, '__orig_bases__'):
+            for base in self.__class__.__orig_bases__:
+                if hasattr(base, '__args__'):
+                    result_type = get_args(base)[0]
+                    if isinstance(self.results, list) and self.results:
+                        if isinstance(self.results[0], dict):
+                            self.results = [result_type.load(x) for x in self.results]
+                    break
+
+    def _serialize(self, data: Mapping | list) -> dict[str, Any] | list[Any]:
         """Serializes data and convert keys to camel case.
 
         Args:
@@ -158,7 +180,9 @@ class _ResponseBase:
                 for i in data
             ]
         return {
-            camelize(k): self._serialize(v) if isinstance(v, (Mapping, list)) else v
+            cast(str, camelize(k)): (
+                self._serialize(v) if isinstance(v, (Mapping, list)) else v
+            )
             for k, v in data.items()
         }
 
@@ -282,7 +306,7 @@ class SensorBase(_ResourceBase):
     name: str
     parameter: ParameterBase
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.parameter, dict):
             self.parameter = ParameterBase.load(self.parameter)
@@ -352,12 +376,12 @@ class Location(_ResourceBase):
     instruments: list[InstrumentBase]
     sensors: list[SensorBase]
     coordinates: Coordinates
-    bounds: Tuple[float, float, float, float]
+    bounds: tuple[float, float, float, float]
     distance: float | None
     datetime_first: Datetime
     datetime_last: Datetime
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.country, dict):
             self.country = CountryBase.load(self.country)
@@ -366,9 +390,14 @@ class Location(_ResourceBase):
         if isinstance(self.provider, dict):
             self.provider = ProviderBase.load(self.provider)
         if isinstance(self.instruments, list):
-            self.instruments = [InstrumentBase.load(x) for x in self.instruments]
+            self.instruments = [
+                InstrumentBase.load(x) if isinstance(x, dict) else x
+                for x in self.instruments
+            ]
         if isinstance(self.sensors, list):
-            self.sensors = [SensorBase.load(x) for x in self.sensors]
+            self.sensors = [
+                SensorBase.load(x) if isinstance(x, dict) else x for x in self.sensors
+            ]
         if isinstance(self.coordinates, dict):
             self.coordinates = Coordinates.load(self.coordinates)
         if isinstance(self.datetime_first, dict):
@@ -378,7 +407,7 @@ class Location(_ResourceBase):
 
 
 @dataclass
-class LocationsResponse(_ResponseBase):
+class LocationsResponse(_ResponseBase[Location]):
     """Representation of the API response for locations resource.
 
     Attributes:
@@ -389,13 +418,6 @@ class LocationsResponse(_ResponseBase):
     """
 
     results: list[Location]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [Location.load(x) for x in self.results]
 
 
 # Providers
@@ -425,9 +447,9 @@ class Bbox(_ResourceBase):
 
     type: str
     coordinates: (
-        list[list[Tuple[float, float]]]
-        | list[Tuple[float, float]]
-        | Tuple[float, float]
+        list[list[tuple[float, float]]]
+        | list[tuple[float, float]]
+        | tuple[float, float]
     )
 
 
@@ -458,16 +480,18 @@ class Provider(_ResourceBase):
     parameters: list[ParameterBase]
     bbox: Bbox | None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.parameters, list):
-            self.parameters = [ParameterBase.load(x) for x in self.parameters]
+            self.parameters = [
+                ParameterBase.load(cast(dict[str, Any], x)) for x in self.parameters
+            ]
         if isinstance(self.bbox, dict):
             self.bbox = Bbox.load(self.bbox)
 
 
 @dataclass
-class ProvidersResponse(_ResponseBase):
+class ProvidersResponse(_ResponseBase[Provider]):
     """Representation of the API response for providers resource.
 
     Attributes:
@@ -476,13 +500,6 @@ class ProvidersResponse(_ResponseBase):
     """
 
     results: list[Provider]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [Provider.load(x) for x in self.results]
 
 
 # Parameters
@@ -508,7 +525,7 @@ class Parameter(_ResourceBase):
 
 
 @dataclass
-class ParametersResponse(_ResponseBase):
+class ParametersResponse(_ResponseBase[Parameter]):
     """Representation of the API response for parameters resource.
 
     Attributes:
@@ -517,13 +534,6 @@ class ParametersResponse(_ResponseBase):
     """
 
     results: list[Parameter]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [Parameter.load(x) for x in self.results]
 
 
 # Countries
@@ -549,14 +559,16 @@ class Country(_ResourceBase):
     datetime_last: str
     parameters: list[ParameterBase]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.parameters, list):
-            self.parameters = [ParameterBase.load(x) for x in self.parameters]
+            self.parameters = [
+                ParameterBase.load(cast(dict[str, Any], x)) for x in self.parameters
+            ]
 
 
 @dataclass
-class CountriesResponse(_ResponseBase):
+class CountriesResponse(_ResponseBase[Country]):
     """Representation of the API response for countries resource.
 
     Attributes:
@@ -565,11 +577,6 @@ class CountriesResponse(_ResponseBase):
     """
 
     results: list[Country]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.results, list):
-            self.results = [Country.load(x) for x in self.results]
 
 
 # Instruments
@@ -591,14 +598,14 @@ class Instrument(_ResourceBase):
     is_monitor: bool
     manufacturer: ManufacturerBase
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.manufacturer, dict):
             self.manufacturer = ManufacturerBase.load(self.manufacturer)
 
 
 @dataclass
-class InstrumentsResponse(_ResponseBase):
+class InstrumentsResponse(_ResponseBase[Instrument]):
     """Representation of the API response for instruments resource.
 
     Attributes:
@@ -607,13 +614,6 @@ class InstrumentsResponse(_ResponseBase):
     """
 
     results: list[Instrument]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [Instrument.load(x) for x in self.results]
 
 
 # Licenses
@@ -645,7 +645,7 @@ class License(_ResourceBase):
 
 
 @dataclass
-class LicensesResponse(_ResponseBase):
+class LicensesResponse(_ResponseBase[License]):
     """Representation of the API response for licenses resource.
 
     Attributes:
@@ -654,13 +654,6 @@ class LicensesResponse(_ResponseBase):
     """
 
     results: list[License]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [License.load(x) for x in self.results]
 
 
 # Manufacturers
@@ -680,29 +673,21 @@ class Manufacturer(_ResourceBase):
     name: str
     instruments: list[InstrumentBase]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.instruments, list):
-            self.instruments = [InstrumentBase.load(x) for x in self.instruments]
+        self.instruments = [
+            InstrumentBase.load(cast(dict[str, Any], x)) for x in self.instruments
+        ]
 
 
 @dataclass
-class ManufacturersResponse(_ResponseBase):
+class ManufacturersResponse(_ResponseBase[Manufacturer]):
     """Representation of the API response for manufacturers resource.
 
     Attributes:
         meta: a metadata object containing information about the results.
         results: a list of manufacturer records.
     """
-
-    results: list[Manufacturer]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [Manufacturer.load(x) for x in self.results]
 
 
 # Measurements
@@ -757,7 +742,7 @@ class Coverage(_ResourceBase):
     datetime_from: Datetime
     datetime_to: Datetime
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.datetime_from, dict):
             self.datetime_from = Datetime.load(self.datetime_from)
@@ -782,7 +767,7 @@ class Period(_ResourceBase):
     datetime_from: Datetime
     datetime_to: Datetime
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.datetime_from, dict):
             self.datetime_from = Datetime.load(self.datetime_from)
@@ -810,7 +795,7 @@ class Measurement(_ResourceBase):
     summary: Summary
     coverage: Coverage
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.period, dict):
             self.period = Period.load(self.period)
@@ -825,7 +810,7 @@ class Measurement(_ResourceBase):
 
 
 @dataclass
-class MeasurementsResponse(_ResponseBase):
+class MeasurementsResponse(_ResponseBase[Measurement]):
     """Representation of the API response for measurements resource.
 
     Attributes:
@@ -834,13 +819,6 @@ class MeasurementsResponse(_ResponseBase):
     """
 
     results: list[Measurement]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [Measurement.load(x) for x in self.results]
 
 
 # Owners
@@ -860,7 +838,7 @@ class Owner(_ResourceBase):
 
 
 @dataclass
-class OwnersResponse(_ResponseBase):
+class OwnersResponse(_ResponseBase[Owner]):
     """Representation of the API response for owners resource.
 
     Attributes:
@@ -869,13 +847,6 @@ class OwnersResponse(_ResponseBase):
     """
 
     results: list[Owner]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [Owner.load(x) for x in self.results]
 
 
 # Sensors
@@ -922,7 +893,7 @@ class Sensor(_ResourceBase):
 
 
 @dataclass
-class SensorsResponse(_ResponseBase):
+class SensorsResponse(_ResponseBase[Sensor]):
     """Representation of the API response for sensors resource.
 
     Attributes:
@@ -931,13 +902,6 @@ class SensorsResponse(_ResponseBase):
     """
 
     results: list[Sensor]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [Sensor.load(x) for x in self.results]
 
 
 @dataclass
@@ -960,7 +924,7 @@ class Latest(_ResourceBase):
 
 
 @dataclass
-class LatestResponse(_ResponseBase):
+class LatestResponse(_ResponseBase[Latest]):
     """Representation of the API response for latest resource.
 
     Attributes:
@@ -969,10 +933,3 @@ class LatestResponse(_ResponseBase):
     """
 
     results: list[Latest]
-
-    def __post_init__(self):
-        """Sets class attributes to correct type after checking input type."""
-        if isinstance(self.meta, dict):
-            self.meta = Meta.load(self.meta)
-        if isinstance(self.results, list):
-            self.results = [Latest.load(x) for x in self.results]

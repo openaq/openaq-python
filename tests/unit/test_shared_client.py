@@ -31,7 +31,7 @@ def test__get_openaq_config_file_exists():
     mock_toml_content = b"""
         api-key = 'openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p'
     """
-    expected_config = {"api-key": "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"}
+    expected_config = {"api_key": "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"}
 
     with patch.object(Path, 'is_file', return_value=True):
         with patch(

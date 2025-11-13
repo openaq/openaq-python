@@ -1,5 +1,7 @@
 from __future__ import annotations
+from types import TracebackType
 
+import httpx
 from typing import Any, Mapping
 
 from openaq._sync.models.countries import Countries
@@ -77,18 +79,16 @@ class OpenAQ(BaseClient[Transport]):
         self.parameters = Parameters(self)
         self.sensors = Sensors(self)
 
-    @property
-    def transport(self) -> Transport:
-        return self._transport
-
     def _do(
         self,
         method: str,
         path: str,
         *,
-        params: Mapping[str, Any] | None = None,
-        headers: Mapping[str, str] | None = None,
-    ):
+        params: (
+            httpx.QueryParams | Mapping[str, str | int | float | bool] | None
+        ) = None,
+        headers: httpx.Headers | Mapping[str, str] | None = None,
+    ) -> httpx.Response:
         self._check_rate_limit()
         request_headers = self.build_request_headers(headers)
         url = self._base_url + path
@@ -102,16 +102,24 @@ class OpenAQ(BaseClient[Transport]):
         self,
         path: str,
         *,
-        params: Mapping[str, str] | None = None,
-        headers: Mapping[str, Any] | None = None,
-    ):
+        params: (
+            httpx.QueryParams | Mapping[str, str | int | float | bool] | None
+        ) = None,
+        headers: httpx.Headers | Mapping[str, str] | None = None,
+    ) -> httpx.Response:
         return self._do("get", path, params=params, headers=headers)
 
-    def close(self):
-        self._transport.close()
+    def close(self) -> None:
+        """Closes transport connection."""
+        self.transport.close()
 
     def __enter__(self) -> OpenAQ:
         return self
 
-    def __exit__(self, *_: Any):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         self.close()
