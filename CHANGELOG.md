@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Additional checks to validate query parameters.
 - Additional checks to prevent out of range identifiers.
 - `TimeoutError` HTTP error exception.
 

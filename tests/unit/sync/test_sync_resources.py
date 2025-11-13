@@ -50,7 +50,11 @@ def test_measurements_list_endpoints(
     call_args = mock_client._get.call_args
 
     assert call_args[0][0] == expected_endpoint
-    assert call_args[1]['params'] == mock_params
+    assert call_args[1]['params'] == {
+        'page': 1,
+        'limit': 1000,
+        'datetime_from': '2016-10-10T00:00:00',
+    }
 
 
 @pytest.mark.parametrize(

@@ -1,4 +1,5 @@
 from openaq.shared.responses import SensorsResponse
+from openaq.shared.validators import validate_integer_id
 
 from .base import SyncResourceBase
 
@@ -31,5 +32,6 @@ class Sensors(SyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        sensors_id = validate_integer_id(sensors_id)
         sensor_response = self._client._get(f"/sensors/{sensors_id}")
         return SensorsResponse.read_response(sensor_response)

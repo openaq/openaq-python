@@ -1,13 +1,23 @@
 """Shared utility functions for working with query parameter models."""
 
 import datetime
-from typing import Any, Mapping
+from typing import Mapping, Sequence
 
 from .exceptions import NotFoundError
 from .types import Data, Rollup
 
 
-def build_query_params(**kwargs) -> Mapping[str, Any]:
+def build_query_params(
+    **kwargs: (
+        str
+        | int
+        | float
+        | bool
+        | Sequence[str | int | float | bool]
+        | datetime.datetime
+        | None
+    ),
+) -> dict[str, str | int | float | bool]:
     """Prepares keyword arguments to a dict for httpx query parameters.
 
     Loops through keyword args, if the value is of type list, tuple, or datetime.datetime,
@@ -22,20 +32,22 @@ def build_query_params(**kwargs) -> Mapping[str, Any]:
         dictionary of the prepared values.
 
     """
-    params = {}
+    params: dict[str, str | int | float | bool] = {}
     for k, v in kwargs.items():
-        if v is not None:
-            if isinstance(v, list) or isinstance(v, tuple):
-                v = ",".join([str(x) for x in v])
-            elif isinstance(v, datetime.datetime):
-                v = v.isoformat()
+        if v is None:
+            continue
+        if isinstance(v, (list, tuple)):
+            params[k] = ",".join(str(x) for x in v)
+        elif isinstance(v, datetime.datetime):
+            params[k] = v.isoformat()
+        elif isinstance(v, (str, int, float, bool)):
             params[k] = v
     return params
 
 
 def build_measurements_path(
     sensors_id: int, data: Data | None = None, rollup: Rollup | None = None
-):
+) -> str:
     """Prepares and builds the path for measurements endpoint using data and rollup parameters.
 
     Args:

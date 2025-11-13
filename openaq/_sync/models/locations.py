@@ -1,10 +1,21 @@
-from typing import Tuple
-
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import (
     LatestResponse,
     LocationsResponse,
     SensorsResponse,
+)
+from openaq.shared.types import SortOrder
+from openaq.shared.validators import (
+    validate_geospatial_params,
+    validate_integer_id,
+    validate_integer_or_list_integer_params,
+    validate_iso_param,
+    validate_limit_param,
+    validate_mobile,
+    validate_monitor,
+    validate_order_by,
+    validate_page_param,
+    validate_sort_order,
 )
 
 from .base import SyncResourceBase
@@ -38,6 +49,7 @@ class Locations(SyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        locations_id = validate_integer_id(locations_id)
         location_response = self._client._get(f"/locations/{locations_id}")
         return LocationsResponse.read_response(location_response)
 
@@ -66,6 +78,7 @@ class Locations(SyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        locations_id = validate_integer_id(locations_id)
         latest = self._client._get(f"/locations/{locations_id}/latest")
         return LatestResponse.read_response(latest)
 
@@ -74,8 +87,8 @@ class Locations(SyncResourceBase):
         page: int = 1,
         limit: int = 100,
         radius: int | None = None,
-        coordinates: Tuple[float, float] | None = None,
-        bbox: Tuple[float, float, float, float] | None = None,
+        coordinates: tuple[float, float] | None = None,
+        bbox: tuple[float, float, float, float] | None = None,
         providers_id: int | list[int] | None = None,
         countries_id: int | list[int] | None = None,
         parameters_id: int | list[int] | None = None,
@@ -84,31 +97,14 @@ class Locations(SyncResourceBase):
         monitor: bool | None = None,
         mobile: bool | None = None,
         order_by: str | None = None,
-        sort_order: str | None = None,
+        sort_order: SortOrder | None = None,
     ) -> LocationsResponse:
         """List locations based on provided filters.
 
-        Provides the ability to filter the locations resource by the given arguments.
-
-        * `page` - Specifies the page number of results to retrieve
-        * `limit` - Sets the number of results generated per page
-        * `radius` - Specifies the distance around a central point, filtering locations within a circular area. Must be used with `coordinates`, cannot be used in combination with `bbox`
-        * `coordinates` - Filters locations by coordinates. Must be used with `radius`, cannot be used in combination with `bbox`
-        * `bbox` - Filters locations using a bounding box. Cannot be used with `coordinates` or `radius`
-        * `providers_id` - Filters results by selected providers ID(s)
-        * `countries_id` - Filters results by selected countries ID(s)
-        * `parameters_id` - Filters results by selected parameters ID(s)
-        * `licenses_id` - Filters results by selected licenses ID(s)
-        * `iso` - Filters results by selected country code
-        * `monitor` - Filters results by reference grade monitors (`true`), air sensors (`false`), or both if not used
-        * `mobile` - Filters results for mobile sensors (`true`), non-mobile sensors (`false`), or both if not used
-        * `order_by` - Determines the fields by which results are sorted; available values are `id`
-        * `sort_order` - Works in tandem with `order_by` to specify the direction: either `asc` (ascending) or `desc` (descending)
-
         Args:
-            page: The page number. Page count is locations found / limit.
-            limit: The number of results returned per page.
-            radius: A distance value in meters to search around the given coordinates value.
+            page: The page number, must be greater than zero. Page count is locations found / limit.
+            limit: The number of results returned per page. Must be between 1 and 1,000.
+            radius: A distance value in meters to search around the given coordinates value, must be between 1 and 25,000 (25km).
             coordinates: WGS 84 coordinate pair in form latitude, longitude (y,x).
             bbox: Geospatial bounding box of min X, min Y, max X, max Y in WGS 84 coordinates. Limited to four decimals precision.
             providers_id: Single providers ID or an array of IDs.
@@ -119,12 +115,13 @@ class Locations(SyncResourceBase):
             monitor: Boolean for reference grade monitors (true) or air sensors (false)
             mobile: Boolean mobile locations (true) or not mobile locations (false).
             order_by: Order by operators for results.
-            sort_order: Sort order (asc/desc).
+            sort_order: Order for sorting results (asc/desc).
 
         Returns:
             LocationsResponse: An instance representing the list of retrieved locations.
 
         Raises:
+            InvalidParameterError: Client validation error, query parameter is not correct type or value.
             IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
             ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
@@ -140,6 +137,35 @@ class Locations(SyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        page = validate_page_param(page)
+        limit = validate_limit_param(limit)
+        validate_geospatial_params(coordinates, radius, bbox)
+        if providers_id:
+            providers_id = validate_integer_or_list_integer_params(
+                'providers_id', providers_id
+            )
+        if countries_id:
+            countries_id = validate_integer_or_list_integer_params(
+                'countries_id', countries_id
+            )
+        if parameters_id:
+            parameters_id = validate_integer_or_list_integer_params(
+                'parameters_id', parameters_id
+            )
+        if licenses_id:
+            licenses_id = validate_integer_or_list_integer_params(
+                'licenses_id', licenses_id
+            )
+        if iso:
+            iso = validate_iso_param(iso)
+        if monitor is not None:
+            monitor = validate_monitor(monitor)
+        if mobile is not None:
+            mobile = validate_mobile(mobile)
+        if sort_order:
+            sort_order = validate_sort_order(sort_order)
+        if order_by:
+            order_by = validate_order_by(order_by)
         params = build_query_params(
             page=page,
             limit=limit,
@@ -185,5 +211,6 @@ class Locations(SyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        locations_id = validate_integer_id(locations_id)
         sensors = self._client._get(f"/locations/{locations_id}/sensors")
         return SensorsResponse.read_response(sensors)

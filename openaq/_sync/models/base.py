@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -17,7 +19,7 @@ class SyncResourceBase:
 
     def __init__(
         self,
-        client: "OpenAQ",
+        client: OpenAQ,
     ):
         """Initialize the AsyncResourceBase.
 

@@ -1,5 +1,16 @@
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import ProvidersResponse
+from openaq.shared.types import SortOrder
+from openaq.shared.validators import (
+    validate_geospatial_params,
+    validate_integer_id,
+    validate_integer_or_list_integer_params,
+    validate_iso_param,
+    validate_limit_param,
+    validate_order_by,
+    validate_page_param,
+    validate_sort_order,
+)
 
 from .base import SyncResourceBase
 
@@ -32,6 +43,7 @@ class Providers(SyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        providers_id = validate_integer_id(providers_id)
         provider_response = self._client._get(f"/providers/{providers_id}")
         return ProvidersResponse.read_response(provider_response)
 
@@ -40,48 +52,38 @@ class Providers(SyncResourceBase):
         page: int = 1,
         limit: int = 1000,
         order_by: str | None = None,
-        sort_order: str | None = None,
-        parameters_id: int | None = None,
+        sort_order: SortOrder | None = None,
+        parameters_id: int | list[int] | None = None,
         monitor: bool | None = None,
-        coordinates: tuple | None = None,
+        coordinates: tuple[float, float] | None = None,
         radius: int | None = None,
-        bbox: tuple | None = None,
+        bbox: tuple[float, float, float, float] | None = None,
         iso: str | None = None,
-        countries_id: int | None = None,
+        countries_id: int | list[int] | None = None,
     ) -> ProvidersResponse:
         """List providers based on provided filters.
 
-        Provides the ability to filter the providers resource by the given arguments.
-
-        * `page` - Specifies the page number of results to retrieve
-        * `limit` - Sets the number of results generated per page
-        * `parameters_id` - Filters results by selected parameters ID(s)
-        * `monitor` - Filters results by reference grade monitors (`true`), air sensors (`false`), or both if not used
-        * `radius` - Defines the distance around a given point to filter locations within that circular area. Always use with `coordinates` and not with `bbox`
-        * `coordinates` - Filters locations by coordinates. Must be used with `radius`, cannot be used in combination with `bbox`
-        * `bbox` - Filters locations using a bounding box. Cannot be used with `coordinates` or `radius`
-        * `iso` - Filters results by selected country code
-        * `countries_id` - Filter results by selected countries ID(s)
-        * `order_by` - Determines the fields by which results are sorted; available values are `id`
-        * `sort_order` - Works in tandem with `order_by` to specify the direction: either `asc` (ascending) or `desc` (descending)
-
         Args:
-            page: The page number. Page count is providers found / limit.
-            limit: The number of results returned per page.
+            page: The page number, must be greater than zero. Page count is providers found / limit.
+            limit: The number of results returned per page. Must be between 1 and 1,000.
             parameters_id: Single parameters ID or an array of IDs.
             monitor: Boolean for reference grade monitors (true) or air sensors (false).
-            radius: A distance value in meters to search around the given coordinates value.
+            radius: A distance value in meters to search around the given coordinates value, must be between 1 and 25,000 (25km).
             coordinates: WGS 84 coordinate pair in form latitude, longitude (y,x).
             bbox: Geospatial bounding box of min X, min Y, max X, max Y in WGS 84 coordinates. Limited to four decimals precision.
-            iso:  2 letter ISO 3166-alpha-2 country code.
+            iso: 2 letter ISO 3166-alpha-2 country code.
             countries_id: Single countries ID or an array of IDs.
             order_by: Order by operators for results.
-            sort_order: Sort order (asc/desc).
+            sort_order: Order for sorting results (asc/desc).
+
+        Returns:
+            ProvidersResponse: An instance representing the list of retrieved providers.
 
         Returns:
             ProvidersResponse: An instance representing the list of retrieved providers.
 
         Raises:
+            InvalidParameterError: Client validation error, query parameter is not correct type or value.
             IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
             ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
@@ -97,6 +99,23 @@ class Providers(SyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        page = validate_page_param(page)
+        limit = validate_limit_param(limit)
+        validate_geospatial_params(coordinates, radius, bbox)
+        if countries_id:
+            countries_id = validate_integer_or_list_integer_params(
+                'countries_id', countries_id
+            )
+        if parameters_id:
+            parameters_id = validate_integer_or_list_integer_params(
+                'parameters_id', parameters_id
+            )
+        if iso:
+            iso = validate_iso_param(iso)
+        if sort_order:
+            sort_order = validate_sort_order(sort_order)
+        if order_by:
+            order_by = validate_order_by(order_by)
         params = build_query_params(
             page=page,
             limit=limit,
@@ -110,6 +129,5 @@ class Providers(SyncResourceBase):
             iso=iso,
             countries_id=countries_id,
         )
-
         providers_response = self._client._get("/providers", params=params)
         return ProvidersResponse.read_response(providers_response)
