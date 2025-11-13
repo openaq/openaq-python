@@ -29,7 +29,7 @@ CoordinatesRadius: TypeAlias = tuple[tuple[float, float], int, None]
 BboxOnly: TypeAlias = tuple[None, None, tuple[float, float, float, float]]
 
 
-class OpenAQConfig(TypedDict):
+class OpenAQConfig(TypedDict, total=False):
     """Type definition for .openaq.toml configuration file."""
 
-    api_key: str
+    api_key: str | None
