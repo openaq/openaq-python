@@ -8,6 +8,7 @@ from openaq._sync.models.locations import Locations
 from openaq.shared.exceptions import NotFoundError, InvalidParameterError
 from openaq.shared.responses import MeasurementsResponse, LocationsResponse
 
+
 @pytest.fixture
 def mock_client():
     return Mock()
@@ -23,29 +24,32 @@ def test_sync_resource_base_init():
 def measurements(mock_client):
     return Measurements(mock_client)
 
+
 @pytest.fixture
 def locations(mock_client):
     return Locations(mock_client)
 
-@pytest.mark.parametrize(
-    "parameter,value,description",
-    [
-        ('page', '1','page value invalid type'),
-        ('limit','1000', 'limit value invalid type'),
-        ('limit', 9999, 'limit value out of range'),
-    ]
-)
-def test_locations_list_throws(
-    locations, mock_client, mocker,parameter, value, description
-):
-    mock_response = Mock()
-    LocationsResponse.read_response = Mock(return_value=mock_response)
-    mock_client._get.return_value = mock_response
-    mock_params = {parmater: value}  
-    mocker.patch('openaq.shared.models.build_query_params', return_value=mock_params)
-    with pytest.raises(InvalidParameterError):
-        locations.list(sensors_id=1, data=data, rollup=rollup)
 
+@pytest.mark.parametrize(
+    "parameter,value",
+    [
+        ('page', '1'),
+        ('limit', '1000'),
+        ('limit', 9999),
+    ],
+    ids=[
+        'page value invalid type',
+        'limit value invalid type',
+        'limit value out of range',
+    ],
+)
+def test_locations_list_throws(locations, mock_client, mocker, parameter, value):
+    mock_response = Mock()
+    mocker.patch.object(LocationsResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    mock_params = {parameter: value}
+    with pytest.raises(InvalidParameterError):
+        locations.list(**mock_params)
 
 
 @pytest.mark.parametrize(
@@ -65,7 +69,9 @@ def test_measurements_list_endpoints(
     measurements, mock_client, mocker, data, rollup, expected_endpoint
 ):
     mock_response = Mock()
-    MeasurementsResponse.read_response = Mock(return_value=mock_response)
+    mocker.patch.object(
+        MeasurementsResponse, 'read_response', return_value=mock_response
+    )
     mock_client._get.return_value = mock_response
     mock_params = {'page': 1, 'limit': 1000, 'datetime_from': '2016-10-10'}
     mocker.patch('openaq.shared.models.build_query_params', return_value=mock_params)
@@ -101,5 +107,3 @@ def test_measurements_list_endpoints(
 def test_measurements_list_endpoints_not_founds(measurements, data, rollup):
     with pytest.raises(NotFoundError):
         measurements.list(sensors_id=1, data=data, rollup=rollup)
-
-
