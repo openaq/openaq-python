@@ -149,8 +149,17 @@ def test_locations_get_throws(locations, mock_client, mocker, value):
         ('licenses_id', True),
         ('iso',42),
         ('iso',True),
-        ('iso', 'USA')
-
+        ('iso', 'USA'),
+        ('mobile', 'True'),
+        ('mobile', 1),
+        ('monitor', 'True'),
+        ('monitor', 1),
+        ('sort_order', 'foo'),
+        ('sort_order', 1),
+        ('sort_order', False),
+        ('order_by', 1),
+        ('order_by', False)
+        
     ],
     ids=[
         'page value invalid type',
@@ -178,7 +187,16 @@ def test_locations_get_throws(locations, mock_client, mocker, value):
         'parameters_id invalid type, boolean',
         'iso invalid type integer',
         'iso invalid type boolean',
-        'iso string too many characters'
+        'iso string too many characters',
+        'mobile invalid value string',
+        'mobile invalid value int',
+        'monitor invalue value string',
+        'monitor invalid value int',
+        'sort_order invalid value, unsupported string',
+        'sort_order invalid value int',
+        'sort_order invalid value bool',
+        'order_by invalid value int',
+        'order_by invalid value bool'
     ],
 )
 def test_locations_list_throws(locations, mock_client, mocker, parameter, value):

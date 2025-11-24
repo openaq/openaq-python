@@ -444,7 +444,7 @@ def validate_order_by(order_by: object) -> str:
         InvalidParameterError: If order_by is not a string.
     """
     if not isinstance(order_by, str):
-        message = f"mobile parameter must be a boolean, got: {type(order_by)}"
+        message = f"order by parameter must be a string, got: {type(order_by)}"
         raise InvalidParameterError(message)
     return order_by
 
