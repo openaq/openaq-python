@@ -10,7 +10,7 @@ from openaq._sync.models.parameters import Parameters
 from openaq._sync.models.licenses import Licenses
 from openaq._sync.models.providers import Providers
 from openaq.shared.exceptions import NotFoundError, InvalidParameterError, IdentifierOutOfBoundsError
-from openaq.shared.responses import MeasurementsResponse, LocationsResponse, ProvidersResponse, CountriesResponse, ParametersResponse, LicensesResponse
+from openaq.shared.responses import CountriesResponse, LicensesResponse, MeasurementsResponse, LocationsResponse, ProvidersResponse, CountriesResponse, ParametersResponse, LicensesResponse
 
 
 @pytest.fixture
@@ -146,6 +146,56 @@ def test_parameters_list_throws(parameters, mock_client, mocker, parameter, valu
         "invalid, zero"
     ]
 )
+def test_licenses_get_throws(licenses, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(LicensesResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        licenses.get(value)
+
+
+@pytest.mark.parametrize(
+    "parameter,value",
+    [
+        ('page', '1'),
+        ('limit', '1000'),
+        ('limit', 9999),
+        ('sort_order', 'foo'),
+        ('sort_order', 1),
+        ('sort_order', False),
+        ('order_by', 1),
+        ('order_by', False)
+        
+    ],
+    ids=[
+        'page value invalid type',
+        'limit value invalid type',
+        'limit value out of range',
+        'sort_order invalid value, unsupported string',
+        'sort_order invalid value int',
+        'sort_order invalid value bool',
+        'order_by invalid value int',
+        'order_by invalid value bool'
+    ],
+)
+def test_licenses_list_throws(licenses, mock_client, mocker, parameter, value):
+    mock_response = Mock()
+    mocker.patch.object(LicensesResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    mock_params = {parameter: value}
+    with pytest.raises(InvalidParameterError):
+        licenses.list(**mock_params)
+
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
 def test_countries_get_throws(countries, mock_client, mocker, value):
     mock_response = Mock()
     mocker.patch.object(CountriesResponse, 'read_response', return_value=mock_response)
@@ -153,6 +203,58 @@ def test_countries_get_throws(countries, mock_client, mocker, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         countries.get(value)
 
+
+@pytest.mark.parametrize(
+    "parameter,value",
+    [
+        ('page', '1'),
+        ('limit', '1000'),
+        ('limit', 9999),
+        ('parameters_id', 2**31),
+        ('parameters_id', '999'),
+        ('parameters_id', [1,2,3,'4']),
+        ('parameters_id', [1,2,3, 2**31]),
+        ('parameters_id', True),
+        ('providers_id', 2**31),
+        ('providers_id', '999'),
+        ('providers_id', [1,2,3,'4']),
+        ('providers_id', [1,2,3, 2**31]),
+        ('providers_id', True),
+        ('sort_order', 'foo'),
+        ('sort_order', 1),
+        ('sort_order', False),
+        ('order_by', 1),
+        ('order_by', False)
+        
+    ],
+    ids=[
+        'page value invalid type',
+        'limit value invalid type',
+        'limit value out of range',
+        'parameters_id out of int range',
+        'parameters_id invalid type, string',
+        'parameters_id list contains invalid type, string',
+        'parameters_id list contains int out of range',
+        'parameters_id invalid type, boolean',
+        'providers_id out of int range',
+        'providers_id invalid type, string',
+        'providers_id list contains invalid type, string',
+        'providers_id list contains int out of range',
+        'providers_id invalid type, boolean',
+        'sort_order invalid value, unsupported string',
+        'sort_order invalid value int',
+        'sort_order invalid value bool',
+        'order_by invalid value int',
+        'order_by invalid value bool'
+    ],
+)
+def test_countries_list_throws(countries, mock_client, mocker, parameter, value):
+    mock_response = Mock()
+    mocker.patch.object(CountriesResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    mock_params = {parameter: value}
+    with pytest.raises(InvalidParameterError):
+        countries.list(**mock_params)
 
 @pytest.mark.parametrize(
     "value",
