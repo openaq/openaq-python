@@ -67,6 +67,74 @@ def test_parameters_get_throws(parameters, mock_client, mocker, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         parameters.get(value)
 
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+def test_parameters_latest_throws(parameters, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        parameters.latest(value)
+        
+@pytest.mark.parametrize(
+    "parameter,value",
+    [
+        ('page', '1'),
+        ('limit', '1000'),
+        ('limit', 9999),
+        ('parameter_type', 'invalid'),
+        ('parameter_type', 1),
+        ('iso',42),
+        ('iso',True),
+        ('iso', 'USA'),
+        ('countries_id', 2**31),
+        ('countries_id', '999'),
+        ('countries_id', [1,2,3,'4']),
+        ('countries_id', [1,2,3, 2**31]),
+        ('countries_id', True),
+        ('sort_order', 'foo'),
+        ('sort_order', 1),
+        ('sort_order', False),
+        ('order_by', 1),
+        ('order_by', False)
+        
+    ],
+    ids=[
+        'page value invalid type',
+        'limit value invalid type',
+        'limit value out of range',
+        'parameter_type invalid, not supported string',
+        'parameter_type invalid type int',
+        'iso invalid type integer',
+        'iso invalid type boolean',
+        'iso string too many characters',
+        'countries_id out of int range',
+        'countries_id invalid type, string',
+        'countries_id list contains invalid type, string',
+        'countries_id list contains int out of range',
+        'countries_id invalid type, boolean',
+        'sort_order invalid value, unsupported string',
+        'sort_order invalid value int',
+        'sort_order invalid value bool',
+        'order_by invalid value int',
+        'order_by invalid value bool'
+    ],
+)
+def test_parameters_list_throws(parameters, mock_client, mocker, parameter, value):
+    mock_response = Mock()
+    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    mock_params = {parameter: value}
+    with pytest.raises(InvalidParameterError):
+        parameters.list(**mock_params)
 
 @pytest.mark.parametrize(
     "value",
@@ -103,6 +171,39 @@ def test_providers_get_throws(providers, mock_client, mocker, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         providers.get(value)
 
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+def test_location_sensors_throws(locations, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        locations.sensors(value)
+        
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+def test_location_latest_throws(locations, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        locations.latest(value)
         
 @pytest.mark.parametrize(
     "value",
