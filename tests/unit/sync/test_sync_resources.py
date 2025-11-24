@@ -5,8 +5,12 @@ import pytest
 from openaq._sync.models.base import SyncResourceBase
 from openaq._sync.models.measurements import Measurements
 from openaq._sync.models.locations import Locations
-from openaq.shared.exceptions import NotFoundError, InvalidParameterError
-from openaq.shared.responses import MeasurementsResponse, LocationsResponse
+from openaq._sync.models.countries import Countries
+from openaq._sync.models.parameters import Parameters
+from openaq._sync.models.licenses import Licenses
+from openaq._sync.models.providers import Providers
+from openaq.shared.exceptions import NotFoundError, InvalidParameterError, IdentifierOutOfBoundsError
+from openaq.shared.responses import MeasurementsResponse, LocationsResponse, ProvidersResponse, CountriesResponse, ParametersResponse, LicensesResponse
 
 
 @pytest.fixture
@@ -19,6 +23,22 @@ def test_sync_resource_base_init():
     resource = SyncResourceBase(client=mock_client)
     assert resource._client == mock_client
 
+@pytest.fixture
+def countries(mock_client):
+    return Countries(mock_client)
+
+@pytest.fixture
+def parameters(mock_client):
+    return Parameters(mock_client)
+
+@pytest.fixture
+def providers(mock_client):
+    return Providers(mock_client)
+
+@pytest.fixture
+def licenses(mock_client):
+    return Parameters(mock_client)
+
 
 @pytest.fixture
 def measurements(mock_client):
@@ -30,6 +50,77 @@ def locations(mock_client):
     return Locations(mock_client)
 
 
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+def test_parameters_get_throws(parameters, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        parameters.get(value)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+def test_countries_get_throws(countries, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(CountriesResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        countries.get(value)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+def test_providers_get_throws(providers, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(ProvidersResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        providers.get(value)
+
+        
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+def test_locations_get_throws(locations, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(LocationsResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        locations.get(value)
+        
 @pytest.mark.parametrize(
     "parameter,value",
     [
@@ -59,6 +150,7 @@ def locations(mock_client):
         ('iso',42),
         ('iso',True),
         ('iso', 'USA')
+
     ],
     ids=[
         'page value invalid type',
