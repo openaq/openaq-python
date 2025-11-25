@@ -12,8 +12,9 @@ from openaq._sync.models.providers import Providers
 from openaq._sync.models.instruments import Instruments
 from openaq._sync.models.manufacturers import Manufacturers
 from openaq._sync.models.sensors import Sensors
+from openaq._sync.models.owners import Owners
 from openaq.shared.exceptions import NotFoundError, InvalidParameterError, IdentifierOutOfBoundsError
-from openaq.shared.responses import CountriesResponse, SensorsResponse, ManufacturersResponse, InstrumentsResponse, LicensesResponse, MeasurementsResponse, LocationsResponse, ProvidersResponse, CountriesResponse, ParametersResponse, LicensesResponse
+from openaq.shared.responses import CountriesResponse,OwnersResponse, SensorsResponse, ManufacturersResponse, InstrumentsResponse, LicensesResponse, MeasurementsResponse, LocationsResponse, ProvidersResponse, CountriesResponse, ParametersResponse, LicensesResponse
 
 
 @pytest.fixture
@@ -33,6 +34,10 @@ def countries(mock_client):
 @pytest.fixture
 def instruments(mock_client):
     return Instruments(mock_client)
+
+@pytest.fixture
+def owners(mock_client):
+    return Owners(mock_client)
 
 @pytest.fixture
 def parameters(mock_client):
@@ -306,6 +311,47 @@ def test_manufacturers_list_throws(manufacturers, parameter, value):
     with pytest.raises(InvalidParameterError):
         manufacturers.list(**mock_params)
 
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+def test_owners_get_throws(owners, value):
+    with pytest.raises(IdentifierOutOfBoundsError):
+        owners.get(value)
+
+@pytest.mark.parametrize(
+    "parameter,value",
+    [
+        ('page', '1'),
+        ('limit', '1000'),
+        ('limit', 9999),
+        ('sort_order', 'foo'),
+        ('sort_order', 1),
+        ('sort_order', False),
+        ('order_by', 1),
+        ('order_by', False)
+    ],
+    ids=[
+        'page value invalid type',
+        'limit value invalid type',
+        'limit value out of range',
+        'sort_order invalid value, unsupported string',
+        'sort_order invalid value int',
+        'sort_order invalid value bool',
+        'order_by invalid value int',
+        'order_by invalid value bool'
+    ],
+)
+def test_owners_list_throws(owners, parameter, value):
+    mock_params = {parameter: value}
+    with pytest.raises(InvalidParameterError):
+        owners.list(**mock_params)
         
 @pytest.mark.parametrize(
     "value",
