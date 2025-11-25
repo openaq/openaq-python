@@ -10,8 +10,9 @@ from openaq._sync.models.parameters import Parameters
 from openaq._sync.models.licenses import Licenses
 from openaq._sync.models.providers import Providers
 from openaq._sync.models.instruments import Instruments
+from openaq._sync.models.manufacturers import Manufacturers
 from openaq.shared.exceptions import NotFoundError, InvalidParameterError, IdentifierOutOfBoundsError
-from openaq.shared.responses import CountriesResponse, InstrumentsResponse, LicensesResponse, MeasurementsResponse, LocationsResponse, ProvidersResponse, CountriesResponse, ParametersResponse, LicensesResponse
+from openaq.shared.responses import CountriesResponse, ManufacturersResponse, InstrumentsResponse, LicensesResponse, MeasurementsResponse, LocationsResponse, ProvidersResponse, CountriesResponse, ParametersResponse, LicensesResponse
 
 
 @pytest.fixture
@@ -44,6 +45,9 @@ def providers(mock_client):
 def licenses(mock_client):
     return Parameters(mock_client)
 
+@pytest.fixture
+def manufacturers(mock_client):
+    return Manufacturers(mock_client)
 
 @pytest.fixture
 def measurements(mock_client):
@@ -241,6 +245,76 @@ def test_instruments_list_throws(instruments, mock_client, mocker, parameter, va
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         instruments.list(**mock_params)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+
+
+def test_manufacturers_get_throws(manufacturers, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(ManufacturersResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        manufacturers.get(value)
+
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
+def test_manufacturers_instruments_throws(instruments, mock_client, mocker, value):
+    mock_response = Mock()
+    mocker.patch.object(InstrumentsResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    with pytest.raises(IdentifierOutOfBoundsError):
+        instruments.get(value)
+
+@pytest.mark.parametrize(
+    "parameter,value",
+    [
+        ('page', '1'),
+        ('limit', '1000'),
+        ('limit', 9999),
+        ('sort_order', 'foo'),
+        ('sort_order', 1),
+        ('sort_order', False),
+        ('order_by', 1),
+        ('order_by', False)
+        
+    ],
+    ids=[
+        'page value invalid type',
+        'limit value invalid type',
+        'limit value out of range',
+        'sort_order invalid value, unsupported string',
+        'sort_order invalid value int',
+        'sort_order invalid value bool',
+        'order_by invalid value int',
+        'order_by invalid value bool'
+    ],
+)
+def test_manufacturers_list_throws(manufacturers, mock_client, mocker, parameter, value):
+    mock_response = Mock()
+    mocker.patch.object(ManufacturersResponse, 'read_response', return_value=mock_response)
+    mock_client._get.return_value = mock_response
+    mock_params = {parameter: value}
+    with pytest.raises(InvalidParameterError):
+        manufacturers.list(**mock_params)
+
         
 @pytest.mark.parametrize(
     "value",
