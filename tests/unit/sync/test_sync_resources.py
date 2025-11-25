@@ -11,8 +11,9 @@ from openaq._sync.models.licenses import Licenses
 from openaq._sync.models.providers import Providers
 from openaq._sync.models.instruments import Instruments
 from openaq._sync.models.manufacturers import Manufacturers
+from openaq._sync.models.sensors import Sensors
 from openaq.shared.exceptions import NotFoundError, InvalidParameterError, IdentifierOutOfBoundsError
-from openaq.shared.responses import CountriesResponse, ManufacturersResponse, InstrumentsResponse, LicensesResponse, MeasurementsResponse, LocationsResponse, ProvidersResponse, CountriesResponse, ParametersResponse, LicensesResponse
+from openaq.shared.responses import CountriesResponse, SensorsResponse, ManufacturersResponse, InstrumentsResponse, LicensesResponse, MeasurementsResponse, LocationsResponse, ProvidersResponse, CountriesResponse, ParametersResponse, LicensesResponse
 
 
 @pytest.fixture
@@ -40,6 +41,12 @@ def parameters(mock_client):
 @pytest.fixture
 def providers(mock_client):
     return Providers(mock_client)
+
+
+@pytest.fixture
+def sensors(mock_client):
+    return Sensors(mock_client)
+
 
 @pytest.fixture
 def licenses(mock_client):
@@ -70,9 +77,6 @@ def locations(mock_client):
     ]
 )
 def test_parameters_get_throws(parameters, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         parameters.get(value)
 
@@ -87,9 +91,6 @@ def test_parameters_get_throws(parameters, mock_client, mocker, value):
     ]
 )
 def test_parameters_latest_throws(parameters, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         parameters.latest(value)
         
@@ -138,9 +139,6 @@ def test_parameters_latest_throws(parameters, mock_client, mocker, value):
     ],
 )
 def test_parameters_list_throws(parameters, mock_client, mocker, parameter, value):
-    mock_response = Mock()
-    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         parameters.list(**mock_params)
@@ -156,9 +154,6 @@ def test_parameters_list_throws(parameters, mock_client, mocker, parameter, valu
     ]
 )
 def test_licenses_get_throws(licenses, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(LicensesResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         licenses.get(value)
 
@@ -188,9 +183,6 @@ def test_licenses_get_throws(licenses, mock_client, mocker, value):
     ],
 )
 def test_licenses_list_throws(licenses, mock_client, mocker, parameter, value):
-    mock_response = Mock()
-    mocker.patch.object(LicensesResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         licenses.list(**mock_params)
@@ -207,9 +199,6 @@ def test_licenses_list_throws(licenses, mock_client, mocker, parameter, value):
 )
 
 def test_instruments_get_throws(instruments, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(InstrumentsResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         instruments.get(value)
 
@@ -239,9 +228,6 @@ def test_instruments_get_throws(instruments, mock_client, mocker, value):
     ],
 )
 def test_instruments_list_throws(instruments, mock_client, mocker, parameter, value):
-    mock_response = Mock()
-    mocker.patch.object(InstrumentsResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         instruments.list(**mock_params)
@@ -257,12 +243,23 @@ def test_instruments_list_throws(instruments, mock_client, mocker, parameter, va
         "invalid, zero"
     ]
 )
+def test_sensors_get_throws(sensors, mock_client, mocker, value):
+    with pytest.raises(IdentifierOutOfBoundsError):
+        sensors.get(value)
+        
+@pytest.mark.parametrize(
+    "value",
+    [('42'),( 2**31), (-1),( 0)],
+    ids=[
+        "invalid, number as string",
+        "invalid, out of int32 range",
+        "invalid, negative number",
+        "invalid, zero"
+    ]
+)
 
 
 def test_manufacturers_get_throws(manufacturers, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(ManufacturersResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         manufacturers.get(value)
 
@@ -276,12 +273,9 @@ def test_manufacturers_get_throws(manufacturers, mock_client, mocker, value):
         "invalid, zero"
     ]
 )
-def test_manufacturers_instruments_throws(instruments, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(InstrumentsResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
+def test_manufacturers_instruments_throws(manufacturers, mock_client, mocker, value):
     with pytest.raises(IdentifierOutOfBoundsError):
-        instruments.get(value)
+        manufacturers.instruments(value)
 
 @pytest.mark.parametrize(
     "parameter,value",
@@ -308,9 +302,6 @@ def test_manufacturers_instruments_throws(instruments, mock_client, mocker, valu
     ],
 )
 def test_manufacturers_list_throws(manufacturers, mock_client, mocker, parameter, value):
-    mock_response = Mock()
-    mocker.patch.object(ManufacturersResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         manufacturers.list(**mock_params)
@@ -327,9 +318,6 @@ def test_manufacturers_list_throws(manufacturers, mock_client, mocker, parameter
     ]
 )
 def test_countries_get_throws(countries, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(CountriesResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         countries.get(value)
 
@@ -379,9 +367,6 @@ def test_countries_get_throws(countries, mock_client, mocker, value):
     ],
 )
 def test_countries_list_throws(countries, mock_client, mocker, parameter, value):
-    mock_response = Mock()
-    mocker.patch.object(CountriesResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         countries.list(**mock_params)
@@ -397,9 +382,6 @@ def test_countries_list_throws(countries, mock_client, mocker, parameter, value)
     ]
 )
 def test_providers_get_throws(providers, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(ProvidersResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         providers.get(value)
 
@@ -414,9 +396,6 @@ def test_providers_get_throws(providers, mock_client, mocker, value):
     ]
 )
 def test_location_sensors_throws(locations, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         locations.sensors(value)
         
@@ -431,9 +410,6 @@ def test_location_sensors_throws(locations, mock_client, mocker, value):
     ]
 )
 def test_location_latest_throws(locations, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(ParametersResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         locations.latest(value)
         
@@ -448,9 +424,6 @@ def test_location_latest_throws(locations, mock_client, mocker, value):
     ]
 )
 def test_locations_get_throws(locations, mock_client, mocker, value):
-    mock_response = Mock()
-    mocker.patch.object(LocationsResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     with pytest.raises(IdentifierOutOfBoundsError):
         locations.get(value)
         
@@ -533,9 +506,6 @@ def test_locations_get_throws(locations, mock_client, mocker, value):
     ],
 )
 def test_locations_list_throws(locations, mock_client, mocker, parameter, value):
-    mock_response = Mock()
-    mocker.patch.object(LocationsResponse, 'read_response', return_value=mock_response)
-    mock_client._get.return_value = mock_response
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         locations.list(**mock_params)
