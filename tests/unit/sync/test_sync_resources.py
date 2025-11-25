@@ -55,7 +55,7 @@ def sensors(mock_client):
 
 @pytest.fixture
 def licenses(mock_client):
-    return Parameters(mock_client)
+    return Licenses(mock_client)
 
 @pytest.fixture
 def manufacturers(mock_client):
