@@ -76,7 +76,7 @@ def locations(mock_client):
         "invalid, zero"
     ]
 )
-def test_parameters_get_throws(parameters, mock_client, mocker, value):
+def test_parameters_get_throws(parameters, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         parameters.get(value)
 
@@ -90,7 +90,7 @@ def test_parameters_get_throws(parameters, mock_client, mocker, value):
         "invalid, zero"
     ]
 )
-def test_parameters_latest_throws(parameters, mock_client, mocker, value):
+def test_parameters_latest_throws(parameters, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         parameters.latest(value)
         
@@ -138,7 +138,7 @@ def test_parameters_latest_throws(parameters, mock_client, mocker, value):
         'order_by invalid value bool'
     ],
 )
-def test_parameters_list_throws(parameters, mock_client, mocker, parameter, value):
+def test_parameters_list_throws(parameters, parameter, value):
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         parameters.list(**mock_params)
@@ -153,7 +153,7 @@ def test_parameters_list_throws(parameters, mock_client, mocker, parameter, valu
         "invalid, zero"
     ]
 )
-def test_licenses_get_throws(licenses, mock_client, mocker, value):
+def test_licenses_get_throws(licenses, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         licenses.get(value)
 
@@ -182,7 +182,7 @@ def test_licenses_get_throws(licenses, mock_client, mocker, value):
         'order_by invalid value bool'
     ],
 )
-def test_licenses_list_throws(licenses, mock_client, mocker, parameter, value):
+def test_licenses_list_throws(licenses, parameter, value):
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         licenses.list(**mock_params)
@@ -198,7 +198,7 @@ def test_licenses_list_throws(licenses, mock_client, mocker, parameter, value):
     ]
 )
 
-def test_instruments_get_throws(instruments, mock_client, mocker, value):
+def test_instruments_get_throws(instruments, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         instruments.get(value)
 
@@ -227,7 +227,7 @@ def test_instruments_get_throws(instruments, mock_client, mocker, value):
         'order_by invalid value bool'
     ],
 )
-def test_instruments_list_throws(instruments, mock_client, mocker, parameter, value):
+def test_instruments_list_throws(instruments, parameter, value):
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         instruments.list(**mock_params)
@@ -243,7 +243,7 @@ def test_instruments_list_throws(instruments, mock_client, mocker, parameter, va
         "invalid, zero"
     ]
 )
-def test_sensors_get_throws(sensors, mock_client, mocker, value):
+def test_sensors_get_throws(sensors, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         sensors.get(value)
         
@@ -259,7 +259,7 @@ def test_sensors_get_throws(sensors, mock_client, mocker, value):
 )
 
 
-def test_manufacturers_get_throws(manufacturers, mock_client, mocker, value):
+def test_manufacturers_get_throws(manufacturers, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         manufacturers.get(value)
 
@@ -273,7 +273,7 @@ def test_manufacturers_get_throws(manufacturers, mock_client, mocker, value):
         "invalid, zero"
     ]
 )
-def test_manufacturers_instruments_throws(manufacturers, mock_client, mocker, value):
+def test_manufacturers_instruments_throws(manufacturers, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         manufacturers.instruments(value)
 
@@ -301,7 +301,7 @@ def test_manufacturers_instruments_throws(manufacturers, mock_client, mocker, va
         'order_by invalid value bool'
     ],
 )
-def test_manufacturers_list_throws(manufacturers, mock_client, mocker, parameter, value):
+def test_manufacturers_list_throws(manufacturers, parameter, value):
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         manufacturers.list(**mock_params)
@@ -317,7 +317,7 @@ def test_manufacturers_list_throws(manufacturers, mock_client, mocker, parameter
         "invalid, zero"
     ]
 )
-def test_countries_get_throws(countries, mock_client, mocker, value):
+def test_countries_get_throws(countries, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         countries.get(value)
 
@@ -366,7 +366,7 @@ def test_countries_get_throws(countries, mock_client, mocker, value):
         'order_by invalid value bool'
     ],
 )
-def test_countries_list_throws(countries, mock_client, mocker, parameter, value):
+def test_countries_list_throws(countries, parameter, value):
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         countries.list(**mock_params)
@@ -381,7 +381,7 @@ def test_countries_list_throws(countries, mock_client, mocker, parameter, value)
         "invalid, zero"
     ]
 )
-def test_providers_get_throws(providers, mock_client, mocker, value):
+def test_providers_get_throws(providers, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         providers.get(value)
 
@@ -395,7 +395,7 @@ def test_providers_get_throws(providers, mock_client, mocker, value):
         "invalid, zero"
     ]
 )
-def test_location_sensors_throws(locations, mock_client, mocker, value):
+def test_location_sensors_throws(locations, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         locations.sensors(value)
         
@@ -409,7 +409,7 @@ def test_location_sensors_throws(locations, mock_client, mocker, value):
         "invalid, zero"
     ]
 )
-def test_location_latest_throws(locations, mock_client, mocker, value):
+def test_location_latest_throws(locations, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         locations.latest(value)
         
@@ -423,7 +423,7 @@ def test_location_latest_throws(locations, mock_client, mocker, value):
         "invalid, zero"
     ]
 )
-def test_locations_get_throws(locations, mock_client, mocker, value):
+def test_locations_get_throws(locations, value):
     with pytest.raises(IdentifierOutOfBoundsError):
         locations.get(value)
         
@@ -505,7 +505,7 @@ def test_locations_get_throws(locations, mock_client, mocker, value):
         'order_by invalid value bool'
     ],
 )
-def test_locations_list_throws(locations, mock_client, mocker, parameter, value):
+def test_locations_list_throws(locations, parameter, value):
     mock_params = {parameter: value}
     with pytest.raises(InvalidParameterError):
         locations.list(**mock_params)
