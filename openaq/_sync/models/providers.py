@@ -102,19 +102,19 @@ class Providers(SyncResourceBase):
         page = validate_page_param(page)
         limit = validate_limit_param(limit)
         validate_geospatial_params(coordinates, radius, bbox)
-        if countries_id:
+        if countries_id is not None:
             countries_id = validate_integer_or_list_integer_params(
                 'countries_id', countries_id
             )
-        if parameters_id:
+        if parameters_id is not None:
             parameters_id = validate_integer_or_list_integer_params(
                 'parameters_id', parameters_id
             )
-        if iso:
+        if iso is not None:
             iso = validate_iso_param(iso)
-        if sort_order:
+        if sort_order is not None:
             sort_order = validate_sort_order(sort_order)
-        if order_by:
+        if order_by is not None:
             order_by = validate_order_by(order_by)
         params = build_query_params(
             page=page,

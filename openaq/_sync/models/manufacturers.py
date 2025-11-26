@@ -40,6 +40,7 @@ class Manufacturers(SyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        manufacturers_id = validate_integer_id(manufacturers_id)
         manufacturer_response = self._client._get(f"/manufacturers/{manufacturers_id}")
         return ManufacturersResponse.read_response(manufacturer_response)
 
@@ -80,9 +81,9 @@ class Manufacturers(SyncResourceBase):
         """
         page = validate_page_param(page)
         limit = validate_limit_param(limit)
-        if sort_order:
+        if sort_order is not None:
             sort_order = validate_sort_order(sort_order)
-        if order_by:
+        if order_by is not None:
             order_by = validate_order_by(order_by)
         params = build_query_params(
             page=page, limit=limit, order_by=order_by, sort_order=sort_order

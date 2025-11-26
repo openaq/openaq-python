@@ -140,31 +140,31 @@ class Locations(SyncResourceBase):
         page = validate_page_param(page)
         limit = validate_limit_param(limit)
         validate_geospatial_params(coordinates, radius, bbox)
-        if providers_id:
+        if providers_id is not None:
             providers_id = validate_integer_or_list_integer_params(
                 'providers_id', providers_id
             )
-        if countries_id:
-            countries_id = validate_integer_or_list_integer_params(
+        if countries_id is not None:
+             countries_id = validate_integer_or_list_integer_params(
                 'countries_id', countries_id
             )
-        if parameters_id:
-            parameters_id = validate_integer_or_list_integer_params(
+        if parameters_id is not None:
+             parameters_id = validate_integer_or_list_integer_params(
                 'parameters_id', parameters_id
             )
-        if licenses_id:
+        if licenses_id is not None:
             licenses_id = validate_integer_or_list_integer_params(
                 'licenses_id', licenses_id
             )
-        if iso:
+        if iso is not None:
             iso = validate_iso_param(iso)
         if monitor is not None:
             monitor = validate_monitor(monitor)
         if mobile is not None:
             mobile = validate_mobile(mobile)
-        if sort_order:
+        if sort_order is not None:
             sort_order = validate_sort_order(sort_order)
-        if order_by:
+        if order_by is not None:
             order_by = validate_order_by(order_by)
         params = build_query_params(
             page=page,

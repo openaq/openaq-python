@@ -109,9 +109,9 @@ class Providers(AsyncResourceBase):
             )
         if iso:
             iso = validate_iso_param(iso)
-        if sort_order:
+        if sort_order is not None:
             sort_order = validate_sort_order(sort_order)
-        if order_by:
+        if order_by is not None:
             order_by = validate_order_by(order_by)
         params = build_query_params(
             page=page,
