@@ -607,11 +607,15 @@ def validate_datetime_params(
     """
     if datetime_to:
         if not datetime_check(datetime_from) or not datetime_check(datetime_to):
-            raise Exception()
+            raise InvalidParameterError(
+                f"Invalid datetime_from of datetime_to, must be either datetime type or ISO8601 formatted string, got {type(datetime_from) and type(datetime_to)}"
+            )
         return (to_datetime(datetime_from), to_datetime(datetime_to))
     else:
         if not datetime_check(datetime_from):
-            raise Exception()
+            raise InvalidParameterError(
+                f"Invalid datetime_from, must be either datetime type or ISO8601 formatted string, got {type(datetime_from)}"
+            )
         return (to_datetime(datetime_from), None)
 
 

@@ -1,6 +1,6 @@
 from openaq.shared.exceptions import IdentifierOutOfBoundsError, InvalidParameterError
 from openaq._sync.models.locations import Locations
-from openaq.shared.responses import LocationsResponse
+from openaq.shared.responses import LatestResponse, LocationsResponse
 
 import pytest
 from unittest.mock import Mock
@@ -9,6 +9,104 @@ from unittest.mock import Mock
 @pytest.fixture
 def mock_client():
     return Mock()
+
+
+@pytest.fixture
+def mock_latest_response():
+    response = Mock()
+    response.json.return_value = {
+        "meta": {
+            "name": "openaq-api",
+            "website": "/",
+            "page": 1,
+            "limit": 100,
+            "found": 8,
+        },
+        "results": [
+            {
+                "datetime": {
+                    "utc": "2025-11-26T17:00:00Z",
+                    "local": "2025-11-26T10:00:00-07:00",
+                },
+                "value": 0.013,
+                "coordinates": {"latitude": 35.1353, "longitude": -106.584702},
+                "sensorsId": 3916,
+                "locationsId": 2178,
+            },
+            {
+                "datetime": {
+                    "utc": "2025-11-26T17:00:00Z",
+                    "local": "2025-11-26T10:00:00-07:00",
+                },
+                "value": 0.0003,
+                "coordinates": {"latitude": 35.1353, "longitude": -106.584702},
+                "sensorsId": 3918,
+                "locationsId": 2178,
+            },
+            {
+                "datetime": {
+                    "utc": "2025-11-26T17:00:00Z",
+                    "local": "2025-11-26T10:00:00-07:00",
+                },
+                "value": 3.6,
+                "coordinates": {"latitude": 35.1353, "longitude": -106.584702},
+                "sensorsId": 3920,
+                "locationsId": 2178,
+            },
+            {
+                "datetime": {
+                    "utc": "2025-11-26T17:00:00Z",
+                    "local": "2025-11-26T10:00:00-07:00",
+                },
+                "value": 0.023,
+                "coordinates": {"latitude": 35.1353, "longitude": -106.584702},
+                "sensorsId": 3917,
+                "locationsId": 2178,
+            },
+            {
+                "datetime": {
+                    "utc": "2025-11-26T17:00:00Z",
+                    "local": "2025-11-26T10:00:00-07:00",
+                },
+                "value": 10,
+                "coordinates": {"latitude": 35.1353, "longitude": -106.584702},
+                "sensorsId": 3919,
+                "locationsId": 2178,
+            },
+            {
+                "datetime": {
+                    "utc": "2025-11-26T17:00:00Z",
+                    "local": "2025-11-26T10:00:00-07:00",
+                },
+                "value": 0.1,
+                "coordinates": {"latitude": 35.1353, "longitude": -106.584702},
+                "sensorsId": 25227,
+                "locationsId": 2178,
+            },
+            {
+                "datetime": {
+                    "utc": "2025-09-19T16:00:00Z",
+                    "local": "2025-09-19T10:00:00-06:00",
+                },
+                "value": 0.01,
+                "coordinates": {"latitude": 35.1353, "longitude": -106.584702},
+                "sensorsId": 4272103,
+                "locationsId": 2178,
+            },
+            {
+                "datetime": {
+                    "utc": "2025-09-19T16:00:00Z",
+                    "local": "2025-09-19T10:00:00-06:00",
+                },
+                "value": 0.002,
+                "coordinates": {"latitude": 35.1353, "longitude": -106.584702},
+                "sensorsId": 4272226,
+                "locationsId": 2178,
+            },
+        ],
+    }
+    response.headers = {}
+    return response
 
 
 @pytest.fixture
@@ -157,6 +255,15 @@ class TestLocations:
         mock_client._get.assert_called_once_with("/locations/2178")
         assert isinstance(result, LocationsResponse)
         assert len(result.results) == 1
+
+    def test_latest_calls_client_correctly(
+        self, locations, mock_client, mock_latest_response
+    ):
+        mock_client._get.return_value = mock_latest_response
+        result = locations.latest(2178)
+        mock_client._get.assert_called_once_with("/locations/2178/latest")
+        assert isinstance(result, LatestResponse)
+        assert len(result.results) == 8
 
     def test_list_with_defaults(self, locations, mock_client, mock_list_response):
         mock_client._get.return_value = mock_list_response
