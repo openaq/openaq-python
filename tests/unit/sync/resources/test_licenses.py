@@ -1,6 +1,6 @@
 from openaq.shared.exceptions import IdentifierOutOfBoundsError, InvalidParameterError
-from openaq._sync.models.instruments import Instruments
-from openaq.shared.responses import InstrumentsResponse
+from openaq._sync.models.licenses import Licenses
+from openaq.shared.responses import LicensesResponse
 
 import pytest
 from unittest.mock import Mock
@@ -24,10 +24,14 @@ def mock_single_response():
         },
         "results": [
             {
-                "id": 12,
-                "name": "MA350",
-                "isMonitor": True,
-                "manufacturer": {"id": 5021, "name": "AethLabs"},
+                "id": 41,
+                "name": "CC BY 4.0",
+                "commercialUseAllowed": True,
+                "attributionRequired": True,
+                "shareAlikeRequired": False,
+                "modificationAllowed": True,
+                "redistributionAllowed": True,
+                "sourceUrl": "https://creativecommons.org/licenses/by/4.0/",
             },
         ],
     }
@@ -49,16 +53,24 @@ def mock_list_response():
         },
         "results": [
             {
-                "id": 12,
-                "name": "MA350",
-                "isMonitor": True,
-                "manufacturer": {"id": 5021, "name": "AethLabs"},
+                "id": 38,
+                "name": "CC0 1.0",
+                "commercialUseAllowed": True,
+                "attributionRequired": False,
+                "shareAlikeRequired": False,
+                "modificationAllowed": True,
+                "redistributionAllowed": True,
+                "sourceUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.ca",
             },
             {
-                "id": 13,
-                "name": "AIO 2",
-                "isMonitor": True,
-                "manufacturer": {"id": 5020, "name": "MetOne"},
+                "id": 41,
+                "name": "CC BY 4.0",
+                "commercialUseAllowed": True,
+                "attributionRequired": True,
+                "shareAlikeRequired": False,
+                "modificationAllowed": True,
+                "redistributionAllowed": True,
+                "sourceUrl": "https://creativecommons.org/licenses/by/4.0/",
             },
         ],
     }
@@ -68,33 +80,33 @@ def mock_list_response():
 
 
 @pytest.fixture
-def instruments(mock_client):
-    return Instruments(mock_client)
+def licenses(mock_client):
+    return Licenses(mock_client)
 
 
-class TestInstruments:
+class TestLicenses:
     def test_get_calls_client_correctly(
-        self, instruments, mock_client, mock_single_response
+        self, licenses, mock_client, mock_single_response
     ):
         mock_client._get.return_value = mock_single_response
-        result = instruments.get(12)
-        mock_client._get.assert_called_once_with("/instruments/12")
-        assert isinstance(result, InstrumentsResponse)
+        result = licenses.get(41)
+        mock_client._get.assert_called_once_with("/licenses/41")
+        assert isinstance(result, LicensesResponse)
         assert len(result.results) == 1
 
-    def test_list_with_defaults(self, instruments, mock_client, mock_list_response):
+    def test_list_with_defaults(self, licenses, mock_client, mock_list_response):
         mock_client._get.return_value = mock_list_response
-        result = instruments.list()
+        result = licenses.list()
         params = mock_client._get.call_args[1]["params"]
-        assert mock_client._get.call_args[0][0] == "/instruments"
+        assert mock_client._get.call_args[0][0] == "/licenses"
         assert params["page"] == 1
         assert params["limit"] == 1000
-        assert isinstance(result, InstrumentsResponse)
+        assert isinstance(result, LicensesResponse)
         assert len(result.results) == 2
 
-    def test_list_with_pagination(self, instruments, mock_client, mock_list_response):
+    def test_list_with_pagination(self, licenses, mock_client, mock_list_response):
         mock_client._get.return_value = mock_list_response
-        instruments.list(page=3, limit=50)
+        licenses.list(page=3, limit=50)
         params = mock_client._get.call_args[1]["params"]
         assert params["page"] == 3
         assert params["limit"] == 50
@@ -107,10 +119,10 @@ class TestInstruments:
         ],
     )
     def test_list_with_sorting(
-        self, instruments, mock_client, mock_list_response, sort_order, expected
+        self, licenses, mock_client, mock_list_response, sort_order, expected
     ):
         mock_client._get.return_value = mock_list_response
-        instruments.list(order_by="id", sort_order=sort_order)
+        licenses.list(order_by="id", sort_order=sort_order)
         params = mock_client._get.call_args[1]["params"]
         assert params["order_by"] == "id"
         assert params["sort_order"] == expected
@@ -125,9 +137,9 @@ class TestInstruments:
             "invalid, zero",
         ],
     )
-    def test_instruments_get_throws(self, instruments, value):
+    def test_get_throws(self, licenses, value):
         with pytest.raises(IdentifierOutOfBoundsError):
-            instruments.get(value)
+            licenses.get(value)
 
     @pytest.mark.parametrize(
         "parameter,value",
@@ -152,7 +164,7 @@ class TestInstruments:
             'order_by invalid value bool',
         ],
     )
-    def test_instruments_list_throws(self, instruments, parameter, value):
+    def test_list_throws(self, licenses, parameter, value):
         mock_params = {parameter: value}
         with pytest.raises(InvalidParameterError):
-            instruments.list(**mock_params)
+            licenses.list(**mock_params)
