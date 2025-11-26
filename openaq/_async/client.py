@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import httpx
+
+from types import TracebackType
 from typing import Any, Mapping
 
 from openaq._async.models.countries import Countries
@@ -85,9 +88,11 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
         method: str,
         path: str,
         *,
-        params: Mapping[str, Any] | None = None,
-        headers: Mapping[str, str] | None = None,
-    ):
+        params: (
+            httpx.QueryParams | Mapping[str, str | int | float | bool] | None
+        ) = None,
+        headers: httpx.Headers | Mapping[str, str] | None = None,
+    ) -> httpx.Response:
         self._check_rate_limit()
         request_headers = self.build_request_headers(headers)
         url = self._base_url + path
@@ -100,16 +105,24 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
         self,
         path: str,
         *,
-        params: Mapping[str, str] | None = None,
-        headers: Mapping[str, Any] | None = None,
-    ):
+        params: (
+            httpx.QueryParams | Mapping[str, str | int | float | bool] | None
+        ) = None,
+        headers: httpx.Headers | Mapping[str, str] | None = None,
+    ) -> httpx.Response:
         return await self._do("get", path, params=params, headers=headers)
 
-    async def close(self):
-        await self._transport.close()
+    async def close(self) -> None:
+        """Closes transport connection."""
+        return await self.transport.close()
 
     async def __aenter__(self) -> AsyncOpenAQ:
         return self
 
-    async def __aexit__(self, *_: Any):
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         await self.close()

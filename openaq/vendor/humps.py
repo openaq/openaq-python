@@ -7,13 +7,16 @@ Thanks to Nick Ficano for the original implementation.
 
 import re
 from collections.abc import Mapping
+from typing import Any, Callable
 
-UNDERSCORE_RE = re.compile(r"(?<=[^\-_])[\-_]+[^\-_]")
-ACRONYM_RE = re.compile(r"([A-Z\d]+)(?=[A-Z\d]|$)")
-SPLIT_RE = re.compile(r"([\-_]*(?<=[^0-9])(?=[A-Z])[^A-Z]*[\-_]*)")
+UNDERSCORE_RE: re.Pattern[str] = re.compile(r"(?<=[^\-_])[\-_]+[^\-_]")
+ACRONYM_RE: re.Pattern[str] = re.compile(r"([A-Z\d]+)(?=[A-Z\d]|$)")
+SPLIT_RE: re.Pattern[str] = re.compile(r"([\-_]*(?<=[^0-9])(?=[A-Z])[^A-Z]*[\-_]*)")
 
 
-def camelize(str_or_iter):
+def camelize(
+    str_or_iter: str | list[Any] | dict[str, Any],
+) -> str | list[Any] | dict[str, Any]:
     """Convert a string, dict, or list of dicts to camel case.
 
     :param str_or_iter:
@@ -26,7 +29,7 @@ def camelize(str_or_iter):
     if isinstance(str_or_iter, (list, Mapping)):
         return _process_keys(str_or_iter, camelize)
 
-    s = _is_none(str_or_iter)
+    s: str = _is_none(str_or_iter)
     if s.isupper() or s.isnumeric():
         return str_or_iter
 
@@ -38,7 +41,9 @@ def camelize(str_or_iter):
     return UNDERSCORE_RE.sub(lambda m: m.group(0)[-1].upper(), s)
 
 
-def decamelize(str_or_iter):
+def decamelize(
+    str_or_iter: str | list[Any] | dict[str, Any],
+) -> str | list[Any] | dict[str, Any]:
     """Convert a string, dict, or list of dicts to snake case.
 
     :param str_or_iter:
@@ -51,14 +56,14 @@ def decamelize(str_or_iter):
     if isinstance(str_or_iter, (list, Mapping)):
         return _process_keys(str_or_iter, decamelize)
 
-    s = _is_none(str_or_iter)
+    s: str = _is_none(str_or_iter)
     if s.isupper() or s.isnumeric():
         return str_or_iter
 
     return _separate_words(_fix_abbreviations(s)).lower()
 
 
-def _is_none(_in):
+def _is_none(_in: object) -> str:
     """Determines if the input is None and returns a string with white-space removed.
 
     :param _in: input
@@ -69,7 +74,7 @@ def _is_none(_in):
     return "" if _in is None else re.sub(r"\s+", "", str(_in))
 
 
-def _separate_words(string, separator="_"):
+def _separate_words(string: str, separator: str = "_") -> str:
     """Split words that are separated by case differentiation.
 
     :param string: Original string.
@@ -81,7 +86,9 @@ def _separate_words(string, separator="_"):
     return separator.join(s for s in SPLIT_RE.split(string) if s)
 
 
-def _process_keys(str_or_iter, fn):
+def _process_keys(
+    str_or_iter: list[Any] | Mapping[str, Any] | Any, fn: Callable[[Any], Any]
+) -> list[Any] | dict[str, Any] | Any:
     if isinstance(str_or_iter, list):
         return [_process_keys(k, fn) for k in str_or_iter]
     if isinstance(str_or_iter, Mapping):
@@ -89,7 +96,7 @@ def _process_keys(str_or_iter, fn):
     return str_or_iter
 
 
-def _fix_abbreviations(string):
+def _fix_abbreviations(string: str) -> str:
     """Rewrite incorrectly cased acronyms, initialisms, and abbreviations, allowing them to be decamelized correctly. For example, given the string "APIResponse", this function is responsible for ensuring the output is "api_response" instead of "a_p_i_response".
 
     :param string: A string that may contain an incorrectly cased abbreviation.

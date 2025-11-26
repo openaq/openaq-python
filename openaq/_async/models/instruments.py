@@ -1,7 +1,13 @@
 from openaq.shared.models import build_query_params
 from openaq.shared.responses import InstrumentsResponse
-from openaq.shared.utils import validate_integer_id
-
+from openaq.shared.types import SortOrder
+from openaq.shared.validators import (
+    validate_integer_id,
+    validate_limit_param,
+    validate_order_by,
+    validate_page_param,
+    validate_sort_order,
+)
 from .base import AsyncResourceBase
 
 
@@ -9,10 +15,10 @@ class Instruments(AsyncResourceBase):
     """This provides methods to retrieve instrument data from the OpenAQ API."""
 
     async def get(self, instruments_id: int) -> InstrumentsResponse:
-        """Retrieve specific instrument data by its providers ID.
+        """Retrieve specific instrument data by its instruments ID.
 
         Args:
-            instruments_id: The providers ID of the instrument to retrieve.
+            instruments_id: The instruments ID of the instrument to retrieve.
 
         Returns:
             InstrumentsResponse: An instance representing the retrieved instrument.
@@ -42,27 +48,21 @@ class Instruments(AsyncResourceBase):
         page: int = 1,
         limit: int = 1000,
         order_by: str | None = None,
-        sort_order: str | None = None,
+        sort_order: SortOrder | None = None,
     ) -> InstrumentsResponse:
         """List instruments based on provided filters.
 
-        Provides the ability to filter the instruments resource by the given arguments.
-
-        * `page` - Specifies the page number of results to retrieve.
-        * `limit` - Sets the number of results generated per page
-        * `order_by` - Determines the fields by which results are sorted; available values are `id`
-        * `sort_order` - Works in tandem with `order_by` to specify the direction: either `asc` (ascending) or `desc` (descending)
-
         Args:
-            page: The page number. Page count is instruments found / limit.
-            limit: The number of results returned per page.
+            page: The page number, must be greater than zero. Page count is instruments found / limit.
+            limit: The number of results returned per page. Must be between 1 and 1,000.
             order_by: Order by operators for results.
-            sort_order: Sort order (asc/desc).
+            sort_order: Order for sorting results (asc/desc).
 
         Returns:
             InstrumentsResponse: An instance representing the list of retrieved instruments.
 
         Raises:
+            InvalidParameterError: Client validation error, query parameter is not correct type or value.
             IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
             ApiKeyMissingError: Authentication error, missing API Key credentials.
             BadRequestError: Raised for HTTP 400 error, indicating a client request error.
@@ -78,6 +78,12 @@ class Instruments(AsyncResourceBase):
             ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
+        page = validate_page_param(page)
+        limit = validate_limit_param(limit)
+        if sort_order is not None:
+            sort_order = validate_sort_order(sort_order)
+        if order_by is not None:
+            order_by = validate_order_by(order_by)
         params = build_query_params(
             page=page, limit=limit, order_by=order_by, sort_order=sort_order
         )

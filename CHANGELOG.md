@@ -4,7 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.5.0] - Unreleased
+## [0.6.0] - 2025-11-26
+
+### Added
+
+- Query parameter validation
+- Additional test coverage
+- mypy typing coverage
+- `py.typed` file
+
+## [0.5.0] - 2025-10-31
 
 ### Updated
 
@@ -13,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Additional checks to validate query parameters.
 - Additional checks to prevent out of range identifiers.
 - `TimeoutError` HTTP error exception.
 

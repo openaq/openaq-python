@@ -7,8 +7,11 @@ name = "openaq"
 description = "Official OpenAQ Python SDK."
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = { file = "LICENSE" }
 keywords = []
+maintainers = [
+  { name = "OpenAQ", email = "dev@openaq.org" },
+]
 authors = [
   { name = "Russ Biggs", email = "russ@openaq.org" },
   { name = "Gabe Fosse", email = "gabe@openaq.org" },
@@ -22,18 +25,34 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
+  "Typing :: Typed",
 ]
-dependencies = ["httpx==0.28.1"]
+dependencies = ["httpx>=0.28.1,<1.0"]
 dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://python.openaq.org" 
+Issues = "https://github.com/openaq/openaq-python/issues"
+Source = "https://github.com/openaq/openaq-python"
+Changelog = "https://github.com/openaq/openaq-python/releases"
 
 [project.optional-dependencies]
 all = ["orjson >=3.2.1"]
 
-[project.urls]
-Documentation = "https://github.com/openaq/openaq-python#readme"
-Issues = "https://github.com/openaq/openaq-python/issues"
-Source = "https://github.com/openaq/openaq-python"
+[tool.hatch.build.targets.wheel]
+packages = ["openaq"]
+include = [
+    "openaq/py.typed",
+]
+
+[tool.hatch.build.targets.sdist]
+
+include = [
+    "/openaq",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+]
 
 [tool.hatch.version]
 path = "openaq/__init__.py"
@@ -53,8 +72,6 @@ dependencies = [
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
 
-
-
 [tool.hatch.envs.test.scripts]
 test-unit = 'pytest tests/unit/ -s -vv'
 test-integration = 'pytest tests/integration/ -s -vv'
@@ -66,14 +83,25 @@ python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.hatch.envs.types]
 detached = true
-dependencies = ["mypy"]
+dependencies = ["mypy", "lxml","httpx"]
 
 [[tool.mypy.overrides]]
 module = ["httpx.*", "openaq"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ["orjson"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tomllib"]
+ignore_missing_imports = true
+
 [tool.hatch.envs.types.scripts]
 check = "mypy -p openaq --install-types --non-interactive"
+ci = "mypy -p openaq"
+cov = "mypy -p openaq --exclude 'openaq/vendor/.*' --install-types --html-report mypy-report"
+
 
 [tool.hatch.envs.style]
 detached = true
@@ -111,14 +139,13 @@ exclude_also = [
 [tool.ruff]
 extend-exclude = ["tests"]
 
+[tool.ruff.lint]
 ignore = [
   "E501", # line too long, handled by black
   "D104",
 ]
 select = ["D"]
-
-[tool.ruff.pydocstyle]
-convention = "google"
+pydocstyle.convention = "google"
 
 [tool.black]
 target-version = ['py313']

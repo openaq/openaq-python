@@ -1,5 +1,5 @@
 from openaq.shared.responses import SensorsResponse
-from openaq.shared.utils import validate_integer_id
+from openaq.shared.validators import validate_integer_id
 
 from .base import AsyncResourceBase
 
