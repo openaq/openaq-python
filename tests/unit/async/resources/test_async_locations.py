@@ -1,14 +1,14 @@
 from openaq.shared.exceptions import IdentifierOutOfBoundsError, InvalidParameterError
-from openaq._sync.models.locations import Locations
+from openaq._async.models.locations import Locations
 from openaq.shared.responses import LatestResponse, LocationsResponse, SensorsResponse
 
 import pytest
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 
 @pytest.fixture
 def mock_client():
-    return Mock()
+    return AsyncMock()
 
 
 @pytest.fixture
@@ -317,37 +317,38 @@ def locations(mock_client):
     return Locations(mock_client)
 
 
+@pytest.mark.asyncio
 class TestLocations:
-    def test_get_calls_client_correctly(
+    async def test_get_calls_client_correctly(
         self, locations, mock_client, mock_single_response
     ):
         mock_client._get.return_value = mock_single_response
-        result = locations.get(2178)
+        result = await locations.get(2178)
         mock_client._get.assert_called_once_with("/locations/2178")
         assert isinstance(result, LocationsResponse)
         assert len(result.results) == 1
 
-    def test_latest_calls_client_correctly(
+    async def test_latest_calls_client_correctly(
         self, locations, mock_client, mock_latest_response
     ):
         mock_client._get.return_value = mock_latest_response
-        result = locations.latest(2178)
+        result = await locations.latest(2178)
         mock_client._get.assert_called_once_with("/locations/2178/latest")
         assert isinstance(result, LatestResponse)
         assert len(result.results) == 8
 
-    def test_sensors_calls_client_correctly(
+    async def test_sensors_calls_client_correctly(
         self, locations, mock_client, mock_sensors_response
     ):
         mock_client._get.return_value = mock_sensors_response
-        result = locations.sensors(2178)
+        result = await locations.sensors(2178)
         mock_client._get.assert_called_once_with("/locations/2178/sensors")
         assert isinstance(result, SensorsResponse)
         assert len(result.results) == 1
 
-    def test_list_with_defaults(self, locations, mock_client, mock_list_response):
+    async def test_list_with_defaults(self, locations, mock_client, mock_list_response):
         mock_client._get.return_value = mock_list_response
-        result = locations.list()
+        result = await locations.list()
         params = mock_client._get.call_args[1]["params"]
         assert mock_client._get.call_args[0][0] == "/locations"
         assert params["page"] == 1
@@ -355,9 +356,11 @@ class TestLocations:
         assert isinstance(result, LocationsResponse)
         assert len(result.results) == 1
 
-    def test_list_with_pagination(self, locations, mock_client, mock_list_response):
+    async def test_list_with_pagination(
+        self, locations, mock_client, mock_list_response
+    ):
         mock_client._get.return_value = mock_list_response
-        locations.list(page=3, limit=50)
+        await locations.list(page=3, limit=50)
         params = mock_client._get.call_args[1]["params"]
         assert params["page"] == 3
         assert params["limit"] == 50
@@ -369,11 +372,11 @@ class TestLocations:
             ("desc", "desc"),
         ],
     )
-    def test_list_with_sorting(
+    async def test_list_with_sorting(
         self, locations, mock_client, mock_list_response, sort_order, expected
     ):
         mock_client._get.return_value = mock_list_response
-        locations.list(order_by="id", sort_order=sort_order)
+        await locations.list(order_by="id", sort_order=sort_order)
         params = mock_client._get.call_args[1]["params"]
         assert params["order_by"] == "id"
         assert params["sort_order"] == expected
@@ -388,9 +391,9 @@ class TestLocations:
             "invalid, zero",
         ],
     )
-    def test_location_sensors_throws(self, locations, value):
+    async def test_location_sensors_throws(self, locations, value):
         with pytest.raises(IdentifierOutOfBoundsError):
-            locations.sensors(value)
+            await locations.sensors(value)
 
     @pytest.mark.parametrize(
         "value",
@@ -402,9 +405,9 @@ class TestLocations:
             "invalid, zero",
         ],
     )
-    def test_location_latest_throws(self, locations, value):
+    async def test_location_latest_throws(self, locations, value):
         with pytest.raises(IdentifierOutOfBoundsError):
-            locations.latest(value)
+            await locations.latest(value)
 
     @pytest.mark.parametrize(
         "value",
@@ -416,9 +419,9 @@ class TestLocations:
             "invalid, zero",
         ],
     )
-    def test_locations_get_throws(self, locations, value):
+    async def test_locations_get_throws(self, locations, value):
         with pytest.raises(IdentifierOutOfBoundsError):
-            locations.get(value)
+            await locations.get(value)
 
     @pytest.mark.parametrize(
         "parameter,value",
@@ -497,7 +500,7 @@ class TestLocations:
             'order_by invalid value bool',
         ],
     )
-    def test_locations_list_throws(self, locations, parameter, value):
+    async def test_locations_list_throws(self, locations, parameter, value):
         mock_params = {parameter: value}
         with pytest.raises(InvalidParameterError):
-            locations.list(**mock_params)
+            await locations.list(**mock_params)

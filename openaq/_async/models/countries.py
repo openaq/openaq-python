@@ -85,15 +85,15 @@ class Countries(AsyncResourceBase):
         """
         page = validate_page_param(page)
         limit = validate_limit_param(limit)
-        if sort_order:
+        if sort_order is not None:
             sort_order = validate_sort_order(sort_order)
-        if order_by:
+        if order_by is not None:
             order_by = validate_order_by(order_by)
-        if parameters_id:
+        if parameters_id is not None:
             parameters_id = validate_integer_or_list_integer_params(
                 'parameters_id', parameters_id
             )
-        if providers_id:
+        if providers_id is not None:
             providers_id = validate_integer_or_list_integer_params(
                 'providers_id', providers_id
             )
