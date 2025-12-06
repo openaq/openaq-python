@@ -7,7 +7,7 @@ are used integrating these types of libraries is straightforward.
 
 Because the data returned from the OpenAQ API is highly nested as a deserialized
 Python object we need to flatten the resulting response so that it fits as a
-2-dimensional array in Pandas. Fortunarely, Pandas provides a function to
+2-dimensional array in Pandas. Fortunately, Pandas provides a function to
 facilitate this, `json_normalize`:
 
 === "Sync"
