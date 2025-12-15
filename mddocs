@@ -1,0 +1,5234 @@
+## `openaq`
+
+OpenAQ Python SDK.
+
+**Modules:**
+
+- [**shared**](#openaq.shared) –
+
+**Classes:**
+
+- [**ApiKeyMissingError**](#openaq.ApiKeyMissingError) – Raised when an API key is required but not provided.
+- [**AsyncOpenAQ**](#openaq.AsyncOpenAQ) – OpenAQ asynchronous client.
+- [**BadGatewayError**](#openaq.BadGatewayError) – HTTP 502 - Bad Gateway.
+- [**BadRequestError**](#openaq.BadRequestError) – HTTP 400 - Bad Request.
+- [**ForbiddenError**](#openaq.ForbiddenError) – HTTP 403 - Forbidden.
+- [**GatewayTimeoutError**](#openaq.GatewayTimeoutError) – HTTP 504 - Gateway Timeout.
+- [**HTTPRateLimitError**](#openaq.HTTPRateLimitError) – HTTP 429 - Too Many Requests.
+- [**IdentifierOutOfBoundsError**](#openaq.IdentifierOutOfBoundsError) – Raised when an ID field is outside the valid range [1, 2_147_483_647].
+- [**NotAuthorizedError**](#openaq.NotAuthorizedError) – HTTP 401 - Unauthorized.
+- [**NotFoundError**](#openaq.NotFoundError) – HTTP 404 - Not Found.
+- [**OpenAQ**](#openaq.OpenAQ) – OpenAQ syncronous client.
+- [**RateLimitError**](#openaq.RateLimitError) – Raised when client-side rate limiting is triggered.
+- [**ServerError**](#openaq.ServerError) – HTTP 5xx - Server Error.
+- [**ServiceUnavailableError**](#openaq.ServiceUnavailableError) – HTTP 503 - Service Unavailable.
+- [**TimeoutError**](#openaq.TimeoutError) – HTTP 408 - Request Timeout.
+- [**ValidationError**](#openaq.ValidationError) – HTTP 422 - Unprocessable Entity.
+
+### `openaq.ApiKeyMissingError`
+
+Bases: <code>[OpenAQError](#openaq.shared.exceptions.OpenAQError)</code>
+
+Raised when an API key is required but not provided.
+
+This exception is raised when attempting to access endpoints that require
+authentication but no API key has been configured in the client.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the missing
+  API key requirement.
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client = OpenAQ() # No API key provided
+client.get_protected_resource()
+except ApiKeyMissingError as e:
+print(f"API key required: {e}")
+
+</details>
+
+### `openaq.AsyncOpenAQ`
+
+```python
+AsyncOpenAQ(api_key=None, headers={}, base_url=DEFAULT_BASE_URL, transport=AsyncTransport())
+```
+
+Bases: <code>[BaseClient](#openaq.shared.client.BaseClient)\[[AsyncTransport](#openaq._async.transport.AsyncTransport)\]</code>
+
+OpenAQ asynchronous client.
+
+**Parameters:**
+
+- **api_key** (<code>[str](#str) | None</code>) – The API key for accessing the service.
+- **headers** (<code>[Mapping](#typing.Mapping)\[[str](#str), [str](#str)\]</code>) – Additional headers to be sent with the request.
+- **base_url** (<code>[str](#str)</code>) – The base URL for the API endpoint.
+
+<details class="note" open markdown="1">
+<summary>Note</summary>
+
+An API key can either be passed directly to the OpenAQ client class at
+instantiation or can be accessed from a system environment variable
+name `OPENAQ-API-KEY`. An API key added at instantiation will always
+override one set in the environment variable.
+
+</details>
+
+<details class="warning" open markdown="1">
+<summary>Warning</summary>
+
+Although the `api_key` parameter is not required for instantiating the
+OpenAQ client, an API Key is required for using the OpenAQ API.
+
+</details>
+
+**Raises:**
+
+- <code>[IdentifierOutOfBoundsError](#openaq.shared.exceptions.IdentifierOutOfBoundsError)</code> – Client validation error, identifier outside support int32 range.
+- <code>[ApiKeyMissingError](#openaq.shared.exceptions.ApiKeyMissingError)</code> – Authentication error, missing API Key credentials.
+- <code>[BadRequestError](#openaq.shared.exceptions.BadRequestError)</code> – Raised for HTTP 400 error, indicating a client request error.
+- <code>[NotAuthorizedError](#openaq.shared.exceptions.NotAuthorizedError)</code> – Raised for HTTP 401 error, indicating the client is not authorized.
+- <code>[ForbiddenError](#openaq.shared.exceptions.ForbiddenError)</code> – Raised for HTTP 403 error, indicating the request is forbidden.
+- <code>[NotFoundError](#openaq.shared.exceptions.NotFoundError)</code> – Raised for HTTP 404 error, indicating a resource is not found.
+- <code>[TimeoutError](#openaq.shared.exceptions.TimeoutError)</code> – Raised for HTTP 408 error, indicating the request has timed out.
+- <code>[ValidationError](#openaq.shared.exceptions.ValidationError)</code> – Raised for HTTP 422 error, indicating invalid request parameters.
+- <code>[RateLimitError](#openaq.shared.exceptions.RateLimitError)</code> – Raised when managed client exceeds rate limit.
+- <code>[HTTPRateLimitError](#openaq.shared.exceptions.HTTPRateLimitError)</code> – Raised for HTTP 429 error, indicating rate limit exceeded.
+- <code>[ServerError](#openaq.shared.exceptions.ServerError)</code> – Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+- <code>[BadGatewayError](#openaq.shared.exceptions.BadGatewayError)</code> – Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+- <code>[ServiceUnavailableError](#openaq.shared.exceptions.ServiceUnavailableError)</code> – Raised for HTTP 503, indicating that the server is not ready to handle the request.
+- <code>[GatewayTimeoutError](#openaq.shared.exceptions.GatewayTimeoutError)</code> – Raised for HTTP 504 error, indicating a gateway timeout.
+
+**Functions:**
+
+- [**build_request_headers**](#openaq.AsyncOpenAQ.build_request_headers) – Copies and updates headers based on input.
+- [**close**](#openaq.AsyncOpenAQ.close) – Closes transport connection.
+- [**resolve_headers**](#openaq.AsyncOpenAQ.resolve_headers) – Resolves and updates the HTTP headers with the given API key and User Agent.
+
+**Attributes:**
+
+- [**api_key**](#openaq.AsyncOpenAQ.api_key) (<code>[str](#str) | None</code>) – Accessor for private \_api_key field.
+- [**base_url**](#openaq.AsyncOpenAQ.base_url) (<code>[str](#str)</code>) – Accessor for private \_base_url field.
+- [**countries**](#openaq.AsyncOpenAQ.countries) –
+- [**headers**](#openaq.AsyncOpenAQ.headers) (<code>[Headers](#httpx.Headers)</code>) – Accessor for private \_headers field.
+- [**instruments**](#openaq.AsyncOpenAQ.instruments) –
+- [**licenses**](#openaq.AsyncOpenAQ.licenses) –
+- [**locations**](#openaq.AsyncOpenAQ.locations) –
+- [**manufacturers**](#openaq.AsyncOpenAQ.manufacturers) –
+- [**measurements**](#openaq.AsyncOpenAQ.measurements) –
+- [**owners**](#openaq.AsyncOpenAQ.owners) –
+- [**parameters**](#openaq.AsyncOpenAQ.parameters) –
+- [**providers**](#openaq.AsyncOpenAQ.providers) –
+- [**sensors**](#openaq.AsyncOpenAQ.sensors) –
+- [**transport**](#openaq.AsyncOpenAQ.transport) (<code>[AsyncTransport](#openaq._async.transport.AsyncTransport)</code>) –
+
+#### `openaq.AsyncOpenAQ.api_key`
+
+```python
+api_key: str | None
+```
+
+Accessor for private \_api_key field.
+
+**Returns:**
+
+- <code>[str](#str) | None</code> – The API key string.
+
+#### `openaq.AsyncOpenAQ.base_url`
+
+```python
+base_url: str
+```
+
+Accessor for private \_base_url field.
+
+**Returns:**
+
+- <code>[str](#str)</code> – base URL string value
+
+#### `openaq.AsyncOpenAQ.build_request_headers`
+
+```python
+build_request_headers(headers=None)
+```
+
+Copies and updates headers based on input.
+
+**Parameters:**
+
+- **headers** (<code>[Mapping](#typing.Mapping)\[[str](#str), [str](#str)\] | None</code>) – The headers to add to the request.
+
+**Returns:**
+
+- <code>[Headers](#httpx.Headers)</code> – A mapping of headers for the request
+
+#### `openaq.AsyncOpenAQ.close`
+
+```python
+close()
+```
+
+Closes transport connection.
+
+#### `openaq.AsyncOpenAQ.countries`
+
+```python
+countries = Countries(self)
+```
+
+#### `openaq.AsyncOpenAQ.headers`
+
+```python
+headers: httpx.Headers
+```
+
+Accessor for private \_headers field.
+
+**Returns:**
+
+- <code>[Headers](#httpx.Headers)</code> – dictionary of http headers to be sent with request
+
+#### `openaq.AsyncOpenAQ.instruments`
+
+```python
+instruments = Instruments(self)
+```
+
+#### `openaq.AsyncOpenAQ.licenses`
+
+```python
+licenses = Licenses(self)
+```
+
+#### `openaq.AsyncOpenAQ.locations`
+
+```python
+locations = Locations(self)
+```
+
+#### `openaq.AsyncOpenAQ.manufacturers`
+
+```python
+manufacturers = Manufacturers(self)
+```
+
+#### `openaq.AsyncOpenAQ.measurements`
+
+```python
+measurements = Measurements(self)
+```
+
+#### `openaq.AsyncOpenAQ.owners`
+
+```python
+owners = Owners(self)
+```
+
+#### `openaq.AsyncOpenAQ.parameters`
+
+```python
+parameters = Parameters(self)
+```
+
+#### `openaq.AsyncOpenAQ.providers`
+
+```python
+providers = Providers(self)
+```
+
+#### `openaq.AsyncOpenAQ.resolve_headers`
+
+```python
+resolve_headers()
+```
+
+Resolves and updates the HTTP headers with the given API key and User Agent.
+
+**Parameters:**
+
+- **headers** – The initial headers.
+- **api_key** – The OpenAQ API key to be added as X-API-Key header.
+- **user_agent** – The User-Agent header to be added.
+
+**Returns:**
+
+- <code>None</code> – Updated headers with the added API key and User Agent.
+
+#### `openaq.AsyncOpenAQ.sensors`
+
+```python
+sensors = Sensors(self)
+```
+
+#### `openaq.AsyncOpenAQ.transport`
+
+```python
+transport: AsyncTransport
+```
+
+### `openaq.BadGatewayError`
+
+Bases: <code>[ServerError](#openaq.shared.exceptions.ServerError)</code>
+
+HTTP 502 - Bad Gateway.
+
+Raised when the API returns a 502 status code, indicating that the gateway
+or proxy received an invalid response from an upstream server.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the bad gateway
+  error.
+
+**Attributes:**
+
+- [**status_code**](#openaq.BadGatewayError.status_code) (<code>[int](#int)</code>) – HTTP status code (502).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_measurements()
+except BadGatewayError as e:
+print(f"Bad gateway: {e}")
+
+</details>
+
+#### `openaq.BadGatewayError.status_code`
+
+```python
+status_code: Literal[502] = 502
+```
+
+### `openaq.BadRequestError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 400 - Bad Request.
+
+Raised when the API returns a 400 status code, indicating that the request
+was malformed or contains invalid syntax.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the bad request.
+
+**Attributes:**
+
+- [**status_code**](#openaq.BadRequestError.status_code) (<code>[int](#int)</code>) – HTTP status code (400).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_locations(invalid_param="bad_value")
+except BadRequestError as e:
+print(f"Bad request: {e}")
+
+</details>
+
+#### `openaq.BadRequestError.status_code`
+
+```python
+status_code: int = 400
+```
+
+### `openaq.ForbiddenError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 403 - Forbidden.
+
+Raised when the API returns a 403 status code, indicating that the client
+is authenticated but does not have permission to access the requested resource.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing why access
+  was forbidden.
+
+**Attributes:**
+
+- [**status_code**](#openaq.ForbiddenError.status_code) (<code>[int](#int)</code>) – HTTP status code (403).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.delete_resource(resource_id=123)
+except ForbiddenError as e:
+print(f"Access denied: {e}")
+
+</details>
+
+#### `openaq.ForbiddenError.status_code`
+
+```python
+status_code: Literal[403] = 403
+```
+
+### `openaq.GatewayTimeoutError`
+
+Bases: <code>[ServerError](#openaq.shared.exceptions.ServerError)</code>
+
+HTTP 504 - Gateway Timeout.
+
+Raised when the API returns a 504 status code, indicating that the gateway
+or proxy timed out while waiting for a response from an upstream server.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the gateway
+  timeout.
+
+**Attributes:**
+
+- [**status_code**](#openaq.GatewayTimeoutError.status_code) (<code>[int](#int)</code>) – HTTP status code (504).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_measurements()
+except GatewayTimeoutError as e:
+print(f"Gateway timeout: {e}")
+
+</details>
+
+#### `openaq.GatewayTimeoutError.status_code`
+
+```python
+status_code: Literal[504] = 504
+```
+
+### `openaq.HTTPRateLimitError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 429 - Too Many Requests.
+
+Raised when the API returns a 429 status code, indicating that the client
+has exceeded the server-side rate limits.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the rate limit
+  error.
+
+**Attributes:**
+
+- [**status_code**](#openaq.HTTPRateLimitError.status_code) (<code>[int](#int)</code>) – HTTP status code (429).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+for i in range(10000):
+client.get_locations()
+except HTTPRateLimitError as e:
+print(f"API rate limit exceeded: {e}")
+
+</details>
+
+#### `openaq.HTTPRateLimitError.status_code`
+
+```python
+status_code: Literal[429] = 429
+```
+
+### `openaq.IdentifierOutOfBoundsError`
+
+Bases: <code>[ClientValidationError](#openaq.shared.exceptions.ClientValidationError)</code>
+
+Raised when an ID field is outside the valid range [1, 2_147_483_647].
+
+This exception is raised when a user provides an identifier (such as a
+location_id, parameter_id, etc.) that falls outside the acceptable range
+defined by the API constraints.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing which identifier
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_location(location_id=3_000_000_000)
+except IdentifierOutOfBoundsError as e:
+print(f"ID out of bounds: {e}")
+
+</details>
+
+### `openaq.NotAuthorizedError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 401 - Unauthorized.
+
+Raised when the API returns a 401 status code, indicating that authentication
+is required or the provided credentials are invalid.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the authorization
+  failure.
+
+**Attributes:**
+
+- [**status_code**](#openaq.NotAuthorizedError.status_code) (<code>[int](#int)</code>) – HTTP status code (401).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client = OpenAQ(api_key="invalid_key")
+client.get_measurements()
+except NotAuthorizedError as e:
+print(f"Authentication failed: {e}")
+
+</details>
+
+#### `openaq.NotAuthorizedError.status_code`
+
+```python
+status_code: Literal[401] = 401
+```
+
+### `openaq.NotFoundError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 404 - Not Found.
+
+Raised when the API returns a 404 status code, indicating that the requested
+resource does not exist.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing which resource
+  was not found.
+
+**Attributes:**
+
+- [**status_code**](#openaq.NotFoundError.status_code) (<code>[int](#int)</code>) – HTTP status code (404).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_location(location_id=999999)
+except NotFoundError as e:
+print(f"Resource not found: {e}")
+
+</details>
+
+#### `openaq.NotFoundError.status_code`
+
+```python
+status_code: Literal[404] = 404
+```
+
+### `openaq.OpenAQ`
+
+```python
+OpenAQ(api_key=None, headers={}, base_url=DEFAULT_BASE_URL, _transport=Transport())
+```
+
+Bases: <code>[BaseClient](#openaq.shared.client.BaseClient)\[[Transport](#openaq._sync.transport.Transport)\]</code>
+
+OpenAQ syncronous client.
+
+**Parameters:**
+
+- **api_key** (<code>[str](#str) | None</code>) – The API key for accessing the service.
+- **headers** (<code>[Mapping](#typing.Mapping)\[[str](#str), [str](#str)\]</code>) – Additional headers to be sent with the request.
+- **base_url** (<code>[str](#str)</code>) – The base URL for the API endpoint.
+
+<details class="note" open markdown="1">
+<summary>Note</summary>
+
+An API key can either be passed directly to the OpenAQ client class at
+instantiation or can be accessed from a system environment variable
+name `OPENAQ-API-KEY`. An API key added at instantiation will always
+override one set in the environment variable.
+
+</details>
+
+<details class="warning" open markdown="1">
+<summary>Warning</summary>
+
+Although the `api_key` parameter is not required for instantiating the
+OpenAQ client, an API Key is required for using the OpenAQ API.
+
+</details>
+
+**Raises:**
+
+- <code>[IdentifierOutOfBoundsError](#openaq.shared.exceptions.IdentifierOutOfBoundsError)</code> – Client validation error, identifier outside support int32 range.
+- <code>[ApiKeyMissingError](#openaq.shared.exceptions.ApiKeyMissingError)</code> – Authentication error, missing API Key credentials.
+- <code>[BadRequestError](#openaq.shared.exceptions.BadRequestError)</code> – Raised for HTTP 400 error, indicating a client request error.
+- <code>[NotAuthorizedError](#openaq.shared.exceptions.NotAuthorizedError)</code> – Raised for HTTP 401 error, indicating the client is not authorized.
+- <code>[ForbiddenError](#openaq.shared.exceptions.ForbiddenError)</code> – Raised for HTTP 403 error, indicating the request is forbidden.
+- <code>[NotFoundError](#openaq.shared.exceptions.NotFoundError)</code> – Raised for HTTP 404 error, indicating a resource is not found.
+- <code>[TimeoutError](#openaq.shared.exceptions.TimeoutError)</code> – Raised for HTTP 408 error, indicating the request has timed out.
+- <code>[ValidationError](#openaq.shared.exceptions.ValidationError)</code> – Raised for HTTP 422 error, indicating invalid request parameters.
+- <code>[RateLimitError](#openaq.shared.exceptions.RateLimitError)</code> – Raised when managed client exceeds rate limit.
+- <code>[HTTPRateLimitError](#openaq.shared.exceptions.HTTPRateLimitError)</code> – Raised for HTTP 429 error, indicating rate limit exceeded.
+- <code>[ServerError](#openaq.shared.exceptions.ServerError)</code> – Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+- <code>[BadGatewayError](#openaq.shared.exceptions.BadGatewayError)</code> – Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+- <code>[ServiceUnavailableError](#openaq.shared.exceptions.ServiceUnavailableError)</code> – Raised for HTTP 503, indicating that the server is not ready to handle the request.
+- <code>[GatewayTimeoutError](#openaq.shared.exceptions.GatewayTimeoutError)</code> – Raised for HTTP 504 error, indicating a gateway timeout.
+
+**Functions:**
+
+- [**build_request_headers**](#openaq.OpenAQ.build_request_headers) – Copies and updates headers based on input.
+- [**close**](#openaq.OpenAQ.close) – Closes transport connection.
+- [**resolve_headers**](#openaq.OpenAQ.resolve_headers) – Resolves and updates the HTTP headers with the given API key and User Agent.
+
+**Attributes:**
+
+- [**api_key**](#openaq.OpenAQ.api_key) (<code>[str](#str) | None</code>) – Accessor for private \_api_key field.
+- [**base_url**](#openaq.OpenAQ.base_url) (<code>[str](#str)</code>) – Accessor for private \_base_url field.
+- [**countries**](#openaq.OpenAQ.countries) –
+- [**headers**](#openaq.OpenAQ.headers) (<code>[Headers](#httpx.Headers)</code>) – Accessor for private \_headers field.
+- [**instruments**](#openaq.OpenAQ.instruments) –
+- [**licenses**](#openaq.OpenAQ.licenses) –
+- [**locations**](#openaq.OpenAQ.locations) –
+- [**manufacturers**](#openaq.OpenAQ.manufacturers) –
+- [**measurements**](#openaq.OpenAQ.measurements) –
+- [**owners**](#openaq.OpenAQ.owners) –
+- [**parameters**](#openaq.OpenAQ.parameters) –
+- [**providers**](#openaq.OpenAQ.providers) –
+- [**sensors**](#openaq.OpenAQ.sensors) –
+- [**transport**](#openaq.OpenAQ.transport) (<code>[TTransport](#openaq.shared.client.TTransport)</code>) – Get the transport mechanism used by the client.
+
+#### `openaq.OpenAQ.api_key`
+
+```python
+api_key: str | None
+```
+
+Accessor for private \_api_key field.
+
+**Returns:**
+
+- <code>[str](#str) | None</code> – The API key string.
+
+#### `openaq.OpenAQ.base_url`
+
+```python
+base_url: str
+```
+
+Accessor for private \_base_url field.
+
+**Returns:**
+
+- <code>[str](#str)</code> – base URL string value
+
+#### `openaq.OpenAQ.build_request_headers`
+
+```python
+build_request_headers(headers=None)
+```
+
+Copies and updates headers based on input.
+
+**Parameters:**
+
+- **headers** (<code>[Mapping](#typing.Mapping)\[[str](#str), [str](#str)\] | None</code>) – The headers to add to the request.
+
+**Returns:**
+
+- <code>[Headers](#httpx.Headers)</code> – A mapping of headers for the request
+
+#### `openaq.OpenAQ.close`
+
+```python
+close()
+```
+
+Closes transport connection.
+
+#### `openaq.OpenAQ.countries`
+
+```python
+countries = Countries(self)
+```
+
+#### `openaq.OpenAQ.headers`
+
+```python
+headers: httpx.Headers
+```
+
+Accessor for private \_headers field.
+
+**Returns:**
+
+- <code>[Headers](#httpx.Headers)</code> – dictionary of http headers to be sent with request
+
+#### `openaq.OpenAQ.instruments`
+
+```python
+instruments = Instruments(self)
+```
+
+#### `openaq.OpenAQ.licenses`
+
+```python
+licenses = Licenses(self)
+```
+
+#### `openaq.OpenAQ.locations`
+
+```python
+locations = Locations(self)
+```
+
+#### `openaq.OpenAQ.manufacturers`
+
+```python
+manufacturers = Manufacturers(self)
+```
+
+#### `openaq.OpenAQ.measurements`
+
+```python
+measurements = Measurements(self)
+```
+
+#### `openaq.OpenAQ.owners`
+
+```python
+owners = Owners(self)
+```
+
+#### `openaq.OpenAQ.parameters`
+
+```python
+parameters = Parameters(self)
+```
+
+#### `openaq.OpenAQ.providers`
+
+```python
+providers = Providers(self)
+```
+
+#### `openaq.OpenAQ.resolve_headers`
+
+```python
+resolve_headers()
+```
+
+Resolves and updates the HTTP headers with the given API key and User Agent.
+
+**Parameters:**
+
+- **headers** – The initial headers.
+- **api_key** – The OpenAQ API key to be added as X-API-Key header.
+- **user_agent** – The User-Agent header to be added.
+
+**Returns:**
+
+- <code>None</code> – Updated headers with the added API key and User Agent.
+
+#### `openaq.OpenAQ.sensors`
+
+```python
+sensors = Sensors(self)
+```
+
+#### `openaq.OpenAQ.transport`
+
+```python
+transport: TTransport
+```
+
+Get the transport mechanism used by the client.
+
+Provides access to the transport instance that the client uses to
+communicate with the OpenAQ API.
+
+**Returns:**
+
+- <code>[TTransport](#openaq.shared.client.TTransport)</code> – The transport instance.
+
+### `openaq.RateLimitError`
+
+Bases: <code>[OpenAQError](#openaq.shared.exceptions.OpenAQError)</code>
+
+Raised when client-side rate limiting is triggered.
+
+This exception is raised by the SDK's internal rate limiting mechanism
+before making a request that would exceed configured rate limits. This is
+separate from HTTPRateLimitError, which indicates server-side rate limiting.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the rate limit
+  that was exceeded.
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+for i in range(1000):
+client.get_locations()
+except RateLimitError as e:
+print(f"Rate limit exceeded: {e}")
+
+</details>
+
+### `openaq.ServerError`
+
+Bases: <code>[APIError](#openaq.shared.exceptions.APIError)</code>
+
+HTTP 5xx - Server Error.
+
+Base class for all HTTP 5xx server error responses. Raised when the API
+encounters an internal error or is unable to process the request due to
+server-side issues.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the server error.
+
+**Attributes:**
+
+- [**status_code**](#openaq.ServerError.status_code) (<code>[int](#int)</code>) – HTTP status code (500 or specific 5xx code).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_locations()
+except ServerError as e:
+print(f"Server error: {e}")
+
+</details>
+
+#### `openaq.ServerError.status_code`
+
+```python
+status_code: int = 500
+```
+
+### `openaq.ServiceUnavailableError`
+
+Bases: <code>[ServerError](#openaq.shared.exceptions.ServerError)</code>
+
+HTTP 503 - Service Unavailable.
+
+Raised when the API returns a 503 status code, indicating that the server
+is temporarily unable to handle the request, typically due to maintenance
+or overload.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing why the service
+  is unavailable.
+
+**Attributes:**
+
+- [**status_code**](#openaq.ServiceUnavailableError.status_code) (<code>[int](#int)</code>) – HTTP status code (503).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_locations()
+except ServiceUnavailableError as e:
+print(f"Service unavailable, try again later: {e}")
+
+</details>
+
+#### `openaq.ServiceUnavailableError.status_code`
+
+```python
+status_code: Literal[503] = 503
+```
+
+### `openaq.TimeoutError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 408 - Request Timeout.
+
+Raised when the API returns a 408 status code, indicating that the server
+timed out waiting for the request to complete.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the timeout.
+
+**Attributes:**
+
+- [**status_code**](#openaq.TimeoutError.status_code) (<code>[int](#int)</code>) – HTTP status code (408).
+
+<details class="note" open markdown="1">
+<summary>Note</summary>
+
+This is different from network-level timeouts, which may raise different
+exceptions depending on the HTTP client library used.
+
+</details>
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_measurements(date_from="2000-01-01", date_to="2024-12-31")
+except TimeoutError as e:
+print(f"Request timed out: {e}")
+
+</details>
+
+#### `openaq.TimeoutError.status_code`
+
+```python
+status_code: Literal[408] = 408
+```
+
+### `openaq.ValidationError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 422 - Unprocessable Entity.
+
+Raised when the API returns a 422 status code, indicating that the request
+was well-formed but contains semantic errors or invalid parameter combinations.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the validation
+  error.
+
+**Attributes:**
+
+- [**status_code**](#openaq.ValidationError.status_code) (<code>[int](#int)</code>) – HTTP status code (422).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_measurements(date_from="2024-01-01", date_to="2023-01-01")
+except ValidationError as e:
+print(f"Validation error: {e}")
+
+</details>
+
+#### `openaq.ValidationError.status_code`
+
+```python
+status_code: Literal[422] = 422
+```
+
+### `openaq.shared`
+
+**Modules:**
+
+- [**client**](#openaq.shared.client) – Base class and utilities to for shared client code.
+- [**constants**](#openaq.shared.constants) – Shared constant values.
+- [**exceptions**](#openaq.shared.exceptions) – Custom exceptions to catch various errors.
+- [**models**](#openaq.shared.models) – Shared utility functions for working with query parameter models.
+- [**responses**](#openaq.shared.responses) – Response models to represent the resources returned from the OpenAQ API.
+- [**transport**](#openaq.shared.transport) – Base class and utlity functions for working with client transport.
+- [**types**](#openaq.shared.types) – Shared custom types.
+- [**validators**](#openaq.shared.validators) – Validator functions for type checking and runtime validation.
+
+#### `openaq.shared.client`
+
+Base class and utilities to for shared client code.
+
+**Classes:**
+
+- [**BaseClient**](#openaq.shared.client.BaseClient) – Abstract class for OpenAQ clients.
+
+**Attributes:**
+
+- [**ACCEPT_HEADER**](#openaq.shared.client.ACCEPT_HEADER) –
+- [**DEFAULT_BASE_URL**](#openaq.shared.client.DEFAULT_BASE_URL) –
+- [**DEFAULT_USER_AGENT**](#openaq.shared.client.DEFAULT_USER_AGENT) –
+- [**TTransport**](#openaq.shared.client.TTransport) –
+- [**logger**](#openaq.shared.client.logger) –
+
+##### `openaq.shared.client.ACCEPT_HEADER`
+
+```python
+ACCEPT_HEADER = 'application/json'
+```
+
+##### `openaq.shared.client.BaseClient`
+
+```python
+BaseClient(transport, headers={}, api_key=None, base_url='https://api.openaq.org/v3/')
+```
+
+Bases: <code>[ABC](#abc.ABC)</code>, <code>[Generic](#typing.Generic)\[[TTransport](#openaq.shared.client.TTransport)\]</code>
+
+Abstract class for OpenAQ clients.
+
+This class provides the basic structure and attributes for OpenAQ clients. It includes methods to
+interact with the OpenAQ API and handle HTTP headers.
+
+**Attributes:**
+
+- [**\_headers**](#openaq.shared.client.BaseClient._headers) (<code>[Headers](#httpx.Headers)</code>) – The HTTP headers to include in requests.
+- [**\_transport**](#openaq.shared.client.BaseClient._transport) (<code>[TTransport](#openaq.shared.client.TTransport)</code>) – The transport instance to make requests.
+- [**\_api_key**](#openaq.shared.client.BaseClient._api_key) (<code>[str](#str) | None</code>) – API key
+- [**\_user_agent**](#openaq.shared.client.BaseClient._user_agent) (<code>[str](#str)</code>) – User-Agent HTTP header
+- [**\_base_url**](#openaq.shared.client.BaseClient._base_url) (<code>[str](#str)</code>) – The base URL of the OpenAQ API.
+
+**Parameters:**
+
+- **transport** (<code>[TTransport](#openaq.shared.client.TTransport)</code>) – The transport mechanism used for making requests to the OpenAQ API.
+- **headers** (<code>[Mapping](#typing.Mapping)\[[str](#str), [str](#str)\]</code>) – mapping of HTTP headers to be sent with request.
+- **api_key** (<code>[str](#str) | None</code>) – OpenAQ API key string.
+- **user_agent** – User-Agent header value to be sent with HTTP requests.
+- **base_url** (<code>[str](#str)</code>) – The base URL for the OpenAQ API. Defaults to "https://api.openaq.org/v3/".
+
+**Functions:**
+
+- [**build_request_headers**](#openaq.shared.client.BaseClient.build_request_headers) – Copies and updates headers based on input.
+- [**resolve_headers**](#openaq.shared.client.BaseClient.resolve_headers) – Resolves and updates the HTTP headers with the given API key and User Agent.
+
+**Parameters:**
+
+- **transport** (<code>[TTransport](#openaq.shared.client.TTransport)</code>) – The transport mechanism used for making requests to the OpenAQ API.
+- **headers** (<code>[Mapping](#typing.Mapping)\[[str](#str), [str](#str)\]</code>) – mapping of HTTP headers to be sent with request.
+- **api_key** (<code>[str](#str) | None</code>) – OpenAQ API key string.
+- **user_agent** – User-Agent header value to be sent with HTTP requests.
+- **base_url** (<code>[str](#str)</code>) – The base URL for the OpenAQ API. Defaults to "https://api.openaq.org/v3/".
+
+###### `openaq.shared.client.BaseClient.api_key`
+
+```python
+api_key: str | None
+```
+
+Accessor for private \_api_key field.
+
+**Returns:**
+
+- <code>[str](#str) | None</code> – The API key string.
+
+###### `openaq.shared.client.BaseClient.base_url`
+
+```python
+base_url: str
+```
+
+Accessor for private \_base_url field.
+
+**Returns:**
+
+- <code>[str](#str)</code> – base URL string value
+
+###### `openaq.shared.client.BaseClient.build_request_headers`
+
+```python
+build_request_headers(headers=None)
+```
+
+Copies and updates headers based on input.
+
+**Parameters:**
+
+- **headers** (<code>[Mapping](#typing.Mapping)\[[str](#str), [str](#str)\] | None</code>) – The headers to add to the request.
+
+**Returns:**
+
+- <code>[Headers](#httpx.Headers)</code> – A mapping of headers for the request
+
+###### `openaq.shared.client.BaseClient.headers`
+
+```python
+headers: httpx.Headers
+```
+
+Accessor for private \_headers field.
+
+**Returns:**
+
+- <code>[Headers](#httpx.Headers)</code> – dictionary of http headers to be sent with request
+
+###### `openaq.shared.client.BaseClient.resolve_headers`
+
+```python
+resolve_headers()
+```
+
+Resolves and updates the HTTP headers with the given API key and User Agent.
+
+**Parameters:**
+
+- **headers** – The initial headers.
+- **api_key** – The OpenAQ API key to be added as X-API-Key header.
+- **user_agent** – The User-Agent header to be added.
+
+**Returns:**
+
+- <code>None</code> – Updated headers with the added API key and User Agent.
+
+###### `openaq.shared.client.BaseClient.transport`
+
+```python
+transport: TTransport
+```
+
+Get the transport mechanism used by the client.
+
+Provides access to the transport instance that the client uses to
+communicate with the OpenAQ API.
+
+**Returns:**
+
+- <code>[TTransport](#openaq.shared.client.TTransport)</code> – The transport instance.
+
+##### `openaq.shared.client.DEFAULT_BASE_URL`
+
+```python
+DEFAULT_BASE_URL = 'https://api.openaq.org/v3/'
+```
+
+##### `openaq.shared.client.DEFAULT_USER_AGENT`
+
+```python
+DEFAULT_USER_AGENT = f'openaq-python-{__version__}-{platform.python_version()}'
+```
+
+##### `openaq.shared.client.TTransport`
+
+```python
+TTransport = TypeVar('TTransport', Transport, AsyncTransport)
+```
+
+##### `openaq.shared.client.logger`
+
+```python
+logger = logging.getLogger('openaq')
+```
+
+#### `openaq.shared.constants`
+
+Shared constant values.
+
+**Attributes:**
+
+- [**ISO_CODES**](#openaq.shared.constants.ISO_CODES) –
+- [**MAX_LIMIT**](#openaq.shared.constants.MAX_LIMIT) –
+- [**MAX_RADIUS**](#openaq.shared.constants.MAX_RADIUS) –
+
+##### `openaq.shared.constants.ISO_CODES`
+
+```python
+ISO_CODES = {'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS', 'ST', 'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'YE', 'YT', 'ZA', 'ZM', 'ZW'}
+```
+
+##### `openaq.shared.constants.MAX_LIMIT`
+
+```python
+MAX_LIMIT = 1000
+```
+
+##### `openaq.shared.constants.MAX_RADIUS`
+
+```python
+MAX_RADIUS = 25000
+```
+
+#### `openaq.shared.exceptions`
+
+Custom exceptions to catch various errors.
+
+**Classes:**
+
+- [**APIError**](#openaq.shared.exceptions.APIError) – Base class for all API-related exceptions.
+- [**ApiKeyMissingError**](#openaq.shared.exceptions.ApiKeyMissingError) – Raised when an API key is required but not provided.
+- [**BadGatewayError**](#openaq.shared.exceptions.BadGatewayError) – HTTP 502 - Bad Gateway.
+- [**BadRequestError**](#openaq.shared.exceptions.BadRequestError) – HTTP 400 - Bad Request.
+- [**ClientValidationError**](#openaq.shared.exceptions.ClientValidationError) – Raised when input validation fails before making an API request.
+- [**ForbiddenError**](#openaq.shared.exceptions.ForbiddenError) – HTTP 403 - Forbidden.
+- [**GatewayTimeoutError**](#openaq.shared.exceptions.GatewayTimeoutError) – HTTP 504 - Gateway Timeout.
+- [**HTTPClientError**](#openaq.shared.exceptions.HTTPClientError) – Base class for all HTTP 4xx client error responses.
+- [**HTTPRateLimitError**](#openaq.shared.exceptions.HTTPRateLimitError) – HTTP 429 - Too Many Requests.
+- [**IdentifierOutOfBoundsError**](#openaq.shared.exceptions.IdentifierOutOfBoundsError) – Raised when an ID field is outside the valid range [1, 2_147_483_647].
+- [**InvalidParameterError**](#openaq.shared.exceptions.InvalidParameterError) – Raised when a query parameter value is invalid.
+- [**NotAuthorizedError**](#openaq.shared.exceptions.NotAuthorizedError) – HTTP 401 - Unauthorized.
+- [**NotFoundError**](#openaq.shared.exceptions.NotFoundError) – HTTP 404 - Not Found.
+- [**OpenAQError**](#openaq.shared.exceptions.OpenAQError) – Base exception for all OpenAQ SDK errors.
+- [**RateLimitError**](#openaq.shared.exceptions.RateLimitError) – Raised when client-side rate limiting is triggered.
+- [**ServerError**](#openaq.shared.exceptions.ServerError) – HTTP 5xx - Server Error.
+- [**ServiceUnavailableError**](#openaq.shared.exceptions.ServiceUnavailableError) – HTTP 503 - Service Unavailable.
+- [**TimeoutError**](#openaq.shared.exceptions.TimeoutError) – HTTP 408 - Request Timeout.
+- [**ValidationError**](#openaq.shared.exceptions.ValidationError) – HTTP 422 - Unprocessable Entity.
+
+##### `openaq.shared.exceptions.APIError`
+
+Bases: <code>[Exception](#Exception)</code>
+
+Base class for all API-related exceptions.
+
+This is the parent class for exceptions that occur due to API responses,
+including both client errors (4xx) and server errors (5xx).
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the API error.
+
+<details class="note" open markdown="1">
+<summary>Note</summary>
+
+This is separate from OpenAQError to distinguish between client-side
+validation errors and actual API response errors.
+
+</details>
+
+##### `openaq.shared.exceptions.ApiKeyMissingError`
+
+Bases: <code>[OpenAQError](#openaq.shared.exceptions.OpenAQError)</code>
+
+Raised when an API key is required but not provided.
+
+This exception is raised when attempting to access endpoints that require
+authentication but no API key has been configured in the client.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the missing
+  API key requirement.
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client = OpenAQ() # No API key provided
+client.get_protected_resource()
+except ApiKeyMissingError as e:
+print(f"API key required: {e}")
+
+</details>
+
+##### `openaq.shared.exceptions.BadGatewayError`
+
+Bases: <code>[ServerError](#openaq.shared.exceptions.ServerError)</code>
+
+HTTP 502 - Bad Gateway.
+
+Raised when the API returns a 502 status code, indicating that the gateway
+or proxy received an invalid response from an upstream server.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the bad gateway
+  error.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.BadGatewayError.status_code) (<code>[int](#int)</code>) – HTTP status code (502).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_measurements()
+except BadGatewayError as e:
+print(f"Bad gateway: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.BadGatewayError.status_code`
+
+```python
+status_code: Literal[502] = 502
+```
+
+##### `openaq.shared.exceptions.BadRequestError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 400 - Bad Request.
+
+Raised when the API returns a 400 status code, indicating that the request
+was malformed or contains invalid syntax.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the bad request.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.BadRequestError.status_code) (<code>[int](#int)</code>) – HTTP status code (400).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_locations(invalid_param="bad_value")
+except BadRequestError as e:
+print(f"Bad request: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.BadRequestError.status_code`
+
+```python
+status_code: int = 400
+```
+
+##### `openaq.shared.exceptions.ClientValidationError`
+
+Bases: <code>[OpenAQError](#openaq.shared.exceptions.OpenAQError)</code>, <code>[ValueError](#ValueError)</code>
+
+Raised when input validation fails before making an API request.
+
+This exception is raised when user-provided parameters fail validation
+on the client side, before any HTTP request is sent to the API. Inherits
+from both OpenAQError and ValueError, allowing it to be caught as either
+an SDK-specific error or a standard Python value error.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the validation
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_location(location_id=-1)
+except ClientValidationError as e:
+print(f"Invalid parameter: {e}")
+except ValueError as e:
+print(f"Value error: {e}")
+
+</details>
+
+##### `openaq.shared.exceptions.ForbiddenError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 403 - Forbidden.
+
+Raised when the API returns a 403 status code, indicating that the client
+is authenticated but does not have permission to access the requested resource.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing why access
+  was forbidden.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.ForbiddenError.status_code) (<code>[int](#int)</code>) – HTTP status code (403).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.delete_resource(resource_id=123)
+except ForbiddenError as e:
+print(f"Access denied: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.ForbiddenError.status_code`
+
+```python
+status_code: Literal[403] = 403
+```
+
+##### `openaq.shared.exceptions.GatewayTimeoutError`
+
+Bases: <code>[ServerError](#openaq.shared.exceptions.ServerError)</code>
+
+HTTP 504 - Gateway Timeout.
+
+Raised when the API returns a 504 status code, indicating that the gateway
+or proxy timed out while waiting for a response from an upstream server.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the gateway
+  timeout.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.GatewayTimeoutError.status_code) (<code>[int](#int)</code>) – HTTP status code (504).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_measurements()
+except GatewayTimeoutError as e:
+print(f"Gateway timeout: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.GatewayTimeoutError.status_code`
+
+```python
+status_code: Literal[504] = 504
+```
+
+##### `openaq.shared.exceptions.HTTPClientError`
+
+Bases: <code>[APIError](#openaq.shared.exceptions.APIError)</code>
+
+Base class for all HTTP 4xx client error responses.
+
+Raised when the API returns a 4xx status code, indicating that the request
+was malformed, unauthorized, or otherwise invalid from the client's side.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the client error.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.HTTPClientError.status_code) (<code>[int](#int)</code>) – The HTTP status code returned by the API.
+
+##### `openaq.shared.exceptions.HTTPRateLimitError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 429 - Too Many Requests.
+
+Raised when the API returns a 429 status code, indicating that the client
+has exceeded the server-side rate limits.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the rate limit
+  error.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.HTTPRateLimitError.status_code) (<code>[int](#int)</code>) – HTTP status code (429).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+for i in range(10000):
+client.get_locations()
+except HTTPRateLimitError as e:
+print(f"API rate limit exceeded: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.HTTPRateLimitError.status_code`
+
+```python
+status_code: Literal[429] = 429
+```
+
+##### `openaq.shared.exceptions.IdentifierOutOfBoundsError`
+
+Bases: <code>[ClientValidationError](#openaq.shared.exceptions.ClientValidationError)</code>
+
+Raised when an ID field is outside the valid range [1, 2_147_483_647].
+
+This exception is raised when a user provides an identifier (such as a
+location_id, parameter_id, etc.) that falls outside the acceptable range
+defined by the API constraints.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing which identifier
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_location(location_id=3_000_000_000)
+except IdentifierOutOfBoundsError as e:
+print(f"ID out of bounds: {e}")
+
+</details>
+
+##### `openaq.shared.exceptions.InvalidParameterError`
+
+Bases: <code>[ClientValidationError](#openaq.shared.exceptions.ClientValidationError)</code>
+
+Raised when a query parameter value is invalid.
+
+This exception is raised when a parameter value doesn't meet the API's
+requirements (e.g., invalid enum value, malformed string, incorrect type).
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing which parameter
+  is invalid and why.
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_locations(limit=-10)
+except InvalidParameterError as e:
+print(f"Invalid parameter: {e}")
+
+</details>
+
+##### `openaq.shared.exceptions.NotAuthorizedError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 401 - Unauthorized.
+
+Raised when the API returns a 401 status code, indicating that authentication
+is required or the provided credentials are invalid.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the authorization
+  failure.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.NotAuthorizedError.status_code) (<code>[int](#int)</code>) – HTTP status code (401).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client = OpenAQ(api_key="invalid_key")
+client.get_measurements()
+except NotAuthorizedError as e:
+print(f"Authentication failed: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.NotAuthorizedError.status_code`
+
+```python
+status_code: Literal[401] = 401
+```
+
+##### `openaq.shared.exceptions.NotFoundError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 404 - Not Found.
+
+Raised when the API returns a 404 status code, indicating that the requested
+resource does not exist.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing which resource
+  was not found.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.NotFoundError.status_code) (<code>[int](#int)</code>) – HTTP status code (404).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_location(location_id=999999)
+except NotFoundError as e:
+print(f"Resource not found: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.NotFoundError.status_code`
+
+```python
+status_code: Literal[404] = 404
+```
+
+##### `openaq.shared.exceptions.OpenAQError`
+
+Bases: <code>[Exception](#Exception)</code>
+
+Base exception for all OpenAQ SDK errors.
+
+This is the root exception class for the OpenAQ SDK. All custom client-related
+exceptions in the SDK inherit from this class, allowing users to catch all
+SDK-specific client errors.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the exception.
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_locations()
+except OpenAQError as e:
+print(f"OpenAQ SDK error: {e}")
+
+</details>
+
+##### `openaq.shared.exceptions.RateLimitError`
+
+Bases: <code>[OpenAQError](#openaq.shared.exceptions.OpenAQError)</code>
+
+Raised when client-side rate limiting is triggered.
+
+This exception is raised by the SDK's internal rate limiting mechanism
+before making a request that would exceed configured rate limits. This is
+separate from HTTPRateLimitError, which indicates server-side rate limiting.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the rate limit
+  that was exceeded.
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+for i in range(1000):
+client.get_locations()
+except RateLimitError as e:
+print(f"Rate limit exceeded: {e}")
+
+</details>
+
+##### `openaq.shared.exceptions.ServerError`
+
+Bases: <code>[APIError](#openaq.shared.exceptions.APIError)</code>
+
+HTTP 5xx - Server Error.
+
+Base class for all HTTP 5xx server error responses. Raised when the API
+encounters an internal error or is unable to process the request due to
+server-side issues.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the server error.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.ServerError.status_code) (<code>[int](#int)</code>) – HTTP status code (500 or specific 5xx code).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_locations()
+except ServerError as e:
+print(f"Server error: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.ServerError.status_code`
+
+```python
+status_code: int = 500
+```
+
+##### `openaq.shared.exceptions.ServiceUnavailableError`
+
+Bases: <code>[ServerError](#openaq.shared.exceptions.ServerError)</code>
+
+HTTP 503 - Service Unavailable.
+
+Raised when the API returns a 503 status code, indicating that the server
+is temporarily unable to handle the request, typically due to maintenance
+or overload.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing why the service
+  is unavailable.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.ServiceUnavailableError.status_code) (<code>[int](#int)</code>) – HTTP status code (503).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_locations()
+except ServiceUnavailableError as e:
+print(f"Service unavailable, try again later: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.ServiceUnavailableError.status_code`
+
+```python
+status_code: Literal[503] = 503
+```
+
+##### `openaq.shared.exceptions.TimeoutError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 408 - Request Timeout.
+
+Raised when the API returns a 408 status code, indicating that the server
+timed out waiting for the request to complete.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the timeout.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.TimeoutError.status_code) (<code>[int](#int)</code>) – HTTP status code (408).
+
+<details class="note" open markdown="1">
+<summary>Note</summary>
+
+This is different from network-level timeouts, which may raise different
+exceptions depending on the HTTP client library used.
+
+</details>
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_measurements(date_from="2000-01-01", date_to="2024-12-31")
+except TimeoutError as e:
+print(f"Request timed out: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.TimeoutError.status_code`
+
+```python
+status_code: Literal[408] = 408
+```
+
+##### `openaq.shared.exceptions.ValidationError`
+
+Bases: <code>[HTTPClientError](#openaq.shared.exceptions.HTTPClientError)</code>
+
+HTTP 422 - Unprocessable Entity.
+
+Raised when the API returns a 422 status code, indicating that the request
+was well-formed but contains semantic errors or invalid parameter combinations.
+
+**Parameters:**
+
+- **message** (<code>[str](#str)</code>) – Human readable string describing the validation
+  error.
+
+**Attributes:**
+
+- [**status_code**](#openaq.shared.exceptions.ValidationError.status_code) (<code>[int](#int)</code>) – HTTP status code (422).
+
+<details class="example" open markdown="1">
+<summary>Example</summary>
+
+try:
+client.get_measurements(date_from="2024-01-01", date_to="2023-01-01")
+except ValidationError as e:
+print(f"Validation error: {e}")
+
+</details>
+
+###### `openaq.shared.exceptions.ValidationError.status_code`
+
+```python
+status_code: Literal[422] = 422
+```
+
+#### `openaq.shared.models`
+
+Shared utility functions for working with query parameter models.
+
+**Functions:**
+
+- [**build_measurements_path**](#openaq.shared.models.build_measurements_path) – Prepares and builds the path for measurements endpoint using data and rollup parameters.
+- [**build_query_params**](#openaq.shared.models.build_query_params) – Prepares keyword arguments to a dict for httpx query parameters.
+
+##### `openaq.shared.models.build_measurements_path`
+
+```python
+build_measurements_path(sensors_id, data=None, rollup=None)
+```
+
+Prepares and builds the path for measurements endpoint using data and rollup parameters.
+
+**Parameters:**
+
+- **sensors_id** (<code>[int](#int)</code>) – sensors ID
+- **data** (<code>[Data](#openaq.shared.types.Data) | None</code>) – the base measurement unit to query. options are 'measurements', 'hours', 'days', 'years'
+- **rollup** (<code>[Rollup](#openaq.shared.types.Rollup) | None</code>) – the period by which to rollup the base measurement data. Options are 'hourly', 'daily', 'yearly'
+
+**Returns:**
+
+- <code>[str](#str)</code> – string of url path
+
+**Raises:**
+
+- <code>[NotFoundError](#openaq.shared.exceptions.NotFoundError)</code> –
+
+##### `openaq.shared.models.build_query_params`
+
+```python
+build_query_params(**kwargs)
+```
+
+Prepares keyword arguments to a dict for httpx query parameters.
+
+Loops through keyword args, if the value is of type list, tuple, or datetime.datetime,
+it makes appropriate conversions. This prevents httpx from splitting list or tuple types
+to individual query params e.g. coordinates=42,42 instead of coordinates=42&coordinates=42.
+For datetime.datetime types, it converts them to ISO 8601 formatted strings.
+
+**Parameters:**
+
+- \*\***kwargs** (<code>[str](#str) | [int](#int) | [float](#float) | [bool](#bool) | [Sequence](#typing.Sequence)\[[str](#str) | [int](#int) | [float](#float) | [bool](#bool)\] | [datetime](#datetime.datetime) | None</code>) – Arbitrary keyword arguments.
+
+**Returns:**
+
+- <code>[dict](#dict)\[[str](#str), [str](#str) | [int](#int) | [float](#float) | [bool](#bool)\]</code> – dictionary of the prepared values.
+
+#### `openaq.shared.responses`
+
+Response models to represent the resources returned from the OpenAQ API.
+
+**Classes:**
+
+- [**Bbox**](#openaq.shared.responses.Bbox) – Bounding box representation for geographic areas.
+- [**Coordinates**](#openaq.shared.responses.Coordinates) – Representation for geographic coordinates in OpenAQ.
+- [**CountriesResponse**](#openaq.shared.responses.CountriesResponse) – Representation of the API response for countries resource.
+- [**Country**](#openaq.shared.responses.Country) – Representation of country resource in OpenAQ.
+- [**CountryBase**](#openaq.shared.responses.CountryBase) – Base representation for country resource in OpenAQ.
+- [**Coverage**](#openaq.shared.responses.Coverage) – Data coverage details for measurements.
+- [**Datetime**](#openaq.shared.responses.Datetime) – Representation for timestamps in OpenAQ.
+- [**Headers**](#openaq.shared.responses.Headers) – API response headers.
+- [**Instrument**](#openaq.shared.responses.Instrument) – Representation of instrument resource in OpenAQ.
+- [**InstrumentBase**](#openaq.shared.responses.InstrumentBase) – Base representation for instrument resource in OpenAQ.
+- [**InstrumentsResponse**](#openaq.shared.responses.InstrumentsResponse) – Representation of the API response for instruments resource.
+- [**Latest**](#openaq.shared.responses.Latest) – Latest measurement.
+- [**LatestBase**](#openaq.shared.responses.LatestBase) – latest measurement.
+- [**LatestResponse**](#openaq.shared.responses.LatestResponse) – Representation of the API response for latest resource.
+- [**License**](#openaq.shared.responses.License) – Representation of license resource in OpenAQ.
+- [**LicensesResponse**](#openaq.shared.responses.LicensesResponse) – Representation of the API response for licenses resource.
+- [**Location**](#openaq.shared.responses.Location) – Representation of location resource in OpenAQ.
+- [**LocationsResponse**](#openaq.shared.responses.LocationsResponse) – Representation of the API response for locations resource.
+- [**Manufacturer**](#openaq.shared.responses.Manufacturer) – Representation of manufacturer resource in OpenAQ.
+- [**ManufacturerBase**](#openaq.shared.responses.ManufacturerBase) – Base representation for manufacturer resource in OpenAQ.
+- [**ManufacturersResponse**](#openaq.shared.responses.ManufacturersResponse) – Representation of the API response for manufacturers resource.
+- [**Measurement**](#openaq.shared.responses.Measurement) – Representation of measurement resource in OpenAQ.
+- [**MeasurementsResponse**](#openaq.shared.responses.MeasurementsResponse) – Representation of the API response for measurements resource.
+- [**Meta**](#openaq.shared.responses.Meta) – API response metadata.
+- [**Owner**](#openaq.shared.responses.Owner) – Detailed information about an owner in OpenAQ.
+- [**OwnerBase**](#openaq.shared.responses.OwnerBase) – Base representation for owner resource in OpenAQ.
+- [**OwnerEntity**](#openaq.shared.responses.OwnerEntity) – Representation of owner entitiy resource in OpenAQ.
+- [**OwnersResponse**](#openaq.shared.responses.OwnersResponse) – Representation of the API response for owners resource.
+- [**Parameter**](#openaq.shared.responses.Parameter) – Representation of parameter resource in OpenAQ.
+- [**ParameterBase**](#openaq.shared.responses.ParameterBase) – Base representation for measurement parameter resource in OpenAQ.
+- [**ParametersResponse**](#openaq.shared.responses.ParametersResponse) – Representation of the API response for parameters resource.
+- [**Period**](#openaq.shared.responses.Period) – Representation of a measurement time period.
+- [**Provider**](#openaq.shared.responses.Provider) – Representation of provider resource in OpenAQ.
+- [**ProviderBase**](#openaq.shared.responses.ProviderBase) – Base representation for providers in OpenAQ.
+- [**ProvidersResponse**](#openaq.shared.responses.ProvidersResponse) – Representation of the API response for providers resource.
+- [**Sensor**](#openaq.shared.responses.Sensor) – Detailed information about a sensor in OpenAQ.
+- [**SensorBase**](#openaq.shared.responses.SensorBase) – Base representation for sensor resource in OpenAQ.
+- [**SensorsResponse**](#openaq.shared.responses.SensorsResponse) – Representation of the API response for sensors resource.
+- [**Summary**](#openaq.shared.responses.Summary) – Statistical summary of measurement values.
+
+**Attributes:**
+
+- [**R**](#openaq.shared.responses.R) –
+- [**T**](#openaq.shared.responses.T) –
+- [**TResult**](#openaq.shared.responses.TResult) –
+
+##### `openaq.shared.responses.Bbox`
+
+```python
+Bbox(type, coordinates)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Bounding box representation for geographic areas.
+
+**Attributes:**
+
+- [**type**](#openaq.shared.responses.Bbox.type) (<code>[str](#str)</code>) – geometry type
+- [**coordinates**](#openaq.shared.responses.Bbox.coordinates) (<code>[list](#list)\[[list](#list)\[[tuple](#tuple)\[[float](#float), [float](#float)\]\]\] | [list](#list)\[[tuple](#tuple)\[[float](#float), [float](#float)\]\] | [tuple](#tuple)\[[float](#float), [float](#float)\]</code>) – list of WGS 84 coordinates of bounding box
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Bbox.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Bbox.coordinates`
+
+```python
+coordinates: list[list[tuple[float, float]]] | list[tuple[float, float]] | tuple[float, float]
+```
+
+###### `openaq.shared.responses.Bbox.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Bbox.type`
+
+```python
+type: str
+```
+
+##### `openaq.shared.responses.Coordinates`
+
+```python
+Coordinates(latitude, longitude)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation for geographic coordinates in OpenAQ.
+
+coordinates are represented in WGS84 (AKA EPSG 4326) coordinate system.
+
+**Attributes:**
+
+- [**latitude**](#openaq.shared.responses.Coordinates.latitude) (<code>[float](#float)</code>) – WGS84 latitude coordinate value
+- [**longitude**](#openaq.shared.responses.Coordinates.longitude) (<code>[float](#float)</code>) – WGS84 longitude coordinate value
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Coordinates.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Coordinates.latitude`
+
+```python
+latitude: float
+```
+
+###### `openaq.shared.responses.Coordinates.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Coordinates.longitude`
+
+```python
+longitude: float
+```
+
+##### `openaq.shared.responses.CountriesResponse`
+
+```python
+CountriesResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Country](#openaq.shared.responses.Country)\]</code>
+
+Representation of the API response for countries resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.CountriesResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.CountriesResponse.results) (<code>[list](#list)\[[Country](#openaq.shared.responses.Country)\]</code>) – a list of country records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.CountriesResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.CountriesResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.CountriesResponse.read_response) –
+
+###### `openaq.shared.responses.CountriesResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.CountriesResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.CountriesResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.CountriesResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.CountriesResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.CountriesResponse.results`
+
+```python
+results: list[Country]
+```
+
+##### `openaq.shared.responses.Country`
+
+```python
+Country(id, code, name, datetime_first, datetime_last, parameters)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of country resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.Country.id) (<code>[int](#int)</code>) – unique identifier for country
+- [**code**](#openaq.shared.responses.Country.code) (<code>[str](#str)</code>) – ISO 3166-1 alpha-2 2 letter country code
+- [**name**](#openaq.shared.responses.Country.name) (<code>[str](#str)</code>) – name of country
+- [**datetime_first**](#openaq.shared.responses.Country.datetime_first) (<code>[str](#str)</code>) – datetime of first measurement available.
+- [**datetime_last**](#openaq.shared.responses.Country.datetime_last) (<code>[str](#str)</code>) – datetime of last measurement available.
+- [**parameters**](#openaq.shared.responses.Country.parameters) (<code>[list](#list)\[[ParameterBase](#openaq.shared.responses.ParameterBase)\]</code>) – list of parameters available in the country.
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Country.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Country.code`
+
+```python
+code: str
+```
+
+###### `openaq.shared.responses.Country.datetime_first`
+
+```python
+datetime_first: str
+```
+
+###### `openaq.shared.responses.Country.datetime_last`
+
+```python
+datetime_last: str
+```
+
+###### `openaq.shared.responses.Country.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.Country.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Country.name`
+
+```python
+name: str
+```
+
+###### `openaq.shared.responses.Country.parameters`
+
+```python
+parameters: list[ParameterBase]
+```
+
+##### `openaq.shared.responses.CountryBase`
+
+```python
+CountryBase(id, code, name)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Base representation for country resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.CountryBase.id) (<code>[int](#int)</code>) – unique identifier for country
+- [**code**](#openaq.shared.responses.CountryBase.code) (<code>[str](#str)</code>) – ISO 3166-1 alpha-2 2 letter country code
+- [**name**](#openaq.shared.responses.CountryBase.name) (<code>[str](#str)</code>) – country name
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.CountryBase.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.CountryBase.code`
+
+```python
+code: str
+```
+
+###### `openaq.shared.responses.CountryBase.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.CountryBase.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.CountryBase.name`
+
+```python
+name: str
+```
+
+##### `openaq.shared.responses.Coverage`
+
+```python
+Coverage(expected_count, expected_interval, observed_count, observed_interval, percent_complete, percent_coverage, datetime_from, datetime_to)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Data coverage details for measurements.
+
+**Attributes:**
+
+- [**expected_count**](#openaq.shared.responses.Coverage.expected_count) (<code>[int](#int)</code>) – expected number of measurements in the period
+- [**expected_interval**](#openaq.shared.responses.Coverage.expected_interval) (<code>[str](#str)</code>) –
+- [**observed_count**](#openaq.shared.responses.Coverage.observed_count) (<code>[int](#int)</code>) – observed number of measurements in the period
+- [**observed_interval**](#openaq.shared.responses.Coverage.observed_interval) (<code>[str](#str)</code>) –
+- [**percent_complete**](#openaq.shared.responses.Coverage.percent_complete) (<code>[float](#float)</code>) –
+- [**percent_coverage**](#openaq.shared.responses.Coverage.percent_coverage) (<code>[float](#float)</code>) – percentage value representing the coverage based on the observed count divded by the expected count of measurements.
+- [**datetime_from**](#openaq.shared.responses.Coverage.datetime_from) (<code>[Datetime](#openaq.shared.responses.Datetime)</code>) – ISO 8601 timestamp
+- [**datetime_to**](#openaq.shared.responses.Coverage.datetime_to) (<code>[Datetime](#openaq.shared.responses.Datetime)</code>) – ISO 8601 timestamp
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Coverage.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Coverage.datetime_from`
+
+```python
+datetime_from: Datetime
+```
+
+###### `openaq.shared.responses.Coverage.datetime_to`
+
+```python
+datetime_to: Datetime
+```
+
+###### `openaq.shared.responses.Coverage.expected_count`
+
+```python
+expected_count: int
+```
+
+###### `openaq.shared.responses.Coverage.expected_interval`
+
+```python
+expected_interval: str
+```
+
+###### `openaq.shared.responses.Coverage.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Coverage.observed_count`
+
+```python
+observed_count: int
+```
+
+###### `openaq.shared.responses.Coverage.observed_interval`
+
+```python
+observed_interval: str
+```
+
+###### `openaq.shared.responses.Coverage.percent_complete`
+
+```python
+percent_complete: float
+```
+
+###### `openaq.shared.responses.Coverage.percent_coverage`
+
+```python
+percent_coverage: float
+```
+
+##### `openaq.shared.responses.Datetime`
+
+```python
+Datetime(utc, local)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation for timestamps in OpenAQ.
+
+**Attributes:**
+
+- [**utc**](#openaq.shared.responses.Datetime.utc) (<code>[str](#str)</code>) – ISO-8601 formatted datetime value at UTC
+- [**local**](#openaq.shared.responses.Datetime.local) (<code>[str](#str)</code>) – ISO-8601 formatted datetime value at local timezone offset
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Datetime.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Datetime.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Datetime.local`
+
+```python
+local: str
+```
+
+###### `openaq.shared.responses.Datetime.utc`
+
+```python
+utc: str
+```
+
+##### `openaq.shared.responses.Headers`
+
+```python
+Headers(x_ratelimit_limit=None, x_ratelimit_remaining=None, x_ratelimit_used=None, x_ratelimit_reset=None)
+```
+
+API response headers.
+
+**Attributes:**
+
+- [**x_ratelimit_limit**](#openaq.shared.responses.Headers.x_ratelimit_limit) (<code>[int](#int) | None</code>) – The X-RateLimit-Limit header indicates the maximum number of requests for rate limit policy
+- [**x_ratelimit_remaining**](#openaq.shared.responses.Headers.x_ratelimit_remaining) (<code>[int](#int) | None</code>) – The X-RateLimit-Remaining header indicates the remaining number of requests for the period
+- [**x_ratelimit_used**](#openaq.shared.responses.Headers.x_ratelimit_used) (<code>[int](#int) | None</code>) – The X-RateLimit-Remaining header indicates the number of requests used for the period
+- [**x_ratelimit_reset**](#openaq.shared.responses.Headers.x_ratelimit_reset) (<code>[int](#int) | None</code>) – The X-RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
+
+###### `openaq.shared.responses.Headers.x_ratelimit_limit`
+
+```python
+x_ratelimit_limit: int | None = None
+```
+
+###### `openaq.shared.responses.Headers.x_ratelimit_remaining`
+
+```python
+x_ratelimit_remaining: int | None = None
+```
+
+###### `openaq.shared.responses.Headers.x_ratelimit_reset`
+
+```python
+x_ratelimit_reset: int | None = None
+```
+
+###### `openaq.shared.responses.Headers.x_ratelimit_used`
+
+```python
+x_ratelimit_used: int | None = None
+```
+
+##### `openaq.shared.responses.Instrument`
+
+```python
+Instrument(id, name, is_monitor, manufacturer)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of instrument resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.Instrument.id) (<code>[int](#int)</code>) – unique identifier for instrument
+- [**name**](#openaq.shared.responses.Instrument.name) (<code>[str](#str)</code>) – name of instrument
+- [**is_monitor**](#openaq.shared.responses.Instrument.is_monitor) (<code>[bool](#bool)</code>) – boolean indicating if instrument is graded as reference monitor.
+- [**manufacturer**](#openaq.shared.responses.Instrument.manufacturer) (<code>[ManufacturerBase](#openaq.shared.responses.ManufacturerBase)</code>) – instrument manufacturer
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Instrument.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Instrument.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.Instrument.is_monitor`
+
+```python
+is_monitor: bool
+```
+
+###### `openaq.shared.responses.Instrument.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Instrument.manufacturer`
+
+```python
+manufacturer: ManufacturerBase
+```
+
+###### `openaq.shared.responses.Instrument.name`
+
+```python
+name: str
+```
+
+##### `openaq.shared.responses.InstrumentBase`
+
+```python
+InstrumentBase(id, name)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Base representation for instrument resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.InstrumentBase.id) (<code>[int](#int)</code>) – unique identifier for instrument
+- [**name**](#openaq.shared.responses.InstrumentBase.name) (<code>[str](#str)</code>) – instrument name
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.InstrumentBase.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.InstrumentBase.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.InstrumentBase.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.InstrumentBase.name`
+
+```python
+name: str
+```
+
+##### `openaq.shared.responses.InstrumentsResponse`
+
+```python
+InstrumentsResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Instrument](#openaq.shared.responses.Instrument)\]</code>
+
+Representation of the API response for instruments resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.InstrumentsResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.InstrumentsResponse.results) (<code>[list](#list)\[[Instrument](#openaq.shared.responses.Instrument)\]</code>) – a list of instrument records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.InstrumentsResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.InstrumentsResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.InstrumentsResponse.read_response) –
+
+###### `openaq.shared.responses.InstrumentsResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.InstrumentsResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.InstrumentsResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.InstrumentsResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.InstrumentsResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.InstrumentsResponse.results`
+
+```python
+results: list[Instrument]
+```
+
+##### `openaq.shared.responses.Latest`
+
+```python
+Latest(datetime, value, coordinates, sensors_id, locations_id)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Latest measurement.
+
+**Attributes:**
+
+- [**datetime**](#openaq.shared.responses.Latest.datetime) (<code>[Datetime](#openaq.shared.responses.Datetime)</code>) – datetime object
+- [**value**](#openaq.shared.responses.Latest.value) (<code>[float](#float)</code>) – measured value
+- [**coordinates**](#openaq.shared.responses.Latest.coordinates) (<code>[Coordinates](#openaq.shared.responses.Coordinates)</code>) – coordinates object with latitude and longitude of measurement
+- [**sensors_id**](#openaq.shared.responses.Latest.sensors_id) (<code>[int](#int)</code>) – unique identifier for sensor
+- [**locations_id**](#openaq.shared.responses.Latest.locations_id) (<code>[int](#int)</code>) – unique identifier for location
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Latest.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Latest.coordinates`
+
+```python
+coordinates: Coordinates
+```
+
+###### `openaq.shared.responses.Latest.datetime`
+
+```python
+datetime: Datetime
+```
+
+###### `openaq.shared.responses.Latest.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Latest.locations_id`
+
+```python
+locations_id: int
+```
+
+###### `openaq.shared.responses.Latest.sensors_id`
+
+```python
+sensors_id: int
+```
+
+###### `openaq.shared.responses.Latest.value`
+
+```python
+value: float
+```
+
+##### `openaq.shared.responses.LatestBase`
+
+```python
+LatestBase(datetime, value, coordinates)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+latest measurement.
+
+**Attributes:**
+
+- [**datetime**](#openaq.shared.responses.LatestBase.datetime) (<code>[Datetime](#openaq.shared.responses.Datetime)</code>) – datetime object
+- [**value**](#openaq.shared.responses.LatestBase.value) (<code>[float](#float)</code>) – measured value
+- [**coordinates**](#openaq.shared.responses.LatestBase.coordinates) (<code>[Coordinates](#openaq.shared.responses.Coordinates)</code>) – coordinates object with latitude and longitude of measurement
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.LatestBase.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.LatestBase.coordinates`
+
+```python
+coordinates: Coordinates
+```
+
+###### `openaq.shared.responses.LatestBase.datetime`
+
+```python
+datetime: Datetime
+```
+
+###### `openaq.shared.responses.LatestBase.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.LatestBase.value`
+
+```python
+value: float
+```
+
+##### `openaq.shared.responses.LatestResponse`
+
+```python
+LatestResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Latest](#openaq.shared.responses.Latest)\]</code>
+
+Representation of the API response for latest resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.LatestResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.LatestResponse.results) (<code>[list](#list)\[[Latest](#openaq.shared.responses.Latest)\]</code>) – a list of latest records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.LatestResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.LatestResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.LatestResponse.read_response) –
+
+###### `openaq.shared.responses.LatestResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.LatestResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.LatestResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.LatestResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.LatestResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.LatestResponse.results`
+
+```python
+results: list[Latest]
+```
+
+##### `openaq.shared.responses.License`
+
+```python
+License(id, name, commercial_use_allowed, attribution_required, share_alike_required, modification_allowed, redistribution_allowed, source_url=None)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of license resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.License.id) (<code>[int](#int)</code>) – unique identifier for license
+- [**name**](#openaq.shared.responses.License.name) (<code>[str](#str)</code>) – name of license
+- [**commercial_use_allowed**](#openaq.shared.responses.License.commercial_use_allowed) (<code>[bool](#bool)</code>) – boolean indicating if commercial use is allowed
+- [**attribution_required**](#openaq.shared.responses.License.attribution_required) (<code>[bool](#bool)</code>) – boolean indicating if attribution is required
+- [**share_alike_required**](#openaq.shared.responses.License.share_alike_required) (<code>[bool](#bool)</code>) – boolean indicating if share alike is required
+- [**modification_allowed**](#openaq.shared.responses.License.modification_allowed) (<code>[bool](#bool)</code>) – boolean indicating if modification is allowed
+- [**redistribution_allowed**](#openaq.shared.responses.License.redistribution_allowed) (<code>[bool](#bool)</code>) – boolean indicating if redistribution is allowed
+- [**source_url**](#openaq.shared.responses.License.source_url) (<code>[str](#str) | None</code>) – URL of original source of license
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.License.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.License.attribution_required`
+
+```python
+attribution_required: bool
+```
+
+###### `openaq.shared.responses.License.commercial_use_allowed`
+
+```python
+commercial_use_allowed: bool
+```
+
+###### `openaq.shared.responses.License.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.License.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.License.modification_allowed`
+
+```python
+modification_allowed: bool
+```
+
+###### `openaq.shared.responses.License.name`
+
+```python
+name: str
+```
+
+###### `openaq.shared.responses.License.redistribution_allowed`
+
+```python
+redistribution_allowed: bool
+```
+
+###### `openaq.shared.responses.License.share_alike_required`
+
+```python
+share_alike_required: bool
+```
+
+###### `openaq.shared.responses.License.source_url`
+
+```python
+source_url: str | None = None
+```
+
+##### `openaq.shared.responses.LicensesResponse`
+
+```python
+LicensesResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[License](#openaq.shared.responses.License)\]</code>
+
+Representation of the API response for licenses resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.LicensesResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.LicensesResponse.results) (<code>[list](#list)\[[License](#openaq.shared.responses.License)\]</code>) – a list of license records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.LicensesResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.LicensesResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.LicensesResponse.read_response) –
+
+###### `openaq.shared.responses.LicensesResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.LicensesResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.LicensesResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.LicensesResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.LicensesResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.LicensesResponse.results`
+
+```python
+results: list[License]
+```
+
+##### `openaq.shared.responses.Location`
+
+```python
+Location(id, name, locality, timezone, country, owner, provider, is_mobile, is_monitor, instruments, sensors, coordinates, bounds, distance, datetime_first, datetime_last)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of location resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.Location.id) (<code>[int](#int)</code>) – unique location identifier
+- [**name**](#openaq.shared.responses.Location.name) (<code>[str](#str)</code>) – location name
+- [**locality**](#openaq.shared.responses.Location.locality) (<code>[str](#str) | None</code>) – name of locality
+- [**timezone**](#openaq.shared.responses.Location.timezone) (<code>[str](#str)</code>) – timezone of location
+- [**country**](#openaq.shared.responses.Location.country) (<code>[CountryBase](#openaq.shared.responses.CountryBase)</code>) – country base object with country information
+- [**owner**](#openaq.shared.responses.Location.owner) (<code>[OwnerBase](#openaq.shared.responses.OwnerBase)</code>) – object with information about the location owner
+- [**provider**](#openaq.shared.responses.Location.provider) (<code>[ProviderBase](#openaq.shared.responses.ProviderBase)</code>) – object with information about the location provider
+- [**is_mobile**](#openaq.shared.responses.Location.is_mobile) (<code>[bool](#bool)</code>) – boolean indicating whether or not location is mobile (true) or stationary (false)
+- [**is_monitor**](#openaq.shared.responses.Location.is_monitor) (<code>[bool](#bool)</code>) – boolean indicating whether or not location is a reference monitor (true) or air sensor (false)
+- [**instruments**](#openaq.shared.responses.Location.instruments) (<code>[list](#list)\[[InstrumentBase](#openaq.shared.responses.InstrumentBase)\]</code>) – list of instruments used by locaiton node
+- [**sensors**](#openaq.shared.responses.Location.sensors) (<code>[list](#list)\[[SensorBase](#openaq.shared.responses.SensorBase)\]</code>) – list of sensors used by location node
+- [**coordinates**](#openaq.shared.responses.Location.coordinates) (<code>[Coordinates](#openaq.shared.responses.Coordinates)</code>) – coordinates objects with latitude and longitude of location
+- [**bounds**](#openaq.shared.responses.Location.bounds) (<code>[tuple](#tuple)\[[float](#float), [float](#float), [float](#float), [float](#float)\]</code>) – WGS84 geographic bounds of location
+- [**distance**](#openaq.shared.responses.Location.distance) (<code>[float](#float) | None</code>) – distance from `coordinates` value when querying by radius and coordinates
+- [**datetime_first**](#openaq.shared.responses.Location.datetime_first) (<code>[Datetime](#openaq.shared.responses.Datetime)</code>) – ISO 8601 datetime of first measurement for location
+- [**datetime_last**](#openaq.shared.responses.Location.datetime_last) (<code>[Datetime](#openaq.shared.responses.Datetime)</code>) – ISO 8601 datetime of last measurement for location
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Location.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Location.bounds`
+
+```python
+bounds: tuple[float, float, float, float]
+```
+
+###### `openaq.shared.responses.Location.coordinates`
+
+```python
+coordinates: Coordinates
+```
+
+###### `openaq.shared.responses.Location.country`
+
+```python
+country: CountryBase
+```
+
+###### `openaq.shared.responses.Location.datetime_first`
+
+```python
+datetime_first: Datetime
+```
+
+###### `openaq.shared.responses.Location.datetime_last`
+
+```python
+datetime_last: Datetime
+```
+
+###### `openaq.shared.responses.Location.distance`
+
+```python
+distance: float | None
+```
+
+###### `openaq.shared.responses.Location.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.Location.instruments`
+
+```python
+instruments: list[InstrumentBase]
+```
+
+###### `openaq.shared.responses.Location.is_mobile`
+
+```python
+is_mobile: bool
+```
+
+###### `openaq.shared.responses.Location.is_monitor`
+
+```python
+is_monitor: bool
+```
+
+###### `openaq.shared.responses.Location.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Location.locality`
+
+```python
+locality: str | None
+```
+
+###### `openaq.shared.responses.Location.name`
+
+```python
+name: str
+```
+
+###### `openaq.shared.responses.Location.owner`
+
+```python
+owner: OwnerBase
+```
+
+###### `openaq.shared.responses.Location.provider`
+
+```python
+provider: ProviderBase
+```
+
+###### `openaq.shared.responses.Location.sensors`
+
+```python
+sensors: list[SensorBase]
+```
+
+###### `openaq.shared.responses.Location.timezone`
+
+```python
+timezone: str
+```
+
+##### `openaq.shared.responses.LocationsResponse`
+
+```python
+LocationsResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Location](#openaq.shared.responses.Location)\]</code>
+
+Representation of the API response for locations resource.
+
+**Attributes:**
+
+- [**headers**](#openaq.shared.responses.LocationsResponse.headers) (<code>[Headers](#openaq.shared.responses.Headers)</code>) – a Headers object of response headers
+- [**meta**](#openaq.shared.responses.LocationsResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.LocationsResponse.results) (<code>[list](#list)\[[Location](#openaq.shared.responses.Location)\]</code>) – a list of location records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.LocationsResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.LocationsResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.LocationsResponse.read_response) –
+
+###### `openaq.shared.responses.LocationsResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.LocationsResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.LocationsResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.LocationsResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.LocationsResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.LocationsResponse.results`
+
+```python
+results: list[Location]
+```
+
+##### `openaq.shared.responses.Manufacturer`
+
+```python
+Manufacturer(id, name, instruments)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of manufacturer resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.Manufacturer.id) (<code>[int](#int)</code>) – unique identifier for manufacturer
+- [**name**](#openaq.shared.responses.Manufacturer.name) (<code>[str](#str)</code>) – manufacturer name
+- [**instruments**](#openaq.shared.responses.Manufacturer.instruments) (<code>[list](#list)\[[InstrumentBase](#openaq.shared.responses.InstrumentBase)\]</code>) – a list of instruments made by the manufacturer
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Manufacturer.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Manufacturer.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.Manufacturer.instruments`
+
+```python
+instruments: list[InstrumentBase]
+```
+
+###### `openaq.shared.responses.Manufacturer.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Manufacturer.name`
+
+```python
+name: str
+```
+
+##### `openaq.shared.responses.ManufacturerBase`
+
+```python
+ManufacturerBase(id, name)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Base representation for manufacturer resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.ManufacturerBase.id) (<code>[int](#int)</code>) – unique identifier for manufacturer
+- [**name**](#openaq.shared.responses.ManufacturerBase.name) (<code>[str](#str)</code>) – manufacturer name
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.ManufacturerBase.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.ManufacturerBase.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.ManufacturerBase.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.ManufacturerBase.name`
+
+```python
+name: str
+```
+
+##### `openaq.shared.responses.ManufacturersResponse`
+
+```python
+ManufacturersResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Manufacturer](#openaq.shared.responses.Manufacturer)\]</code>
+
+Representation of the API response for manufacturers resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.ManufacturersResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.ManufacturersResponse.results) (<code>[list](#list)\[[TResult](#openaq.shared.responses.TResult)\]</code>) – a list of manufacturer records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.ManufacturersResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.ManufacturersResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.ManufacturersResponse.read_response) –
+
+###### `openaq.shared.responses.ManufacturersResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.ManufacturersResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.ManufacturersResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.ManufacturersResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.ManufacturersResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.ManufacturersResponse.results`
+
+```python
+results: list[TResult]
+```
+
+##### `openaq.shared.responses.Measurement`
+
+```python
+Measurement(period, value, parameter, coordinates, summary, coverage)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of measurement resource in OpenAQ.
+
+**Attributes:**
+
+- [**period**](#openaq.shared.responses.Measurement.period) (<code>[Period](#openaq.shared.responses.Period)</code>) – object detailing the measurement period.
+- [**value**](#openaq.shared.responses.Measurement.value) (<code>[float](#float)</code>) – measured value or mean value if aggregate to period.
+- [**parameter**](#openaq.shared.responses.Measurement.parameter) (<code>[ParameterBase](#openaq.shared.responses.ParameterBase)</code>) – object representing the parameter measured by the sensor.
+- [**coordinates**](#openaq.shared.responses.Measurement.coordinates) (<code>[Coordinates](#openaq.shared.responses.Coordinates) | None</code>) – WGS84 coordinate values if location is mobile.
+- [**coverage**](#openaq.shared.responses.Measurement.coverage) (<code>[Coverage](#openaq.shared.responses.Coverage)</code>) – object detailing the data coverage of the sensor for the period.
+- [**summary**](#openaq.shared.responses.Measurement.summary) (<code>[Summary](#openaq.shared.responses.Summary)</code>) – object with summary statistics of mueasurment values of the sensor for the period.
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Measurement.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Measurement.coordinates`
+
+```python
+coordinates: Coordinates | None
+```
+
+###### `openaq.shared.responses.Measurement.coverage`
+
+```python
+coverage: Coverage
+```
+
+###### `openaq.shared.responses.Measurement.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Measurement.parameter`
+
+```python
+parameter: ParameterBase
+```
+
+###### `openaq.shared.responses.Measurement.period`
+
+```python
+period: Period
+```
+
+###### `openaq.shared.responses.Measurement.summary`
+
+```python
+summary: Summary
+```
+
+###### `openaq.shared.responses.Measurement.value`
+
+```python
+value: float
+```
+
+##### `openaq.shared.responses.MeasurementsResponse`
+
+```python
+MeasurementsResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Measurement](#openaq.shared.responses.Measurement)\]</code>
+
+Representation of the API response for measurements resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.MeasurementsResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.MeasurementsResponse.results) (<code>[list](#list)\[[Measurement](#openaq.shared.responses.Measurement)\]</code>) – a list of measurement records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.MeasurementsResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.MeasurementsResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.MeasurementsResponse.read_response) –
+
+###### `openaq.shared.responses.MeasurementsResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.MeasurementsResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.MeasurementsResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.MeasurementsResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.MeasurementsResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.MeasurementsResponse.results`
+
+```python
+results: list[Measurement]
+```
+
+##### `openaq.shared.responses.Meta`
+
+```python
+Meta(name, website, page, limit, found)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+API response metadata.
+
+**Attributes:**
+
+- [**name**](#openaq.shared.responses.Meta.name) (<code>[str](#str)</code>) – API name
+- [**website**](#openaq.shared.responses.Meta.website) (<code>[str](#str)</code>) – API URL
+- [**page**](#openaq.shared.responses.Meta.page) (<code>[int](#int)</code>) – the page number for paginated results.
+- [**limit**](#openaq.shared.responses.Meta.limit) (<code>[int](#int)</code>) – the limit number of records per page.
+- [**found**](#openaq.shared.responses.Meta.found) (<code>[int](#int)</code>) – a count of the total number of records.
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Meta.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Meta.found`
+
+```python
+found: int
+```
+
+###### `openaq.shared.responses.Meta.limit`
+
+```python
+limit: int
+```
+
+###### `openaq.shared.responses.Meta.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Meta.name`
+
+```python
+name: str
+```
+
+###### `openaq.shared.responses.Meta.page`
+
+```python
+page: int
+```
+
+###### `openaq.shared.responses.Meta.website`
+
+```python
+website: str
+```
+
+##### `openaq.shared.responses.Owner`
+
+```python
+Owner(id, name)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Detailed information about an owner in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.Owner.id) (<code>[int](#int)</code>) – unique identifier for owner
+- [**name**](#openaq.shared.responses.Owner.name) (<code>[str](#str)</code>) – owner name
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Owner.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Owner.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.Owner.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Owner.name`
+
+```python
+name: str
+```
+
+##### `openaq.shared.responses.OwnerBase`
+
+```python
+OwnerBase(id, name)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Base representation for owner resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.OwnerBase.id) (<code>[int](#int)</code>) – unique identifier for owner
+- [**name**](#openaq.shared.responses.OwnerBase.name) (<code>[str](#str)</code>) – owner name
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.OwnerBase.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.OwnerBase.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.OwnerBase.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.OwnerBase.name`
+
+```python
+name: str
+```
+
+##### `openaq.shared.responses.OwnerEntity`
+
+```python
+OwnerEntity(id, name)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of owner entitiy resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.OwnerEntity.id) (<code>[int](#int)</code>) – unique identifier for owner entity
+- [**name**](#openaq.shared.responses.OwnerEntity.name) (<code>[str](#str)</code>) – owner entity name
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.OwnerEntity.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.OwnerEntity.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.OwnerEntity.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.OwnerEntity.name`
+
+```python
+name: str
+```
+
+##### `openaq.shared.responses.OwnersResponse`
+
+```python
+OwnersResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Owner](#openaq.shared.responses.Owner)\]</code>
+
+Representation of the API response for owners resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.OwnersResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.OwnersResponse.results) (<code>[list](#list)\[[Owner](#openaq.shared.responses.Owner)\]</code>) – a list of owner records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.OwnersResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.OwnersResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.OwnersResponse.read_response) –
+
+###### `openaq.shared.responses.OwnersResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.OwnersResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.OwnersResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.OwnersResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.OwnersResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.OwnersResponse.results`
+
+```python
+results: list[Owner]
+```
+
+##### `openaq.shared.responses.Parameter`
+
+```python
+Parameter(id, name, units, display_name=None, description=None)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of parameter resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.Parameter.id) (<code>[int](#int)</code>) – unique identifier for parameter
+- [**name**](#openaq.shared.responses.Parameter.name) (<code>[str](#str)</code>) – name of parameter
+- [**units**](#openaq.shared.responses.Parameter.units) (<code>[str](#str)</code>) – units of measurement of parameter
+- [**display_name**](#openaq.shared.responses.Parameter.display_name) (<code>[str](#str) | None</code>) – display name of parameter
+- [**description**](#openaq.shared.responses.Parameter.description) (<code>[str](#str) | None</code>) – description of parameter
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Parameter.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Parameter.description`
+
+```python
+description: str | None = None
+```
+
+###### `openaq.shared.responses.Parameter.display_name`
+
+```python
+display_name: str | None = None
+```
+
+###### `openaq.shared.responses.Parameter.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.Parameter.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Parameter.name`
+
+```python
+name: str
+```
+
+###### `openaq.shared.responses.Parameter.units`
+
+```python
+units: str
+```
+
+##### `openaq.shared.responses.ParameterBase`
+
+```python
+ParameterBase(id, name, units, display_name)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Base representation for measurement parameter resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.ParameterBase.id) (<code>[int](#int)</code>) – unique identifier for parameter
+- [**name**](#openaq.shared.responses.ParameterBase.name) (<code>[str](#str)</code>) – parameter name
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.ParameterBase.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.ParameterBase.display_name`
+
+```python
+display_name: str | None
+```
+
+###### `openaq.shared.responses.ParameterBase.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.ParameterBase.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.ParameterBase.name`
+
+```python
+name: str
+```
+
+###### `openaq.shared.responses.ParameterBase.units`
+
+```python
+units: str
+```
+
+##### `openaq.shared.responses.ParametersResponse`
+
+```python
+ParametersResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Parameter](#openaq.shared.responses.Parameter)\]</code>
+
+Representation of the API response for parameters resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.ParametersResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.ParametersResponse.results) (<code>[list](#list)\[[Parameter](#openaq.shared.responses.Parameter)\]</code>) – a list of parameter records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.ParametersResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.ParametersResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.ParametersResponse.read_response) –
+
+###### `openaq.shared.responses.ParametersResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.ParametersResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.ParametersResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.ParametersResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.ParametersResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.ParametersResponse.results`
+
+```python
+results: list[Parameter]
+```
+
+##### `openaq.shared.responses.Period`
+
+```python
+Period(label, interval, datetime_from, datetime_to)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of a measurement time period.
+
+**Attributes:**
+
+- [**label**](#openaq.shared.responses.Period.label) (<code>[str](#str)</code>) – label of measurement period
+- [**interval**](#openaq.shared.responses.Period.interval) (<code>[str](#str)</code>) – time interval of measurement aggregation
+- [**datetime_from**](#openaq.shared.responses.Period.datetime_from) (<code>[Datetime](#openaq.shared.responses.Datetime)</code>) – datetime object of period start
+- [**datetime_to**](#openaq.shared.responses.Period.datetime_to) (<code>[Datetime](#openaq.shared.responses.Datetime)</code>) – datetime object of period end
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Period.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Period.datetime_from`
+
+```python
+datetime_from: Datetime
+```
+
+###### `openaq.shared.responses.Period.datetime_to`
+
+```python
+datetime_to: Datetime
+```
+
+###### `openaq.shared.responses.Period.interval`
+
+```python
+interval: str
+```
+
+###### `openaq.shared.responses.Period.label`
+
+```python
+label: str
+```
+
+###### `openaq.shared.responses.Period.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+##### `openaq.shared.responses.Provider`
+
+```python
+Provider(id, name, source_name, export_prefix, datetime_added, datetime_first, datetime_last, entities_id, parameters, bbox)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Representation of provider resource in OpenAQ.
+
+id: unique identifier for provider
+name: provider name
+source_name: name of source
+export_prefix:
+datetime_added: ISO-8601 datetime of when provider was added to OpenAQ
+datetime_first: ISO-8601 datetime of first measurement
+datetime_last: ISO-8601 datetime of first measurement
+entities_id: entity id
+parameters: list of parameters available from provider
+bbox: bounding box of geographic area of provider locations
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Provider.load) – Deserializes JSON response from API into response object.
+
+**Attributes:**
+
+- [**bbox**](#openaq.shared.responses.Provider.bbox) (<code>[Bbox](#openaq.shared.responses.Bbox) | None</code>) –
+- [**datetime_added**](#openaq.shared.responses.Provider.datetime_added) (<code>[str](#str)</code>) –
+- [**datetime_first**](#openaq.shared.responses.Provider.datetime_first) (<code>[str](#str)</code>) –
+- [**datetime_last**](#openaq.shared.responses.Provider.datetime_last) (<code>[str](#str)</code>) –
+- [**entities_id**](#openaq.shared.responses.Provider.entities_id) (<code>[int](#int)</code>) –
+- [**export_prefix**](#openaq.shared.responses.Provider.export_prefix) (<code>[str](#str)</code>) –
+- [**id**](#openaq.shared.responses.Provider.id) (<code>[int](#int)</code>) –
+- [**name**](#openaq.shared.responses.Provider.name) (<code>[str](#str)</code>) –
+- [**parameters**](#openaq.shared.responses.Provider.parameters) (<code>[list](#list)\[[ParameterBase](#openaq.shared.responses.ParameterBase)\]</code>) –
+- [**source_name**](#openaq.shared.responses.Provider.source_name) (<code>[str](#str)</code>) –
+
+###### `openaq.shared.responses.Provider.bbox`
+
+```python
+bbox: Bbox | None
+```
+
+###### `openaq.shared.responses.Provider.datetime_added`
+
+```python
+datetime_added: str
+```
+
+###### `openaq.shared.responses.Provider.datetime_first`
+
+```python
+datetime_first: str
+```
+
+###### `openaq.shared.responses.Provider.datetime_last`
+
+```python
+datetime_last: str
+```
+
+###### `openaq.shared.responses.Provider.entities_id`
+
+```python
+entities_id: int
+```
+
+###### `openaq.shared.responses.Provider.export_prefix`
+
+```python
+export_prefix: str
+```
+
+###### `openaq.shared.responses.Provider.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.Provider.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Provider.name`
+
+```python
+name: str
+```
+
+###### `openaq.shared.responses.Provider.parameters`
+
+```python
+parameters: list[ParameterBase]
+```
+
+###### `openaq.shared.responses.Provider.source_name`
+
+```python
+source_name: str
+```
+
+##### `openaq.shared.responses.ProviderBase`
+
+```python
+ProviderBase(id, name)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Base representation for providers in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.ProviderBase.id) (<code>[int](#int)</code>) – unique identifier for provider
+- [**name**](#openaq.shared.responses.ProviderBase.name) (<code>[str](#str)</code>) – provider name
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.ProviderBase.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.ProviderBase.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.ProviderBase.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.ProviderBase.name`
+
+```python
+name: str
+```
+
+##### `openaq.shared.responses.ProvidersResponse`
+
+```python
+ProvidersResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Provider](#openaq.shared.responses.Provider)\]</code>
+
+Representation of the API response for providers resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.ProvidersResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.ProvidersResponse.results) (<code>[list](#list)\[[Provider](#openaq.shared.responses.Provider)\]</code>) – a list of provider records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.ProvidersResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.ProvidersResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.ProvidersResponse.read_response) –
+
+###### `openaq.shared.responses.ProvidersResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.ProvidersResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.ProvidersResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.ProvidersResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.ProvidersResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.ProvidersResponse.results`
+
+```python
+results: list[Provider]
+```
+
+##### `openaq.shared.responses.R`
+
+```python
+R = TypeVar('R', bound='_ResponseBase')
+```
+
+##### `openaq.shared.responses.Sensor`
+
+```python
+Sensor(id, name, parameter, datetime_first=None, datetime_last=None, coverage=None, latest=None, summary=None)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Detailed information about a sensor in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.Sensor.id) (<code>[int](#int)</code>) – unique identifier for sensor
+- [**name**](#openaq.shared.responses.Sensor.name) (<code>[str](#str)</code>) – sensor name
+- [**parameter**](#openaq.shared.responses.Sensor.parameter) (<code>[Parameter](#openaq.shared.responses.Parameter)</code>) – object representing the parameter measured by the sensor.
+- [**datetime_first**](#openaq.shared.responses.Sensor.datetime_first) (<code>[Datetime](#openaq.shared.responses.Datetime) | None</code>) – datetime value representing first value available for the sensor.
+- [**datetime_last**](#openaq.shared.responses.Sensor.datetime_last) (<code>[Datetime](#openaq.shared.responses.Datetime) | None</code>) – datetime value representing last value available for the sensor.
+- [**coverage**](#openaq.shared.responses.Sensor.coverage) (<code>[Coverage](#openaq.shared.responses.Coverage) | None</code>) – object detailing the data coverage of the sensor
+- [**latest**](#openaq.shared.responses.Sensor.latest) (<code>[LatestBase](#openaq.shared.responses.LatestBase) | None</code>) – latest measurement value for the sensor
+- [**summary**](#openaq.shared.responses.Sensor.summary) (<code>[Summary](#openaq.shared.responses.Summary) | None</code>) – object with summary statistics of mueasurment values for the sensor
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Sensor.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Sensor.coverage`
+
+```python
+coverage: Coverage | None = None
+```
+
+###### `openaq.shared.responses.Sensor.datetime_first`
+
+```python
+datetime_first: Datetime | None = None
+```
+
+###### `openaq.shared.responses.Sensor.datetime_last`
+
+```python
+datetime_last: Datetime | None = None
+```
+
+###### `openaq.shared.responses.Sensor.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.Sensor.latest`
+
+```python
+latest: LatestBase | None = None
+```
+
+###### `openaq.shared.responses.Sensor.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Sensor.name`
+
+```python
+name: str
+```
+
+###### `openaq.shared.responses.Sensor.parameter`
+
+```python
+parameter: Parameter
+```
+
+###### `openaq.shared.responses.Sensor.summary`
+
+```python
+summary: Summary | None = None
+```
+
+##### `openaq.shared.responses.SensorBase`
+
+```python
+SensorBase(id, name, parameter)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Base representation for sensor resource in OpenAQ.
+
+**Attributes:**
+
+- [**id**](#openaq.shared.responses.SensorBase.id) (<code>[int](#int)</code>) – unique identifier for sensor
+- [**name**](#openaq.shared.responses.SensorBase.name) (<code>[str](#str)</code>) – sensor name
+- [**parameter**](#openaq.shared.responses.SensorBase.parameter) (<code>[ParameterBase](#openaq.shared.responses.ParameterBase)</code>) – parameter measured by sensor
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.SensorBase.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.SensorBase.id`
+
+```python
+id: int
+```
+
+###### `openaq.shared.responses.SensorBase.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.SensorBase.name`
+
+```python
+name: str
+```
+
+###### `openaq.shared.responses.SensorBase.parameter`
+
+```python
+parameter: ParameterBase
+```
+
+##### `openaq.shared.responses.SensorsResponse`
+
+```python
+SensorsResponse(headers, meta, results)
+```
+
+Bases: <code>[\_ResponseBase](#openaq.shared.responses._ResponseBase)\[[Sensor](#openaq.shared.responses.Sensor)\]</code>
+
+Representation of the API response for sensors resource.
+
+**Attributes:**
+
+- [**meta**](#openaq.shared.responses.SensorsResponse.meta) (<code>[Meta](#openaq.shared.responses.Meta)</code>) – a metadata object containing information about the results.
+- [**results**](#openaq.shared.responses.SensorsResponse.results) (<code>[list](#list)\[[Sensor](#openaq.shared.responses.Sensor)\]</code>) – a list of sensor records.
+
+**Functions:**
+
+- [**dict**](#openaq.shared.responses.SensorsResponse.dict) – Serializes response data to Python dictionary.
+- [**json**](#openaq.shared.responses.SensorsResponse.json) – Serializes response data to JSON string.
+- [**read_response**](#openaq.shared.responses.SensorsResponse.read_response) –
+
+###### `openaq.shared.responses.SensorsResponse.dict`
+
+```python
+dict()
+```
+
+Serializes response data to Python dictionary.
+
+**Returns:**
+
+- <code>[dict](#openaq.shared.responses._ResponseBase.dict)</code> – Python dictionary of the response data.
+
+###### `openaq.shared.responses.SensorsResponse.headers`
+
+```python
+headers: Headers
+```
+
+###### `openaq.shared.responses.SensorsResponse.json`
+
+```python
+json(encoder=json)
+```
+
+Serializes response data to JSON string.
+
+Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+
+**Parameters:**
+
+- **encoder** (<code>[ModuleType](#types.ModuleType)</code>) – JSON serializer module.
+
+**Returns:**
+
+- <code>[str](#str)</code> – string representation of the response in JSON.
+
+###### `openaq.shared.responses.SensorsResponse.meta`
+
+```python
+meta: Meta
+```
+
+###### `openaq.shared.responses.SensorsResponse.read_response`
+
+```python
+read_response(response)
+```
+
+###### `openaq.shared.responses.SensorsResponse.results`
+
+```python
+results: list[Sensor]
+```
+
+##### `openaq.shared.responses.Summary`
+
+```python
+Summary(min, q02, q25, median, q75, q98, max, sd)
+```
+
+Bases: <code>[\_ResourceBase](#openaq.shared.responses._ResourceBase)</code>
+
+Statistical summary of measurement values.
+
+**Attributes:**
+
+- [**min**](#openaq.shared.responses.Summary.min) (<code>[float](#float)</code>) – mininum value
+- [**q02**](#openaq.shared.responses.Summary.q02) (<code>[float](#float)</code>) – 2nd percentile
+- [**q25**](#openaq.shared.responses.Summary.q25) (<code>[float](#float)</code>) – 25th percentile
+- [**median**](#openaq.shared.responses.Summary.median) (<code>[float](#float)</code>) – median value/50th percentile
+- [**q75**](#openaq.shared.responses.Summary.q75) (<code>[float](#float)</code>) – 75th percentile
+- [**q98**](#openaq.shared.responses.Summary.q98) (<code>[float](#float)</code>) – 98th percentile
+- [**max**](#openaq.shared.responses.Summary.max) (<code>[float](#float)</code>) – maximum value
+- [**sd**](#openaq.shared.responses.Summary.sd) (<code>[float](#float) | None</code>) – standard deviation
+
+**Functions:**
+
+- [**load**](#openaq.shared.responses.Summary.load) – Deserializes JSON response from API into response object.
+
+###### `openaq.shared.responses.Summary.load`
+
+```python
+load(results)
+```
+
+Deserializes JSON response from API into response object.
+
+**Parameters:**
+
+- **results** (<code>[Mapping](#collections.abc.Mapping)\[[str](#str), [Any](#typing.Any)\]</code>) – A dictionary representation of the data returned from the API.
+
+**Returns:**
+
+- <code>[T](#openaq.shared.responses.T)</code> – Deserialized representation of the response data as a Python object.
+
+###### `openaq.shared.responses.Summary.max`
+
+```python
+max: float
+```
+
+###### `openaq.shared.responses.Summary.median`
+
+```python
+median: float
+```
+
+###### `openaq.shared.responses.Summary.min`
+
+```python
+min: float
+```
+
+###### `openaq.shared.responses.Summary.q02`
+
+```python
+q02: float
+```
+
+###### `openaq.shared.responses.Summary.q25`
+
+```python
+q25: float
+```
+
+###### `openaq.shared.responses.Summary.q75`
+
+```python
+q75: float
+```
+
+###### `openaq.shared.responses.Summary.q98`
+
+```python
+q98: float
+```
+
+###### `openaq.shared.responses.Summary.sd`
+
+```python
+sd: float | None
+```
+
+##### `openaq.shared.responses.T`
+
+```python
+T = TypeVar('T', bound='_ResourceBase')
+```
+
+##### `openaq.shared.responses.TResult`
+
+```python
+TResult = TypeVar('TResult')
+```
+
+#### `openaq.shared.transport`
+
+Base class and utlity functions for working with client transport.
+
+**Functions:**
+
+- [**check_response**](#openaq.shared.transport.check_response) – Checks the HTTP response of the request.
+
+**Attributes:**
+
+- [**logger**](#openaq.shared.transport.logger) –
+
+##### `openaq.shared.transport.check_response`
+
+```python
+check_response(res)
+```
+
+Checks the HTTP response of the request.
+
+**Parameters:**
+
+- **res** (<code>[Response](#httpx.Response)</code>) – an httpx.Response object
+
+**Returns:**
+
+- <code>[Response](#httpx.Response)</code> – httpx.Response
+
+**Raises:**
+
+- <code>[BadRequestError](#openaq.shared.exceptions.BadRequestError)</code> – Raised for HTTP 400 error, indicating a client request error.
+- <code>[NotAuthorizedError](#openaq.shared.exceptions.NotAuthorizedError)</code> – Raised for HTTP 401 error, indicating the client is not authorized.
+- <code>[ForbiddenError](#openaq.shared.exceptions.ForbiddenError)</code> – Raised for HTTP 403 error, indicating the request is forbidden.
+- <code>[NotFoundError](#openaq.shared.exceptions.NotFoundError)</code> – Raised for HTTP 404 error, indicating a resource is not found.
+- <code>[TimeoutError](#openaq.shared.exceptions.TimeoutError)</code> – Raised for HTTP 408 error, indicating the request has timed out.
+- <code>[ValidationError](#openaq.shared.exceptions.ValidationError)</code> – Raised for HTTP 422 error, indicating invalid request parameters.
+- <code>[HTTPRateLimitError](#openaq.shared.exceptions.HTTPRateLimitError)</code> – Raised for HTTP 429 error, indicating rate limit exceeded.
+- <code>[ServerError](#openaq.shared.exceptions.ServerError)</code> – Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+- <code>[BadGatewayError](#openaq.shared.exceptions.BadGatewayError)</code> – Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+- <code>[ServiceUnavailableError](#openaq.shared.exceptions.ServiceUnavailableError)</code> – Raised for HTTP 503, indicating that the server is not ready to handle the request.
+- <code>[GatewayTimeoutError](#openaq.shared.exceptions.GatewayTimeoutError)</code> – Raised for HTTP 504 error, indicating a gateway timeout.
+
+##### `openaq.shared.transport.logger`
+
+```python
+logger = logging.getLogger('transport')
+```
+
+#### `openaq.shared.types`
+
+Shared custom types.
+
+**Classes:**
+
+- [**OpenAQConfig**](#openaq.shared.types.OpenAQConfig) – Type definition for .openaq.toml configuration file.
+
+**Attributes:**
+
+- [**BboxOnly**](#openaq.shared.types.BboxOnly) (<code>[TypeAlias](#typing.TypeAlias)</code>) –
+- [**CoordinatesRadius**](#openaq.shared.types.CoordinatesRadius) (<code>[TypeAlias](#typing.TypeAlias)</code>) –
+- [**Data**](#openaq.shared.types.Data) (<code>[TypeAlias](#typing.TypeAlias)</code>) –
+- [**ParameterType**](#openaq.shared.types.ParameterType) (<code>[TypeAlias](#typing.TypeAlias)</code>) –
+- [**Rollup**](#openaq.shared.types.Rollup) (<code>[TypeAlias](#typing.TypeAlias)</code>) –
+- [**SortOrder**](#openaq.shared.types.SortOrder) (<code>[TypeAlias](#typing.TypeAlias)</code>) –
+
+##### `openaq.shared.types.BboxOnly`
+
+```python
+BboxOnly: TypeAlias = tuple[None, None, tuple[float, float, float, float]]
+```
+
+##### `openaq.shared.types.CoordinatesRadius`
+
+```python
+CoordinatesRadius: TypeAlias = tuple[tuple[float, float], int, None]
+```
+
+##### `openaq.shared.types.Data`
+
+```python
+Data: TypeAlias = Literal['measurements', 'hours', 'days', 'years']
+```
+
+##### `openaq.shared.types.OpenAQConfig`
+
+Bases: <code>[TypedDict](#typing.TypedDict)</code>
+
+Type definition for .openaq.toml configuration file.
+
+**Attributes:**
+
+- [**api_key**](#openaq.shared.types.OpenAQConfig.api_key) (<code>[str](#str) | None</code>) –
+
+###### `openaq.shared.types.OpenAQConfig.api_key`
+
+```python
+api_key: str | None
+```
+
+##### `openaq.shared.types.ParameterType`
+
+```python
+ParameterType: TypeAlias = Literal['pollutant', 'meteorological']
+```
+
+##### `openaq.shared.types.Rollup`
+
+```python
+Rollup: TypeAlias = Literal['hourly', 'daily', 'monthly', 'yearly', 'hourofday', 'dayofweek', 'monthofyear']
+```
+
+##### `openaq.shared.types.SortOrder`
+
+```python
+SortOrder: TypeAlias = Literal['ASC', 'DESC', 'asc', 'desc']
+```
+
+#### `openaq.shared.validators`
+
+Validator functions for type checking and runtime validation.
+
+**Functions:**
+
+- [**data_check**](#openaq.shared.validators.data_check) – Check if value is a valid data type.
+- [**datetime_check**](#openaq.shared.validators.datetime_check) – Check if value is a valid datetime object or ISO-8601 string.
+- [**geospatial_params_exclusivity_check**](#openaq.shared.validators.geospatial_params_exclusivity_check) – Check if geospatial query parameter combination is valid.
+- [**integer_id_check**](#openaq.shared.validators.integer_id_check) – Check if value is a valid positive integer within 32-bit range.
+- [**is_int_list**](#openaq.shared.validators.is_int_list) – Check if all items in list are valid integer IDs.
+- [**iso8601_check**](#openaq.shared.validators.iso8601_check) – Check if value is a valid ISO-8601 datetime string.
+- [**iso_check**](#openaq.shared.validators.iso_check) – Check if value is a valid ISO-3166-1 alpha-2 country code.
+- [**limit_check**](#openaq.shared.validators.limit_check) – Check if value is a valid limit number.
+- [**page_check**](#openaq.shared.validators.page_check) – Check if value is a valid page number.
+- [**parameter_type_check**](#openaq.shared.validators.parameter_type_check) – Check if value is a valid parameter type.
+- [**radius_check**](#openaq.shared.validators.radius_check) – Check if value is a valid radius integer.
+- [**rollup_check**](#openaq.shared.validators.rollup_check) – Check if value is a valid rollup type.
+- [**to_datetime**](#openaq.shared.validators.to_datetime) – Convert value to datetime object if not already a datetime.
+- [**validate_bbox**](#openaq.shared.validators.validate_bbox) – Validate bounding box query parameter and raise error if invalid.
+- [**validate_coordinates**](#openaq.shared.validators.validate_coordinates) – Validate coordinates query parameter and raise error if invalid.
+- [**validate_data**](#openaq.shared.validators.validate_data) – Validate data path parameter and raise error if invalid.
+- [**validate_datetime_params**](#openaq.shared.validators.validate_datetime_params) – Validate datetime query parameters and raise error if invalid.
+- [**validate_geospatial_params**](#openaq.shared.validators.validate_geospatial_params) – Validate geospatial query parameters and raise error if invalid.
+- [**validate_integer_id**](#openaq.shared.validators.validate_integer_id) – Validate integer ID parameter and raise error if invalid.
+- [**validate_integer_or_list_integer_params**](#openaq.shared.validators.validate_integer_or_list_integer_params) – Validate query parameter that accepts either a single integer or list of integers.
+- [**validate_iso_param**](#openaq.shared.validators.validate_iso_param) – Validate ISO country code query parameter and raise error if invalid.
+- [**validate_limit_param**](#openaq.shared.validators.validate_limit_param) – Validate limit query parameter and raise error if invalid.
+- [**validate_mobile**](#openaq.shared.validators.validate_mobile) – Validate mobile query parameter and raise error if invalid.
+- [**validate_monitor**](#openaq.shared.validators.validate_monitor) – Validate monitor query parameter and raise error if invalid.
+- [**validate_order_by**](#openaq.shared.validators.validate_order_by) – Validate order_by query parameter and raise error if invalid.
+- [**validate_page_param**](#openaq.shared.validators.validate_page_param) – Validate page query parameter and raise error if invalid.
+- [**validate_parameter_type**](#openaq.shared.validators.validate_parameter_type) – Validate parameter_type query parameter and raise error if invalid.
+- [**validate_radius**](#openaq.shared.validators.validate_radius) – Validate radius query parameter and raise error if invalid.
+- [**validate_rollup**](#openaq.shared.validators.validate_rollup) – Validate rollup path parameter and raise error if invalid.
+- [**validate_sort_order**](#openaq.shared.validators.validate_sort_order) – Validate sort_order query parameter and raise error if invalid.
+
+##### `openaq.shared.validators.data_check`
+
+```python
+data_check(data)
+```
+
+Check if value is a valid data type.
+
+**Parameters:**
+
+- **data** (<code>[object](#object)</code>) – Value to validate as a data path parameter.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[Data](#openaq.shared.types.Data)\]</code> – True if value is one of: 'measurements', 'hours', 'days', 'years', False otherwise.
+
+##### `openaq.shared.validators.datetime_check`
+
+```python
+datetime_check(value)
+```
+
+Check if value is a valid datetime object or ISO-8601 string.
+
+**Parameters:**
+
+- **value** (<code>[object](#object)</code>) – Value to validate as a datetime query parameter.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[datetime](#datetime.datetime) | [str](#str)\]</code> – True if value is a datetime object or valid ISO-8601 string, False otherwise.
+
+##### `openaq.shared.validators.geospatial_params_exclusivity_check`
+
+```python
+geospatial_params_exclusivity_check(coordinates, radius, bbox)
+```
+
+Check if geospatial query parameter combination is valid.
+
+Validates that:
+
+- coordinates and radius are either both provided or both absent
+- bbox is mutually exclusive with coordinates/radius
+
+**Parameters:**
+
+- **coordinates** (<code>[object](#object) | None</code>) – Coordinates query parameter value.
+- **radius** (<code>[object](#object) | None</code>) – Radius query parameter value.
+- **bbox** (<code>[object](#object) | None</code>) – Bounding box query parameter value.
+
+**Returns:**
+
+- <code>[bool](#bool)</code> – True if parameters form a valid combination, False otherwise.
+
+##### `openaq.shared.validators.integer_id_check`
+
+```python
+integer_id_check(id)
+```
+
+Check if value is a valid positive integer within 32-bit range.
+
+**Parameters:**
+
+- **id** (<code>[object](#object)</code>) – Value to validate as an API identifier.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[int](#int)\]</code> – True if value is a valid integer ID (1 to 2,147,483,647), False otherwise.
+
+##### `openaq.shared.validators.is_int_list`
+
+```python
+is_int_list(id)
+```
+
+Check if all items in list are valid integer IDs.
+
+**Parameters:**
+
+- **id** (<code>[list](#list)\[[object](#object)\]</code>) – List of values to validate.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[list](#list)\[[int](#int)\]\]</code> – True if all items are valid integer IDs, False otherwise.
+
+##### `openaq.shared.validators.iso8601_check`
+
+```python
+iso8601_check(value)
+```
+
+Check if value is a valid ISO-8601 datetime string.
+
+**Parameters:**
+
+- **value** (<code>[object](#object)</code>) – Value to validate as an ISO-8601 datetime string.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[str](#str)\]</code> – True if value is a valid ISO-8601 formatted datetime string, False otherwise.
+
+##### `openaq.shared.validators.iso_check`
+
+```python
+iso_check(code)
+```
+
+Check if value is a valid ISO-3166-1 alpha-2 country code.
+
+**Parameters:**
+
+- **code** (<code>[object](#object)</code>) – Value to validate as an ISO country code query parameter.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[str](#str)\]</code> – True if value is a valid 2-letter ISO country code (case-insensitive), False otherwise.
+
+##### `openaq.shared.validators.limit_check`
+
+```python
+limit_check(limit)
+```
+
+Check if value is a valid limit number.
+
+**Parameters:**
+
+- **limit** (<code>[int](#int)</code>) – Value to validate as a limit query parameter.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[int](#int)\]</code> – True if value is an integer between 1 and MAX_LIMIT (1,000), False otherwise.
+
+##### `openaq.shared.validators.page_check`
+
+```python
+page_check(page)
+```
+
+Check if value is a valid page number.
+
+**Parameters:**
+
+- **page** (<code>[object](#object)</code>) – Value to validate as a page query parameter.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[int](#int)\]</code> – True if value is a positive integer, False otherwise.
+
+##### `openaq.shared.validators.parameter_type_check`
+
+```python
+parameter_type_check(parameter_type)
+```
+
+Check if value is a valid parameter type.
+
+**Parameters:**
+
+- **parameter_type** (<code>[object](#object)</code>) – Value to validate as a parameter_type query parameter.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[ParameterType](#openaq.shared.types.ParameterType)\]</code> – True if value is one of: 'pollutant', 'meteorological', False otherwise.
+
+##### `openaq.shared.validators.radius_check`
+
+```python
+radius_check(radius)
+```
+
+Check if value is a valid radius integer.
+
+**Parameters:**
+
+- **radius** (<code>[object](#object)</code>) – Value to validate as a radius query parameter.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[int](#int)\]</code> – True if value is an integer between 1 and 25,000 (meters), False otherwise.
+
+##### `openaq.shared.validators.rollup_check`
+
+```python
+rollup_check(rollup)
+```
+
+Check if value is a valid rollup type.
+
+**Parameters:**
+
+- **rollup** (<code>[object](#object)</code>) – Value to validate as a rollup path parameter.
+
+**Returns:**
+
+- <code>[TypeGuard](#typing.TypeGuard)\[[Rollup](#openaq.shared.types.Rollup)\]</code> – True if value is a valid rollup type (e.g., 'hourly', 'daily', 'monthly'), False otherwise.
+
+##### `openaq.shared.validators.to_datetime`
+
+```python
+to_datetime(value)
+```
+
+Convert value to datetime object if not already a datetime.
+
+**Parameters:**
+
+- **value** (<code>[datetime](#datetime.datetime) | [str](#str)</code>) – Datetime object or ISO-8601 datetime string.
+
+**Returns:**
+
+- <code>[datetime](#datetime.datetime)</code> – Datetime object (converted from string if necessary).
+
+##### `openaq.shared.validators.validate_bbox`
+
+```python
+validate_bbox(bbox)
+```
+
+Validate bounding box query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **bbox** (<code>[object](#object)</code>) – Value representing the bbox query parameter as (min_lon, min_lat, max_lon, max_lat).
+
+**Returns:**
+
+- <code>[tuple](#tuple)\[[float](#float), [float](#float), [float](#float), [float](#float)\]</code> – The unaltered validated bounding box tuple.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If bounding box is not a valid 4-value tuple with valid coordinate ranges.
+
+##### `openaq.shared.validators.validate_coordinates`
+
+```python
+validate_coordinates(coordinates)
+```
+
+Validate coordinates query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **coordinates** (<code>[object](#object)</code>) – Value representing the coordinates query parameter as (latitude, longitude).
+
+**Returns:**
+
+- <code>[tuple](#tuple)\[[float](#float), [float](#float)\]</code> – The unaltered validated coordinates tuple.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If coordinates are not a valid (lat, lon) tuple with valid ranges.
+
+##### `openaq.shared.validators.validate_data`
+
+```python
+validate_data(data)
+```
+
+Validate data path parameter and raise error if invalid.
+
+**Parameters:**
+
+- **data** (<code>[object](#object)</code>) – Value representing the data path parameter.
+
+**Returns:**
+
+- <code>[Data](#openaq.shared.types.Data)</code> – The unaltered validated data value.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If data is not one of the valid data types.
+
+##### `openaq.shared.validators.validate_datetime_params`
+
+```python
+validate_datetime_params(datetime_from, datetime_to)
+```
+
+Validate datetime query parameters and raise error if invalid.
+
+**Parameters:**
+
+- **datetime_from** (<code>[object](#object)</code>) – Value representing the datetime_from query parameter (start date/time).
+- **datetime_to** (<code>[object](#object)</code>) – Value representing the datetime_to query parameter (end date/time), or None.
+
+**Returns:**
+
+- <code>[tuple](#tuple)\[[datetime](#datetime.datetime), [datetime](#datetime.datetime) | None\]</code> – Tuple of validated datetime objects (datetime_from, datetime_to), where datetime_to may be None.
+
+**Raises:**
+
+- <code>[Exception](#Exception)</code> – If either datetime value is invalid.
+
+##### `openaq.shared.validators.validate_geospatial_params`
+
+```python
+validate_geospatial_params(coordinates, radius, bbox)
+```
+
+Validate geospatial query parameters and raise error if invalid.
+
+**Parameters:**
+
+- **coordinates** (<code>[object](#object) | None</code>) – Coordinates query parameter value.
+- **radius** (<code>[object](#object) | None</code>) – Radius query parameter value.
+- **bbox** (<code>[object](#object) | None</code>) – Bounding box query parameter value.
+
+**Returns:**
+
+- <code>[CoordinatesRadius](#openaq.shared.types.CoordinatesRadius) | [BboxOnly](#openaq.shared.types.BboxOnly) | [tuple](#tuple)[None, None, None]</code> – Validated geospatial parameters as one of:
+- <code>[CoordinatesRadius](#openaq.shared.types.CoordinatesRadius) | [BboxOnly](#openaq.shared.types.BboxOnly) | [tuple](#tuple)[None, None, None]</code> – - (coordinates, radius, None) if coordinates/radius provided
+- <code>[CoordinatesRadius](#openaq.shared.types.CoordinatesRadius) | [BboxOnly](#openaq.shared.types.BboxOnly) | [tuple](#tuple)[None, None, None]</code> – - (None, None, bbox) if bbox provided
+- <code>[CoordinatesRadius](#openaq.shared.types.CoordinatesRadius) | [BboxOnly](#openaq.shared.types.BboxOnly) | [tuple](#tuple)[None, None, None]</code> – - (None, None, None) if no geospatial parameters provided
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If parameter combination is invalid or values fail validation.
+
+##### `openaq.shared.validators.validate_integer_id`
+
+```python
+validate_integer_id(id)
+```
+
+Validate integer ID parameter and raise error if invalid.
+
+**Parameters:**
+
+- **id** (<code>[object](#object)</code>) – Value representing an ID query or path parameter.
+
+**Returns:**
+
+- <code>[int](#int)</code> – The unaltered validated integer ID.
+
+**Raises:**
+
+- <code>[IdentifierOutOfBoundsError](#openaq.shared.exceptions.IdentifierOutOfBoundsError)</code> – If ID is not a positive integer within valid range.
+
+##### `openaq.shared.validators.validate_integer_or_list_integer_params`
+
+```python
+validate_integer_or_list_integer_params(param_name, id)
+```
+
+Validate query parameter that accepts either a single integer or list of integers.
+
+**Parameters:**
+
+- **param_name** (<code>[str](#str)</code>) – Name of the query parameter (for error messages).
+- **id** (<code>[list](#list)\[[object](#object)\] | [object](#object)</code>) – Value representing a query parameter that can be an integer or list of integers.
+
+**Returns:**
+
+- <code>[list](#list)\[[int](#int)\] | [int](#int)</code> – The unaltered validated integer or list of integers.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If value is not a valid integer or list of valid integers.
+
+##### `openaq.shared.validators.validate_iso_param`
+
+```python
+validate_iso_param(code)
+```
+
+Validate ISO country code query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **code** (<code>[str](#str)</code>) – Value representing the iso query parameter (ISO-3166-1 alpha-2 country code).
+
+**Returns:**
+
+- <code>[str](#str)</code> – The unaltered validated ISO country code string.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If code is not a valid ISO-3166-1 alpha-2 country code.
+
+##### `openaq.shared.validators.validate_limit_param`
+
+```python
+validate_limit_param(limit)
+```
+
+Validate limit query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **limit** (<code>[int](#int)</code>) – Value representing the limit query parameter (results per page).
+
+**Returns:**
+
+- <code>[int](#int)</code> – The unaltered validated limit integer.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If limit is not an integer between 1 and 1,000.
+
+##### `openaq.shared.validators.validate_mobile`
+
+```python
+validate_mobile(mobile)
+```
+
+Validate mobile query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **mobile** (<code>[object](#object)</code>) – Value representing the mobile query parameter.
+
+**Returns:**
+
+- <code>[bool](#bool)</code> – The unaltered validated mobile boolean.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If mobile is not a boolean.
+
+##### `openaq.shared.validators.validate_monitor`
+
+```python
+validate_monitor(monitor)
+```
+
+Validate monitor query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **monitor** (<code>[object](#object)</code>) – Value representing the monitor query parameter.
+
+**Returns:**
+
+- <code>[bool](#bool)</code> – The unaltered validated monitor boolean.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If monitor is not a boolean.
+
+##### `openaq.shared.validators.validate_order_by`
+
+```python
+validate_order_by(order_by)
+```
+
+Validate order_by query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **order_by** (<code>[object](#object)</code>) – Value representing the order_by query parameter (field name to sort by).
+
+**Returns:**
+
+- <code>[str](#str)</code> – The unaltered validated order_by string.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If order_by is not a string.
+
+##### `openaq.shared.validators.validate_page_param`
+
+```python
+validate_page_param(page)
+```
+
+Validate page query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **page** (<code>[object](#object)</code>) – Value representing the page query parameter.
+
+**Returns:**
+
+- <code>[int](#int)</code> – The unaltered validated page integer.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If page is not a positive integer.
+
+##### `openaq.shared.validators.validate_parameter_type`
+
+```python
+validate_parameter_type(parameter_type)
+```
+
+Validate parameter_type query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **parameter_type** (<code>[object](#object)</code>) – Value representing the parameter_type query parameter.
+
+**Returns:**
+
+- <code>[ParameterType](#openaq.shared.types.ParameterType)</code> – The unaltered validated parameter_type value.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If parameter_type is not one of the valid parameter_type types.
+
+##### `openaq.shared.validators.validate_radius`
+
+```python
+validate_radius(radius)
+```
+
+Validate radius query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **radius** (<code>[object](#object)</code>) – Value representing the radius query parameter (in meters).
+
+**Returns:**
+
+- <code>[int](#int)</code> – The unaltered validated radius integer.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If radius is not an integer between 1 and 25,000.
+
+##### `openaq.shared.validators.validate_rollup`
+
+```python
+validate_rollup(rollup)
+```
+
+Validate rollup path parameter and raise error if invalid.
+
+**Parameters:**
+
+- **rollup** (<code>[object](#object)</code>) – Value representing the rollup path parameter.
+
+**Returns:**
+
+- <code>[Rollup](#openaq.shared.types.Rollup)</code> – The unaltered validated rollup value.
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If rollup is not one of the valid rollup types.
+
+##### `openaq.shared.validators.validate_sort_order`
+
+```python
+validate_sort_order(sort_order)
+```
+
+Validate sort_order query parameter and raise error if invalid.
+
+**Parameters:**
+
+- **sort_order** (<code>[object](#object)</code>) – Value representing the sort_order query parameter.
+
+**Returns:**
+
+- <code>[SortOrder](#openaq.shared.types.SortOrder)</code> – The unaltered validated sort_order value (one of: 'ASC', 'DESC', 'asc', 'desc').
+
+**Raises:**
+
+- <code>[InvalidParameterError](#openaq.shared.exceptions.InvalidParameterError)</code> – If sort_order is not a valid sort order string.

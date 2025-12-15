@@ -1,0 +1,126 @@
+---
+title: Locations
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+
+
+
+## Methods
+
+### get a single location
+
+
+<Tabs  syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    with OpenAQ() as client:
+        client.locations.get()
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    async with AsyncOpenAQ() as client:
+        await client.locations.get()
+    ```
+  </TabItem>
+</Tabs>
+
+
+### iterate through multiple locations
+
+
+<Tabs syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    with OpenAQ() as client:
+        client.locations.get()
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    async with AsyncOpenAQ() as client:
+        await client.locations.get()
+    ```
+  </TabItem>
+</Tabs>
+
+### get latest measuremetns from a location
+
+
+<Tabs syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    with OpenAQ() as client:
+        client.locations.list()
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    async with AsyncOpenAQ() as client:
+        await client.locations.list()
+    ```
+  </TabItem>
+</Tabs>
+
+## Response
+
+
+```
+Location[]
+└── [Location]
+    ├── id: int
+    ├── name: str
+    ├── locality: str | None
+    ├── timezone: str
+    ├── country: CountryBase
+    │   ├── id: int
+    │   ├── code: str
+    │   └── name: str
+    ├── owner: OwnerBase
+    │   ├── id: int
+    │   └── name: str
+    ├── provider: ProviderBase
+    │   ├── id: int
+    │   └── name: str
+    ├── is_mobile: bool
+    ├── is_monitor: bool
+    ├── instruments: InstrumentBase[]
+    │   └── [InstrumentBase]
+    │       ├── id: int
+    │       └── name: str
+    ├── sensors: SensorBase[]
+    │   └── [SensorBase]
+    │       ├── id: int
+    │       ├── name: str
+    │       └── parameter: ParameterBase
+    │           ├── id: int
+    │           ├── name: str
+    │           ├── units: str
+    │           └── display_name: str | None
+    ├── coordinates: Coordinates
+    │   ├── latitude: float
+    │   └── longitude: float
+    ├── bounds: tuple[float, float, float, float]
+    ├── distance: float | None
+    ├── datetime_first: Datetime
+    │   ├── utc: str
+    │   └── local: str
+    └── datetime_last: Datetime├── utc: str└── local: str
+```
+
+
+

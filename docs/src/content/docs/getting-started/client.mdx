@@ -1,0 +1,125 @@
+---
+title: Client
+---
+
+The OpenAQ SDK provides the `OpenAQ` and `AsyncOpenAQ` classes which serve as
+clients for calling endpoints in the OpenAQ API. 
+
+### API key
+
+To use the OpenAQ SDK with the OpenAQ API a valid OpenAQ API key must be
+provided to the client at instantiation.
+
+```py
+from openaq import OpenAQ
+
+client = OpenAQ(api_key="replace-with-a-valid-openaq-api-key")
+```
+
+The OpenAQ API key can be passed directly as an argument on the creation of the
+client as shown above. Alternatively, we can set the `OPENAQ_API_KEY`
+environment variable to set the `api_key` value without directly setting the
+value on client instantiation. e.g.:
+
+```py title="main.py"
+from openaq import OpenAQ
+
+client = OpenAQ()
+```
+
+```sh
+OPENAQ_API_KEY=replace-with-a-valid-openaq-api-key python main.py
+```
+
+Setting the API key via the `api_key` argument on instantiation will always
+supercede the implicit setting of `api_key` through the `OPENAQ_API_KEY` 
+environment variable.
+
+If no key is provided, the client will raise an `ApiKeyMissingError` exception.
+If the key is invalid the request will raise a `NotAuthorizedError` HTTP 401
+exception.
+
+## Synchronous Client
+
+The `OpenAQ` class provide a synchronous interface for accessing resources from
+the OpenAQ API. 
+
+```py
+from openaq import OpenAQ
+```
+
+The synchronous client uses HTTPX's Client under the hood to provide HTTP
+connection pooling  which provides ["significant performance benefits"](https://www.python-httpx.org/advanced/clients/). This
+also means the connection should be closed after finishing requests to release 
+the pool.
+
+```py
+from openaq import OpenAQ
+
+
+client = OpenAQ()
+
+# call resources with the open connection pool
+
+client.close()
+
+```
+
+### Context manager 
+
+The OpenAQ client can also be used as a context manager. Using a `with` block 
+will ensure the client closes after leaving the block. When using as a 
+context manager it is not necessary to call the `close()` method, as it is 
+handled automatically.
+
+```py
+with OpenAQ(api_key='replace-with-a-valid-openaq-api-key') as client:
+    ...
+```
+
+
+## Asynchronous Client
+
+The `AsyncOpenAQ` class provide an asynchronous interface for accessing
+resources from the OpenAQ API. This can be helpful when working with asyncio or 
+other asynchronous environments where you want to avoid blocking calls. 
+
+```py
+from openaq import AsyncOpenAQ
+```
+
+The asynchronous client uses HTTPX's AsyncClient under the hood to provide HTTP
+connection pooling. This also means the connection should be closed after
+finishing requests to release the pool. For the asynchronous client the 
+`close()` method is an asynchronous function and so must be called with an 
+`await`.
+
+
+```python
+import asyncio
+
+from openaq import AsyncOpenAQ
+
+async def main():
+    client = AsyncOpenAQ(api_key='replace-with-a-valid-openaq-api-key')
+    await client.close()
+
+if __name__ ==  '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+```
+
+
+
+
+### Context manager 
+
+The AsyncOpenAQ asynchronous client can also be used as a context manager,
+providing the same automatic connection management and benefit as the
+synchronous client. The only difference is the use of the `async` keyword when
+declaring the context manager block. 
+
+```py
+async with OpenAQ(api_key='replace-with-a-valid-openaq-api-key') as client:
+    ...
+```

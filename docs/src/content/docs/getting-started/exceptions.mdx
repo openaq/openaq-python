@@ -1,0 +1,43 @@
+---
+title: Exceptions
+---
+
+The OpenAQ Python SDK raises exceptions when an error occurs. Custom exceptions
+included in the package include two main types: `OpenAQError` and `APIError`.
+
+Using `try` and `except` the exception allow a more predictable interface for 
+catching errors and identifying the specific class of error thrown. 
+
+### OpenAQError 
+
+`OpenAQError` is a superclass that is inherited by exceptions that indicate the
+OpenAQ SDK client or methods has found an issue and throws an exception _before_
+making a request to the API.
+
+```py
+try:
+    client = OpenAQ() # raises ApiKeyMissingError since no key is provided
+except ApiKeyMissingError as e:
+    print(e)
+```
+
+### APIError
+
+`APIError` is a superclass that is inherited by exceptions that indicate an 
+error has occured _after_ the request to the API has been made. `APIError` 
+exceptions are all wrappers around HTTP Error codes (4xx and 5xx) and provide
+access to the `status_code` in the body of the exception:
+
+```py
+from openaq import OpenAQ 
+
+with client as OpenAQ(api_key='replace-with-valid-openaq-api-key'):
+    try:
+        client.countries.get(999)
+    except NotFoundError as e:
+        print(e.message) # Country not found
+        print(e.status_code) # 404
+```
+
+
+See the Exception reference documentation for a detailed lists of Exceptions.

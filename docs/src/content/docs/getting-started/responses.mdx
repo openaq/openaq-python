@@ -1,0 +1,66 @@
+---
+title: Responses
+---
+
+The OpenAQ API follows a resource-based design, where each endpoint returns a 
+response corresponding to the endpoint. The OpenAQ Python SDK further simplifies
+this by providing convenient resources from the client with methods to call the 
+endpoints. All API responses through the SDK provide common features for reading
+data as convenient Python objects, a dictionary or a JSON string. 
+
+## Response objects
+
+By default, resource methods return OpenAQ API JSON responses into deserialized
+data objects for easier access. These data objects support convenient dot
+notation access to attributes, allowing you to retrieve values like
+`response.meta.page` or `response.headers.x_ratelimit_remaining` instead of
+using dictionary-style key lookups.
+
+All response objects follow a common top-level form, with specific data objects
+for each specific resources within the results.
+
+```
+├── headers
+│   ├── x_ratelimit_limit: int | None
+│   ├── x_ratelimit_remaining: int | None
+│   ├── x_ratelimit_used: int | None
+│   └── x_ratelimit_reset: int | None
+├── meta
+│   ├── name: str
+│   ├── website: str
+│   ├── page: int
+│   ├── limit: int
+│   └── found: int
+└── results: list[]
+```
+
+The structure of individual resource response objects can be found in their
+respective pages (locations, providers, measurements etc.)
+
+
+## Dictionary
+
+Responses can also be optionally returned as a Python dictionary. All resource 
+responses include a `dict()` method which will allow property access using 
+Python dictionary key syntax:
+
+```py
+response.dict()['results']
+```
+
+or using the built-in `get()`:
+
+```py
+response.dict().get('results')
+```
+
+
+## JSON
+
+The response objects also provide the option to return the raw JSON string of 
+the response payload. This can be accessed on all response objects with the 
+`json()` method.
+
+```py
+response.json()
+```

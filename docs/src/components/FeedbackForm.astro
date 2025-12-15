@@ -1,0 +1,183 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<style>
+  .feedback-form {
+    margin: 2em 0 1em;
+    text-align: center;
+  }
+
+  .feedback-form > fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .feedback-note--hidden {
+    display: none;
+  }
+
+  .feedback-form-buttons {
+    margin-top: 0;
+  }
+
+  .feedback-form-buttons > button {
+    cursor: pointer;
+    background: #0000;
+    border: 0;
+    font-family: inherit;
+    font-size: inherit;
+    margin: 0;
+    padding: 0;
+  }
+
+  .feedback-icon {
+    color: #5a6672;
+  }
+
+  .feedback-icon:hover {
+    transition: all 300ms ease-in-out;
+    transform: scale(1.2);
+    color: #000;
+  }
+</style>
+
+<form class="feedback-form">
+  <fieldset>
+    <legend>Was this page helpful?</legend>
+    <div class="feedback-form-buttons" style="margin-top: 0;">
+      <input type="hidden" name="feedback-value" id="feedback-value" value="" />
+      <button type="submit" data-value="good" style="margin-top: 0.5rem;">
+        <Icon name="mdi:emoticon-happy-outline" class="feedback-icon" width="32" height="32" />
+      </button>
+      <button type="submit" data-value="bad"style="margin-top: 0.5rem;" >
+        <Icon name="mdi:emoticon-sad-outline" class="feedback-icon" width="32" height="32" />
+      </button>
+    </div>
+    <div class="feedback-note feedback-note--hidden">
+      Thank you for your feedback
+    </div>
+  </fieldset>
+</form>
+
+<script>
+  import Plausible from 'plausible-tracker';
+  const { trackEvent } = Plausible({
+    domain: 'docs.openaq.org',
+  });
+
+  function onFormSubmit(e: SubmitEvent) {
+    e.preventDefault();
+    const value = submitValueField.value;
+    trackEvent(`Feedback:${value}`);
+    const form = document.querySelector<HTMLFormElement>('.feedback-form');
+    (form!.firstElementChild! as HTMLFieldSetElement).disabled = true;
+    form!.children;
+    const note = document.querySelector('.feedback-note');
+    note!.classList.remove('feedback-note--hidden');
+    return false;
+  }
+
+  const form = document.querySelector<HTMLFormElement>('.feedback-form');
+  form!.addEventListener('submit', onFormSubmit);
+
+  const submitValueField = document.getElementById('feedback-value') as HTMLInputElement;
+
+  form!.querySelectorAll('button[type="submit"]').forEach(button => {
+    button.addEventListener('click', function(e) {
+      submitValueField!.value = (e.currentTarget as HTMLButtonElement).getAttribute('data-value')!;
+    });
+  });
+</script>---
+import { Icon } from 'astro-icon/components';
+---
+
+<style>
+  .feedback-form {
+    margin: 2em 0 1em;
+    text-align: center;
+  }
+
+  .feedback-form > fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .feedback-note--hidden {
+    display: none;
+  }
+
+  .feedback-form-buttons {
+    margin-top: 0;
+  }
+
+  .feedback-form-buttons > button {
+    cursor: pointer;
+    background: #0000;
+    border: 0;
+    font-family: inherit;
+    font-size: inherit;
+    margin: 0;
+    padding: 0;
+  }
+
+  .feedback-icon {
+    color: #5a6672;
+  }
+
+  .feedback-icon:hover {
+    transition: all 300ms ease-in-out;
+    transform: scale(1.2);
+    color: #000;
+  }
+</style>
+
+<form class="feedback-form">
+  <fieldset>
+    <legend>Was this page helpful?</legend>
+    <div class="feedback-form-buttons" style="margin-top: 0;">
+      <input type="hidden" name="feedback-value" id="feedback-value" value="" />
+      <button type="submit" data-value="good" style="margin-top: 0.5rem;">
+        <Icon name="mdi:emoticon-happy-outline" class="feedback-icon" width="32" height="32" />
+      </button>
+      <button type="submit" data-value="bad"style="margin-top: 0.5rem;" >
+        <Icon name="mdi:emoticon-sad-outline" class="feedback-icon" width="32" height="32" />
+      </button>
+    </div>
+    <div class="feedback-note feedback-note--hidden">
+      Thank you for your feedback
+    </div>
+  </fieldset>
+</form>
+
+<script>
+  import Plausible from 'plausible-tracker';
+  const { trackEvent } = Plausible({
+    domain: 'docs.openaq.org',
+  });
+
+  function onFormSubmit(e: SubmitEvent) {
+    e.preventDefault();
+    const value = submitValueField.value;
+    trackEvent(`Feedback:${value}`);
+    const form = document.querySelector<HTMLFormElement>('.feedback-form');
+    (form!.firstElementChild! as HTMLFieldSetElement).disabled = true;
+    form!.children;
+    const note = document.querySelector('.feedback-note');
+    note!.classList.remove('feedback-note--hidden');
+    return false;
+  }
+
+  const form = document.querySelector<HTMLFormElement>('.feedback-form');
+  form!.addEventListener('submit', onFormSubmit);
+
+  const submitValueField = document.getElementById('feedback-value') as HTMLInputElement;
+
+  form!.querySelectorAll('button[type="submit"]').forEach(button => {
+    button.addEventListener('click', function(e) {
+      submitValueField!.value = (e.currentTarget as HTMLButtonElement).getAttribute('data-value')!;
+    });
+  });
+</script>

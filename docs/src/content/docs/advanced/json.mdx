@@ -1,0 +1,28 @@
+---
+title: orjson JSON serialization
+---
+
+The OpenAQ SDK provides optional support for `orjson` for JSON serialization.
+This may provide up to [2x speed performance]() when serializing a response
+object to JSON. This may be a useful optimization if performance is crucial for
+your application and you need to serialize data to JSON.
+
+`orjson` is an optional dependency and can be installed with:
+
+```sh
+pip install openaq[orjson]
+```
+
+Then when serializing results pass the orjson pass to the `json()` method's 
+encoder parameter, which defaults to the built-in `json` module:
+
+```py
+import orjson
+
+# create a client
+# ...
+# call a resource
+
+res.json(encoder = orjson)
+
+```
