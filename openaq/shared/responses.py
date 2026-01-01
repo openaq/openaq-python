@@ -864,7 +864,13 @@ class LatestBase(_ResourceBase):
     datetime: Datetime
     value: float
     coordinates: Coordinates
-
+    
+    def __post_init__(self) -> None:
+        """Sets class attributes to correct type after checking input type."""
+        if isinstance(self.datetime, dict):
+            self.datetime = Datetime.load(self.datetime)
+        if isinstance(self.coordinates, dict):
+            self.coordinates = Coordinates.load(self.coordinates)
 
 @dataclass
 class Sensor(_ResourceBase):
@@ -890,6 +896,20 @@ class Sensor(_ResourceBase):
     latest: LatestBase | None = None
     summary: Summary | None = None
 
+    def __post_init__(self) -> None:
+        """Sets class attributes to correct type after checking input type."""
+        if isinstance(self.parameter, dict):
+            self.parameter = Parameter.load(self.parameter)
+        if isinstance(self.datetime_first, dict):
+            self.datetime_first = Datetime.load(self.datetime_first)
+        if isinstance(self.datetime_last, dict):
+            self.datetime_last = Datetime.load(self.datetime_last)
+        if isinstance(self.coverage, dict):
+            self.coverage = Coverage.load(self.coverage)
+        if isinstance(self.latest, dict):
+            self.latest = LatestBase.load(self.latest)
+        if isinstance(self.summary, dict):
+            self.summary = Summary.load(self.summary)
 
 @dataclass
 class SensorsResponse(_ResponseBase[Sensor]):
@@ -921,6 +941,12 @@ class Latest(_ResourceBase):
     sensors_id: int
     locations_id: int
 
+    def __post_init__(self) -> None:
+        """Sets class attributes to correct type after checking input type."""
+        if isinstance(self.datetime, dict):
+            self.datetime = Datetime.load(self.datetime)
+        if isinstance(self.coordinates, dict):
+            self.coordinates = Coordinates.load(self.coordinates)
 
 @dataclass
 class LatestResponse(_ResponseBase[Latest]):
