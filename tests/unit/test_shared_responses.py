@@ -69,6 +69,13 @@ def mock_response(data: str) -> httpx.Response:
         status_code=200, headers=RATE_LIMIT_HEADERS, json=json.loads(data)
     )
 
+def remove_nulls(value):
+    if isinstance(value, dict):
+        return {k: remove_nulls(v) for k, v in value.items() if v is not None}
+    if isinstance(value, list):
+        return [remove_nulls(v) for v in value]
+    else:
+        return value
 
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")
 def test_rate_limit_headers_response():
@@ -159,7 +166,7 @@ def test_responses_json(name: str, response_class: _ResponseBase):
     d = json.loads(response_data.json())
     headers_less_response = {k: d[k] for k in set(list(d.keys())) - set(['headers'])}
 
-    assert json.loads(response) == headers_less_response
+    assert remove_nulls(json.loads(response)) == remove_nulls(headers_less_response)
 
 
 def test_response_ignores_unexpected_fields():

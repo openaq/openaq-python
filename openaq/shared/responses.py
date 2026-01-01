@@ -715,6 +715,7 @@ class Summary(_ResourceBase):
     q98: float
     max: float
     sd: float | None
+    avg: float | None = None
 
 
 @dataclass
