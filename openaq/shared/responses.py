@@ -399,6 +399,8 @@ class Location(_ResourceBase):
             ]
         if isinstance(self.coordinates, dict):
             self.coordinates = Coordinates.load(self.coordinates)
+        if isinstance(self.bounds, list):
+            self.bounds = tuple(self.bounds)
         if isinstance(self.datetime_first, dict):
             self.datetime_first = Datetime.load(self.datetime_first)
         if isinstance(self.datetime_last, dict):
