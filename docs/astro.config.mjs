@@ -9,9 +9,15 @@ export default defineConfig({
 			title: 'OpenAQ Python SDK',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/openaq/openaq-python' }],
 			sidebar: [
+												{
+					label: 'About',
+					items: [
+						{label: 'About', slug : 'about/about'},
+					]},
 								{
 					label: 'Getting started',
 					items: [
+
 						{label: 'Quick start', slug : 'getting-started/quick-start'},
 						{label: 'Client', slug : 'getting-started/client'},
 						{label: 'Pagination', slug : 'getting-started/pagination'},

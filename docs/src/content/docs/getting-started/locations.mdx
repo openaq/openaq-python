@@ -7,9 +7,19 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 
 
+
 ## Methods
 
 ### get a single location
+
+```py
+get(locations_id: int) -> LocationsResponse
+```
+
+Arguments:
+- locations_id: a number representing 
+
+#### Example
 
 
 <Tabs  syncKey="client">
@@ -33,6 +43,30 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 
 ### iterate through multiple locations
+
+```py
+list(
+  limit: int = 100, 
+  page:int = 1, 
+  radius: int | None = None,
+  iso: str | None = None
+  coordinate: tuple[float, float] | None = None
+  countries_id: list[int] | int
+  ) -> LocationsResponse
+```
+
+Arguments:
+
+| name   | description  |  rules | 
+|---|---|---|
+|  countries_id | ``` list[int] \| int ```   |  cannot be used with `iso`  | 
+|   |   |   |   
+|   |   |   |   
+
+- radius: a number representing the meters around a point to search, is optional
+must be accompanied by `coordinates`.
+  - WARNING: cannot be used in combination with `bbox`
+- countries_id: cannot be used with `iso`
 
 
 <Tabs syncKey="client">
