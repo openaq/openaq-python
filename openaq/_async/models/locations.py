@@ -131,23 +131,23 @@ class Locations(AsyncResourceBase):
         page = validate_page_param(page)
         limit = validate_limit_param(limit)
         validate_geospatial_params(coordinates, radius, bbox)
-        if providers_id:
+        if providers_id is not None:
             providers_id = validate_integer_or_list_integer_params(
                 'providers_id', providers_id
             )
-        if countries_id:
+        if countries_id is not None:
             countries_id = validate_integer_or_list_integer_params(
                 'countries_id', countries_id
             )
-        if parameters_id:
+        if parameters_id is not None:
             parameters_id = validate_integer_or_list_integer_params(
                 'parameters_id', parameters_id
             )
-        if licenses_id:
+        if licenses_id is not None:
             licenses_id = validate_integer_or_list_integer_params(
                 'licenses_id', licenses_id
             )
-        if iso:
+        if iso is not None:
             iso = validate_iso_param(iso)
         if monitor is not None:
             monitor = validate_monitor(monitor)

@@ -1,9 +1,10 @@
 from __future__ import annotations
+import logging
 
 import httpx
 
 from types import TracebackType
-from typing import Any, Mapping
+from typing import Mapping
 
 from openaq._async.models.countries import Countries
 from openaq._async.models.instruments import Instruments
@@ -21,6 +22,8 @@ from openaq.shared.client import (
 )
 
 from .transport import AsyncTransport
+
+logger = logging.getLogger('openaq.async')
 
 
 class AsyncOpenAQ(BaseClient[AsyncTransport]):
@@ -93,6 +96,7 @@ class AsyncOpenAQ(BaseClient[AsyncTransport]):
         ) = None,
         headers: httpx.Headers | Mapping[str, str] | None = None,
     ) -> httpx.Response:
+        logger.debug(f"AsyncOpenAQ client request: {method.upper()} {path}")
         self._check_rate_limit()
         request_headers = self.build_request_headers(headers)
         url = self._base_url + path

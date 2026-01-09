@@ -145,11 +145,11 @@ class Locations(SyncResourceBase):
                 'providers_id', providers_id
             )
         if countries_id is not None:
-             countries_id = validate_integer_or_list_integer_params(
+            countries_id = validate_integer_or_list_integer_params(
                 'countries_id', countries_id
             )
         if parameters_id is not None:
-             parameters_id = validate_integer_or_list_integer_params(
+            parameters_id = validate_integer_or_list_integer_params(
                 'parameters_id', parameters_id
             )
         if licenses_id is not None:

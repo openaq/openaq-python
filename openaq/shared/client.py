@@ -19,8 +19,7 @@ from openaq._sync.transport import Transport
 from openaq.shared.exceptions import ApiKeyMissingError, RateLimitError
 from openaq.shared.types import OpenAQConfig
 
-
-logger = logging.getLogger('openaq')
+logger = logging.getLogger("openaq.client")
 
 # for Python versions <3.11 tomllib is not part of std. library
 _has_toml = True
@@ -88,6 +87,16 @@ class BaseClient(ABC, Generic[TTransport]):
             self._api_key = api_key
         else:
             self._api_key = self._get_api_key()
+
+        logger.debug(
+            f"Initializing {self.__class__.__name__}",
+            extra={
+                "base_url": base_url,
+                "has_api_key": self._api_key is not None,
+                "api_key_source": "parameter" if api_key else "environment/config",
+            },
+        )
+
         self._headers = httpx.Headers(headers)
         self._transport: TTransport = transport
         self._base_url = base_url
@@ -99,9 +108,6 @@ class BaseClient(ABC, Generic[TTransport]):
 
     def _check_api_key_url(self) -> None:
         if not self.api_key and self.base_url == DEFAULT_BASE_URL:
-            logger.error(
-                "API key not set: An API key is required when using the OpenAQ API"
-            )
             raise ApiKeyMissingError(
                 "API key not set: An API key is required when using the OpenAQ API"
             )
@@ -206,7 +212,13 @@ class BaseClient(ABC, Generic[TTransport]):
 
     def _check_rate_limit(self) -> None:
         if self._is_rate_limited():
-            logger.exception(f"Rate limit exceeded")
+            logger.warning(
+                "Rate limit exceeded, blocking request",
+                extra={
+                    "rate_limit_reset_seconds": self._rate_limit_reset_seconds,
+                    "rate_limit_reset_datetime": self._rate_limit_reset_datetime.isoformat(),
+                },
+            )
             message = f"Rate limit exceeded. Limit resets in {self._rate_limit_reset_seconds} seconds"
             raise RateLimitError(message)
 

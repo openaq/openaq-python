@@ -420,3 +420,19 @@ class GatewayTimeoutError(ServerError):
     """
 
     status_code: Literal[504] = 504
+
+
+class UnexpectedStatusCodeError(APIError):
+    """HTTP 504 - Gateway Timeout.
+
+    Raised when the API returns an unhandled status code, indicating that the
+    other SDK exceptions do not cover the status code.
+
+    Args:
+        message (str, optional): Human readable string describing the error
+
+    Attributes:
+        status_code (int): HTTP status code.
+    """
+
+    status_code: int
