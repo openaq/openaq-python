@@ -690,6 +690,8 @@ class ManufacturersResponse(_ResponseBase[Manufacturer]):
         results: a list of manufacturer records.
     """
 
+    results: list[Manufacturer]
+
 
 # Measurements
 
@@ -867,13 +869,14 @@ class LatestBase(_ResourceBase):
     datetime: Datetime
     value: float
     coordinates: Coordinates
-    
+
     def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.datetime, dict):
             self.datetime = Datetime.load(self.datetime)
         if isinstance(self.coordinates, dict):
             self.coordinates = Coordinates.load(self.coordinates)
+
 
 @dataclass
 class Sensor(_ResourceBase):
@@ -914,6 +917,7 @@ class Sensor(_ResourceBase):
         if isinstance(self.summary, dict):
             self.summary = Summary.load(self.summary)
 
+
 @dataclass
 class SensorsResponse(_ResponseBase[Sensor]):
     """Representation of the API response for sensors resource.
@@ -950,6 +954,7 @@ class Latest(_ResourceBase):
             self.datetime = Datetime.load(self.datetime)
         if isinstance(self.coordinates, dict):
             self.coordinates = Coordinates.load(self.coordinates)
+
 
 @dataclass
 class LatestResponse(_ResponseBase[Latest]):
