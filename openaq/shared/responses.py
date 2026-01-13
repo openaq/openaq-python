@@ -48,7 +48,7 @@ class _ResourceBase:
         out: dict[str, Any] = {}
         for k, v in data.items():
             if k not in _DECAMELIZE_CACHE:
-                _DECAMELIZE_CACHE[k] = decamelize(k)
+                _DECAMELIZE_CACHE[k] = cast(str, decamelize(k))
             key = _DECAMELIZE_CACHE[k]
             if isinstance(v, dict):
                 out[key] = cls._deserialize(v)
