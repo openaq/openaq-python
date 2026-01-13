@@ -25,6 +25,8 @@ except ImportError:
 
 T = TypeVar("T", bound="_ResourceBase")
 
+_DECAMELIZE_CACHE: dict[str, str] = {}
+
 
 class _ResourceBase:
     """Base clase for all response classes.
@@ -45,7 +47,9 @@ class _ResourceBase:
         """
         out: dict[str, Any] = {}
         for k, v in data.items():
-            key = cast(str, decamelize(k))
+            if k not in _DECAMELIZE_CACHE:
+                _DECAMELIZE_CACHE[k] = decamelize(k)
+            key = _DECAMELIZE_CACHE[k]
             if isinstance(v, dict):
                 out[key] = cls._deserialize(v)
             elif isinstance(v, list):
