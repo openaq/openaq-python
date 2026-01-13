@@ -34,6 +34,8 @@ class _ResourceBase:
 
     """
 
+    __slots__ = ()
+
     @classmethod
     def _deserialize(cls: type[T], data: Mapping[str, Any]) -> dict[str, Any]:
         """Deserializes data and convert keys from camel case to snake case.
@@ -73,7 +75,7 @@ class _ResourceBase:
         return cls(**expected_fields)
 
 
-@dataclass
+@dataclass(slots=True)
 class Headers:
     """API response headers.
 
@@ -97,7 +99,7 @@ class Headers:
         self.x_ratelimit_reset = int(self.x_ratelimit_reset or 0)
 
 
-@dataclass
+@dataclass(slots=True)
 class Meta(_ResourceBase):
     """API response metadata.
 
@@ -121,7 +123,7 @@ R = TypeVar("R", bound="_ResponseBase")
 TResult = TypeVar("TResult")
 
 
-@dataclass
+@dataclass(slots=True)
 class _ResponseBase(Generic[TResult]):
     """Base clase for all response classes.
 
@@ -209,7 +211,7 @@ class _ResponseBase(Generic[TResult]):
         return encoder.dumps(self._serialize(self.dict()), ensure_ascii=False)
 
 
-@dataclass
+@dataclass(slots=True)
 class CountryBase(_ResourceBase):
     """Base representation for country resource in OpenAQ.
 
@@ -224,7 +226,7 @@ class CountryBase(_ResourceBase):
     name: str
 
 
-@dataclass
+@dataclass(slots=True)
 class InstrumentBase(_ResourceBase):
     """Base representation for instrument resource in OpenAQ.
 
@@ -237,7 +239,7 @@ class InstrumentBase(_ResourceBase):
     name: str
 
 
-@dataclass
+@dataclass(slots=True)
 class ManufacturerBase(_ResourceBase):
     """Base representation for manufacturer resource in OpenAQ.
 
@@ -250,7 +252,7 @@ class ManufacturerBase(_ResourceBase):
     name: str
 
 
-@dataclass
+@dataclass(slots=True)
 class OwnerBase(_ResourceBase):
     """Base representation for owner resource in OpenAQ.
 
@@ -263,7 +265,7 @@ class OwnerBase(_ResourceBase):
     name: str
 
 
-@dataclass
+@dataclass(slots=True)
 class ParameterBase(_ResourceBase):
     """Base representation for measurement parameter resource in OpenAQ.
 
@@ -278,7 +280,7 @@ class ParameterBase(_ResourceBase):
     display_name: str | None
 
 
-@dataclass
+@dataclass(slots=True)
 class ProviderBase(_ResourceBase):
     """Base representation for providers in OpenAQ.
 
@@ -291,7 +293,7 @@ class ProviderBase(_ResourceBase):
     name: str
 
 
-@dataclass
+@dataclass(slots=True)
 class SensorBase(_ResourceBase):
     """Base representation for sensor resource in OpenAQ.
 
@@ -311,7 +313,7 @@ class SensorBase(_ResourceBase):
             self.parameter = ParameterBase.load(self.parameter)
 
 
-@dataclass
+@dataclass(slots=True)
 class Coordinates(_ResourceBase):
     """Representation for geographic coordinates in OpenAQ.
 
@@ -326,7 +328,7 @@ class Coordinates(_ResourceBase):
     longitude: float
 
 
-@dataclass
+@dataclass(slots=True)
 class Datetime(_ResourceBase):
     """Representation for timestamps in OpenAQ.
 
@@ -339,7 +341,7 @@ class Datetime(_ResourceBase):
     local: str
 
 
-@dataclass
+@dataclass(slots=True)
 class Location(_ResourceBase):
     """Representation of location resource in OpenAQ.
 
@@ -407,7 +409,7 @@ class Location(_ResourceBase):
             self.datetime_last = Datetime.load(self.datetime_last)
 
 
-@dataclass
+@dataclass(slots=True)
 class LocationsResponse(_ResponseBase[Location]):
     """Representation of the API response for locations resource.
 
@@ -424,7 +426,7 @@ class LocationsResponse(_ResponseBase[Location]):
 # Providers
 
 
-@dataclass
+@dataclass(slots=True)
 class OwnerEntity(_ResourceBase):
     """Representation of owner entitiy resource in OpenAQ.
 
@@ -437,7 +439,7 @@ class OwnerEntity(_ResourceBase):
     name: str
 
 
-@dataclass
+@dataclass(slots=True)
 class Bbox(_ResourceBase):
     """Bounding box representation for geographic areas.
 
@@ -454,7 +456,7 @@ class Bbox(_ResourceBase):
     )
 
 
-@dataclass
+@dataclass(slots=True)
 class Provider(_ResourceBase):
     """Representation of provider resource in OpenAQ.
 
@@ -491,7 +493,7 @@ class Provider(_ResourceBase):
             self.bbox = Bbox.load(self.bbox)
 
 
-@dataclass
+@dataclass(slots=True)
 class ProvidersResponse(_ResponseBase[Provider]):
     """Representation of the API response for providers resource.
 
@@ -506,7 +508,7 @@ class ProvidersResponse(_ResponseBase[Provider]):
 # Parameters
 
 
-@dataclass
+@dataclass(slots=True)
 class Parameter(_ResourceBase):
     """Representation of parameter resource in OpenAQ.
 
@@ -525,7 +527,7 @@ class Parameter(_ResourceBase):
     description: str | None = None
 
 
-@dataclass
+@dataclass(slots=True)
 class ParametersResponse(_ResponseBase[Parameter]):
     """Representation of the API response for parameters resource.
 
@@ -540,7 +542,7 @@ class ParametersResponse(_ResponseBase[Parameter]):
 # Countries
 
 
-@dataclass
+@dataclass(slots=True)
 class Country(_ResourceBase):
     """Representation of country resource in OpenAQ.
 
@@ -568,7 +570,7 @@ class Country(_ResourceBase):
             ]
 
 
-@dataclass
+@dataclass(slots=True)
 class CountriesResponse(_ResponseBase[Country]):
     """Representation of the API response for countries resource.
 
@@ -583,7 +585,7 @@ class CountriesResponse(_ResponseBase[Country]):
 # Instruments
 
 
-@dataclass
+@dataclass(slots=True)
 class Instrument(_ResourceBase):
     """Representation of instrument resource in OpenAQ.
 
@@ -605,7 +607,7 @@ class Instrument(_ResourceBase):
             self.manufacturer = ManufacturerBase.load(self.manufacturer)
 
 
-@dataclass
+@dataclass(slots=True)
 class InstrumentsResponse(_ResponseBase[Instrument]):
     """Representation of the API response for instruments resource.
 
@@ -620,7 +622,7 @@ class InstrumentsResponse(_ResponseBase[Instrument]):
 # Licenses
 
 
-@dataclass
+@dataclass(slots=True)
 class License(_ResourceBase):
     """Representation of license resource in OpenAQ.
 
@@ -645,7 +647,7 @@ class License(_ResourceBase):
     source_url: str | None = None
 
 
-@dataclass
+@dataclass(slots=True)
 class LicensesResponse(_ResponseBase[License]):
     """Representation of the API response for licenses resource.
 
@@ -660,7 +662,7 @@ class LicensesResponse(_ResponseBase[License]):
 # Manufacturers
 
 
-@dataclass
+@dataclass(slots=True)
 class Manufacturer(_ResourceBase):
     """Representation of manufacturer resource in OpenAQ.
 
@@ -681,7 +683,7 @@ class Manufacturer(_ResourceBase):
         ]
 
 
-@dataclass
+@dataclass(slots=True)
 class ManufacturersResponse(_ResponseBase[Manufacturer]):
     """Representation of the API response for manufacturers resource.
 
@@ -696,7 +698,7 @@ class ManufacturersResponse(_ResponseBase[Manufacturer]):
 # Measurements
 
 
-@dataclass
+@dataclass(slots=True)
 class Summary(_ResourceBase):
     """Statistical summary of measurement values.
 
@@ -722,7 +724,7 @@ class Summary(_ResourceBase):
     avg: float | None = None
 
 
-@dataclass
+@dataclass(slots=True)
 class Coverage(_ResourceBase):
     """Data coverage details for measurements.
 
@@ -754,7 +756,7 @@ class Coverage(_ResourceBase):
             self.datetime_to = Datetime.load(self.datetime_to)
 
 
-@dataclass
+@dataclass(slots=True)
 class Period(_ResourceBase):
     """Representation of a measurement time period.
 
@@ -779,7 +781,7 @@ class Period(_ResourceBase):
             self.datetime_to = Datetime.load(self.datetime_to)
 
 
-@dataclass
+@dataclass(slots=True)
 class Measurement(_ResourceBase):
     """Representation of measurement resource in OpenAQ.
 
@@ -813,7 +815,7 @@ class Measurement(_ResourceBase):
             self.coverage = Coverage.load(self.coverage)
 
 
-@dataclass
+@dataclass(slots=True)
 class MeasurementsResponse(_ResponseBase[Measurement]):
     """Representation of the API response for measurements resource.
 
@@ -828,7 +830,7 @@ class MeasurementsResponse(_ResponseBase[Measurement]):
 # Owners
 
 
-@dataclass
+@dataclass(slots=True)
 class Owner(_ResourceBase):
     """Detailed information about an owner in OpenAQ.
 
@@ -841,7 +843,7 @@ class Owner(_ResourceBase):
     name: str
 
 
-@dataclass
+@dataclass(slots=True)
 class OwnersResponse(_ResponseBase[Owner]):
     """Representation of the API response for owners resource.
 
@@ -856,7 +858,7 @@ class OwnersResponse(_ResponseBase[Owner]):
 # Sensors
 
 
-@dataclass
+@dataclass(slots=True)
 class LatestBase(_ResourceBase):
     """latest measurement.
 
@@ -878,7 +880,7 @@ class LatestBase(_ResourceBase):
             self.coordinates = Coordinates.load(self.coordinates)
 
 
-@dataclass
+@dataclass(slots=True)
 class Sensor(_ResourceBase):
     """Detailed information about a sensor in OpenAQ.
 
@@ -918,7 +920,7 @@ class Sensor(_ResourceBase):
             self.summary = Summary.load(self.summary)
 
 
-@dataclass
+@dataclass(slots=True)
 class SensorsResponse(_ResponseBase[Sensor]):
     """Representation of the API response for sensors resource.
 
@@ -930,7 +932,7 @@ class SensorsResponse(_ResponseBase[Sensor]):
     results: list[Sensor]
 
 
-@dataclass
+@dataclass(slots=True)
 class Latest(_ResourceBase):
     """Latest measurement.
 
@@ -956,7 +958,7 @@ class Latest(_ResourceBase):
             self.coordinates = Coordinates.load(self.coordinates)
 
 
-@dataclass
+@dataclass(slots=True)
 class LatestResponse(_ResponseBase[Latest]):
     """Representation of the API response for latest resource.
 
