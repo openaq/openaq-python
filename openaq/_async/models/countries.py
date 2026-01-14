@@ -9,6 +9,7 @@ from openaq.shared.validators import (
     validate_page_param,
     validate_sort_order,
 )
+
 from .base import AsyncResourceBase
 
 

@@ -19,8 +19,7 @@ class MockTransport:
     ):
         return self.response
 
-    def close(self):
-        ...
+    def close(self): ...
 
 
 @pytest.fixture(scope='class')

@@ -2,7 +2,7 @@
 
 import logging
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 
 logger = logging.getLogger("openaq")
@@ -13,18 +13,18 @@ from ._async.client import AsyncOpenAQ as AsyncOpenAQ
 from ._sync.client import OpenAQ as OpenAQ
 from .shared.exceptions import (
     ApiKeyMissingError,
-    IdentifierOutOfBoundsError,
     BadGatewayError,
     BadRequestError,
     ForbiddenError,
     GatewayTimeoutError,
     HTTPRateLimitError,
+    IdentifierOutOfBoundsError,
     NotAuthorizedError,
     NotFoundError,
-    TimeoutError,
     RateLimitError,
-    ServiceUnavailableError,
     ServerError,
+    ServiceUnavailableError,
+    TimeoutError,
     ValidationError,
 )
 

@@ -6,13 +6,7 @@ import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, fields
 from types import ModuleType
-from typing import (
-    Any,
-    Generic,
-    TypeVar,
-    cast,
-    get_args,
-)
+from typing import Any, Generic, TypeVar, cast, get_args
 
 import httpx
 

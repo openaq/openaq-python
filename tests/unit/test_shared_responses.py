@@ -75,6 +75,7 @@ def mock_response(data: str) -> httpx.Response:
         status_code=200, headers=RATE_LIMIT_HEADERS, json=json.loads(data)
     )
 
+
 def remove_nulls(value):
     if isinstance(value, dict):
         return {k: remove_nulls(v) for k, v in value.items() if v is not None}
@@ -83,8 +84,9 @@ def remove_nulls(value):
     else:
         return value
 
+
 def value_matches_type(value, expected_type) -> bool:
-    """Currently has some special cases covered(Union, numbers, lists with same 
+    """Currently has some special cases covered(Union, numbers, lists with same
     type values, tuples), but making this test fully generic is not trivial"""
     if expected_type is float:
         return isinstance(value, numbers.Real)
@@ -93,9 +95,9 @@ def value_matches_type(value, expected_type) -> bool:
         return isinstance(value, numbers.Integral)
 
     origin = get_origin(expected_type)
-    if origin is Union or origin is types.UnionType:   
+    if origin is Union or origin is types.UnionType:
         return any(value_matches_type(value, t) for t in get_args(expected_type))
-    
+
     if origin is not None and not isinstance(value, origin):
         return False
 
@@ -107,8 +109,8 @@ def value_matches_type(value, expected_type) -> bool:
 
         (item_type,) = args
 
-        return all(value_matches_type(v, item_type) for v in value) 
-    
+        return all(value_matches_type(v, item_type) for v in value)
+
     if origin is tuple and len(args) == 2 and args[1] is Ellipsis:
         return all(value_matches_type(v, args[0]) for v in value)
 
@@ -118,6 +120,7 @@ def value_matches_type(value, expected_type) -> bool:
         )
 
     return isinstance(value, expected_type)
+
 
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")
 def test_rate_limit_headers_response():
@@ -226,6 +229,7 @@ def test_response_ignores_unexpected_fields():
     except Exception as e:
         pytest.fail(f"Deserialization failed with unexpected field 'anotherField': {e}")
 
+
 @pytest.mark.parametrize(
     "name,response_class",
     [
@@ -241,7 +245,6 @@ def test_response_ignores_unexpected_fields():
         ('sensors', SensorsResponse),
     ],
 )
-
 @pytest.mark.respx(base_url="https://api.openaq.org/v3/")
 def test_field_types(name: str, response_class: _ResponseBase):
     """Tests whether all fields have the correct types"""

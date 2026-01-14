@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import httpx
-
 from types import TracebackType
-from typing import Any, Mapping
+from typing import Mapping
+
+import httpx
 
 from openaq._async.models.countries import Countries
 from openaq._async.models.instruments import Instruments
@@ -15,10 +15,7 @@ from openaq._async.models.owners import Owners
 from openaq._async.models.parameters import Parameters
 from openaq._async.models.providers import Providers
 from openaq._async.models.sensors import Sensors
-from openaq.shared.client import (
-    DEFAULT_BASE_URL,
-    BaseClient,
-)
+from openaq.shared.client import DEFAULT_BASE_URL, BaseClient
 
 from .transport import AsyncTransport
 
