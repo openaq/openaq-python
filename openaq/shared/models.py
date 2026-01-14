@@ -1,7 +1,7 @@
 """Shared utility functions for working with query parameter models."""
 
 import datetime
-from typing import Mapping, Sequence
+from typing import Sequence
 
 from .exceptions import NotFoundError
 from .types import Data, Rollup

@@ -1,4 +1,4 @@
-from typing import Any, Mapping
+from typing import Mapping
 
 import httpx
 

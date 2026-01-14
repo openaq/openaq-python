@@ -7,8 +7,6 @@ from openaq.shared.validators import (
     validate_integer_or_list_integer_params,
     validate_iso_param,
     validate_limit_param,
-    validate_mobile,
-    validate_monitor,
     validate_order_by,
     validate_page_param,
     validate_parameter_type,

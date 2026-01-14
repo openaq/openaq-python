@@ -109,7 +109,12 @@ dependencies = ["ruff", "black", "isort", "pydocstyle"]
 
 [tool.hatch.envs.style.scripts]
 check = ["ruff check", "black --check --diff .", "isort --check-only --diff ."]
-fmt = ["isort format", "black .", "check"]
+fmt = [
+    "ruff check --select F401 --fix openaq",
+    "isort openaq", 
+    "black .", 
+    "check"
+]
 
 [tool.hatch.envs.docs]
 dependencies = [

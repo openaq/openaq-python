@@ -13,12 +13,10 @@ from typing import Generic, Mapping, TypeVar
 
 import httpx
 
-
 from openaq._async.transport import AsyncTransport
 from openaq._sync.transport import Transport
 from openaq.shared.exceptions import ApiKeyMissingError, RateLimitError
 from openaq.shared.types import OpenAQConfig
-
 
 logger = logging.getLogger('openaq')
 

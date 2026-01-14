@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import logging
-from abc import ABC, abstractmethod
 from http import HTTPStatus
-from typing import Mapping
 
 import httpx
 
@@ -14,12 +12,12 @@ from openaq.shared.exceptions import (
     BadRequestError,
     ForbiddenError,
     GatewayTimeoutError,
-    TimeoutError,
     HTTPRateLimitError,
     NotAuthorizedError,
     NotFoundError,
     ServerError,
     ServiceUnavailableError,
+    TimeoutError,
     ValidationError,
 )
 

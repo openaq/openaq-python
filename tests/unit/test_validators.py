@@ -969,6 +969,7 @@ def test_iso8601_check(value: object, valid: bool):
 def test_datetime_check(value: object, valid: bool):
     assert datetime_check(value) == valid
 
+
 @pytest.mark.parametrize(
     "value,expected",
     [

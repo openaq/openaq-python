@@ -2,6 +2,7 @@
 
 import datetime
 from typing import TypeGuard, cast
+
 from openaq.shared.constants import ISO_CODES, MAX_LIMIT
 from openaq.shared.exceptions import (
     IdentifierOutOfBoundsError,
