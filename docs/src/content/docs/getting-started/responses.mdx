@@ -2,11 +2,9 @@
 title: Responses
 ---
 
-The OpenAQ API follows a resource-based design, where each endpoint returns a 
-response corresponding to the endpoint. The OpenAQ Python SDK further simplifies
-this by providing convenient resources from the client with methods to call the 
-endpoints. All API responses through the SDK provide common features for reading
-data as convenient Python objects, a dictionary or a JSON string. 
+The OpenAQ API and in turn the Python SDK return a common format for the 
+responses to ensure a consistent and predictable interface. The Python SDK
+handles 
 
 ## Response objects
 
@@ -17,7 +15,10 @@ notation access to attributes, allowing you to retrieve values like
 using dictionary-style key lookups.
 
 All response objects follow a common top-level form, with specific data objects
-for each specific resources within the results.
+for each specific resources within the results. The results object in each
+response will _always_ be a `list` (or array in JSON), this applies even if 
+requesting a single object by keys, like in `get()` function call, or if
+filtering removes all possible results; you will recieve an empty list.
 
 ```
 ├── headers
@@ -53,6 +54,9 @@ or using the built-in `get()`:
 ```py
 response.dict().get('results')
 ```
+
+Just like in the deserialized object, the `results` key will always be a Python
+`list`.
 
 
 ## JSON

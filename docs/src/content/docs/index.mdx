@@ -5,36 +5,41 @@ template: splash # Remove or comment out this line to display the site sidebar o
 hero:
   tagline: Reference and learning resources for using the OpenAQ API with Python!
   image:
-    file: ../../assets/houston.webp
+    alt: OpenAQ Python ASCII Art in a terminal application
+    dark: ../../assets/term-light.png
+    light: ../../assets/term-dark.png
   actions:
     - text: Get started
-      link: /guides/example/
+      link: /about/about/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
-      variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Icon } from 'astro-icon/components'
 
-## Next steps
+import CustomIconCard from '@components/CustomIconCard.astro';
+
+## Key Features
+
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
+	<CustomIconCard title="Helpers" color="#b3d9ff">
+		<Icon slot="icon" name="component"/>
+		Helpful built-in features like automatic rate-limiting, expressive error 
+		handling and more.
+	</CustomIconCard>
+	<CustomIconCard title="Async-ready" color="#b2d78e">
+		<Icon slot="icon" name="async"/>
+		Provides both synchronous and asynchronous clients, so you can choose the right approach for your use case
+	</CustomIconCard> 
+	<CustomIconCard title="Intuitive Access" color="#fee172">
+		<Icon slot="icon" name="component"/>
+		Converts API responses to Python objects for easier, more intuitive data access. Work with familiar object attributes instead of dictionary syntax
+	</CustomIconCard> 
+	<CustomIconCard title="Type annotations" color="#b0e8e6">
+		<Icon slot="icon" name="text"/>
+
+		Fully typed for excellent autocomplete, inline documentation, and catch errors before runtime
+	</CustomIconCard> 
+
 </CardGrid>

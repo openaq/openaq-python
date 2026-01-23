@@ -1,0 +1,26 @@
+---
+
+const { color } = Astro.props;
+
+
+---
+
+<style lang="scss" define:vars={{ color: color }}>
+
+@use "sass:color";
+
+    .bordered-icon {
+        --base-color: var(--color);
+        border: 1px solid color-mix(in srgb, var(--base-color), black 20%);
+        background-color: var( --base-color);
+        padding: 0.2em;
+        border-radius: 0.25rem;
+        flex-shrink: 0;
+    }
+
+</style>
+
+
+<div class="bordered-icon">
+    <slot name="icon" />
+</div>

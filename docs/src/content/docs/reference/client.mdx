@@ -2,16 +2,335 @@
 title: Client
 ---
 
+import { Aside } from '@astrojs/starlight/components';
 
-```py
-OpenAQ(api_key: str | None = None, headers: Mapping[str, str] = {})
+
+
+## `OpenAQ`
+
+`openaq._sync.client`
+
+
+OpenAQ syncronous client.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+| --- | --- | --- | --- |
+| `api_key` | `str | None` | The API key for accessing the service. | `None` |
+| `headers` | `Mapping[str, str]` | Additional headers to be sent with the request. | `{}` |
+| `base_url` | `str` | The base URL for the API endpoint. | `DEFAULT_BASE_URL` |
+
+<Aside type="note">
+    An API key can either be passed directly to the OpenAQ client class at
+    instantiation or can be accessed from a system environment variable
+    name `OPENAQ-API-KEY`. An API key added at instantiation will always
+    override one set in the environment variable.
+</Aside>
+
+<Aside type="tip">
+    Although the `api_key` parameter is not required for instantiating the
+    OpenAQ client, an API Key is required for using the OpenAQ API.
+</Aside>
+**Raises:**
+
+| Type | Description |
+| --- | --- |
+| `IdentifierOutOfBoundsError` | Client validation error, identifier outside support int32 range. |
+| `ApiKeyMissingError` | Authentication error, missing API Key credentials. |
+| `BadRequestError` | Raised for HTTP 400 error, indicating a client request error. |
+| `NotAuthorizedError` | Raised for HTTP 401 error, indicating the client is not authorized. |
+| `ForbiddenError` | Raised for HTTP 403 error, indicating the request is forbidden. |
+| `NotFoundError` | Raised for HTTP 404 error, indicating a resource is not found. |
+| `TimeoutError` | Raised for HTTP 408 error, indicating the request has timed out. |
+| `ValidationError` | Raised for HTTP 422 error, indicating invalid request parameters. |
+| `RateLimitError` | Raised when managed client exceeds rate limit. |
+| `HTTPRateLimitError` | Raised for HTTP 429 error, indicating rate limit exceeded. |
+| `ServerError` | Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue. |
+| `BadGatewayError` | Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server. |
+| `ServiceUnavailableError` | Raised for HTTP 503, indicating that the server is not ready to handle the request. |
+| `GatewayTimeoutError` | Raised for HTTP 504 error, indicating a gateway timeout. |
+
+**Source code in** `openaq/_sync/client.py`
+```python
+class OpenAQ(BaseClient[Transport]):
+    """OpenAQ syncronous client.
+
+    Args:
+        api_key: The API key for accessing the service.
+        headers: Additional headers to be sent with the request.
+        base_url: The base URL for the API endpoint.
+
+    Note:
+        An API key can either be passed directly to the OpenAQ client class at
+        instantiation or can be accessed from a system environment variable
+        name `OPENAQ-API-KEY`. An API key added at instantiation will always
+        override one set in the environment variable.
+
+    Warning:
+        Although the `api_key` parameter is not required for instantiating the
+        OpenAQ client, an API Key is required for using the OpenAQ API.
+
+
+    Raises:
+        IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+        ApiKeyMissingError: Authentication error, missing API Key credentials.
+        BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+        NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+        ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
+        NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+        TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
+        ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+        RateLimitError: Raised when managed client exceeds rate limit.
+        HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
+        ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+        BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+        ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
+        GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
+
+    """
+
+    def __init__(
+        self,
+        api_key: str | None = None,
+        headers: Mapping[str, str] = {},
+        base_url: str = DEFAULT_BASE_URL,
+        _transport: Transport = Transport(),
+    ) -> None:
+        super().__init__(_transport, headers, api_key, base_url)
+
+        self.countries = Countries(self)
+        self.instruments = Instruments(self)
+        self.licenses = Licenses(self)
+        self.locations = Locations(self)
+        self.manufacturers = Manufacturers(self)
+        self.measurements = Measurements(self)
+        self.owners = Owners(self)
+        self.providers = Providers(self)
+        self.parameters = Parameters(self)
+        self.sensors = Sensors(self)
+
+    def _do(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: (
+            httpx.QueryParams | Mapping[str, str | int | float | bool] | None
+        ) = None,
+        headers: httpx.Headers | Mapping[str, str] | None = None,
+    ) -> httpx.Response:
+        self._check_rate_limit()
+        request_headers = self.build_request_headers(headers)
+        url = self._base_url + path
+        data = self.transport.send_request(
+            method=method, url=url, params=params, headers=request_headers
+        )
+        self._set_rate_limit(data.headers)
+        return data
+
+    def _get(
+        self,
+        path: str,
+        *,
+        params: (
+            httpx.QueryParams | Mapping[str, str | int | float | bool] | None
+        ) = None,
+        headers: httpx.Headers | Mapping[str, str] | None = None,
+    ) -> httpx.Response:
+        return self._do("get", path, params=params, headers=headers)
+
+    def close(self) -> None:
+        """Closes transport connection."""
+        self.transport.close()
+
+    def __enter__(self) -> OpenAQ:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        self.close()
+```
+
+#### `close()`
+
+Closes transport connection.
+
+**Source code in** `openaq/_sync/client.py`
+```python
+def close(self) -> None:
+    """Closes transport connection."""
+    self.transport.close()
 ```
 
 
-#### Example
 
-```py
-from openaq import OpenAQ
+## `AsyncOpenAQ`
 
-client = OpenAQ(api_key = 'this-api-key-will-not-work-replace-with-your-own')
+`openaq._async.client`
+
+
+OpenAQ asynchronous client.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+| --- | --- | --- | --- |
+| `api_key` | `str | None` | The API key for accessing the service. | `None` |
+| `headers` | `Mapping[str, str]` | Additional headers to be sent with the request. | `{}` |
+| `base_url` | `str` | The base URL for the API endpoint. | `DEFAULT_BASE_URL` |
+| `transport` | `AsyncTransport` | The async transport layer for HTTP communication. | `AsyncTransport()` |
+
+<Aside type="note">
+    An API key can either be passed directly to the OpenAQ client class at
+    instantiation or can be accessed from a system environment variable
+    name `OPENAQ-API-KEY`. An API key added at instantiation will always
+    override one set in the environment variable.
+</Aside>
+
+<Aside type="tip">
+    Although the `api_key` parameter is not required for instantiating the
+    OpenAQ client, an API Key is required for using the OpenAQ API.
+</Aside>
+**Raises:**
+
+**Raises:**
+
+| Type | Description |
+| --- | --- |
+| `IdentifierOutOfBoundsError` | Client validation error, identifier outside support int32 range. |
+| `ApiKeyMissingError` | Authentication error, missing API Key credentials. |
+| `BadRequestError` | Raised for HTTP 400 error, indicating a client request error. |
+| `NotAuthorizedError` | Raised for HTTP 401 error, indicating the client is not authorized. |
+| `ForbiddenError` | Raised for HTTP 403 error, indicating the request is forbidden. |
+| `NotFoundError` | Raised for HTTP 404 error, indicating a resource is not found. |
+| `TimeoutError` | Raised for HTTP 408 error, indicating the request has timed out. |
+| `ValidationError` | Raised for HTTP 422 error, indicating invalid request parameters. |
+| `RateLimitError` | Raised when managed client exceeds rate limit. |
+| `HTTPRateLimitError` | Raised for HTTP 429 error, indicating rate limit exceeded. |
+| `ServerError` | Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue. |
+| `BadGatewayError` | Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server. |
+| `ServiceUnavailableError` | Raised for HTTP 503, indicating that the server is not ready to handle the request. |
+| `GatewayTimeoutError` | Raised for HTTP 504 error, indicating a gateway timeout. |
+
+**Source code in** `openaq/_async/client.py`
+```python
+class AsyncOpenAQ(BaseClient[AsyncTransport]):
+    """OpenAQ asynchronous client.
+
+    Args:
+        api_key: The API key for accessing the service.
+        headers: Additional headers to be sent with the request.
+        base_url: The base URL for the API endpoint.
+
+    Note:
+        An API key can either be passed directly to the OpenAQ client class at
+        instantiation or can be accessed from a system environment variable
+        name `OPENAQ-API-KEY`. An API key added at instantiation will always
+        override one set in the environment variable.
+
+    Warning:
+        Although the `api_key` parameter is not required for instantiating the
+        OpenAQ client, an API Key is required for using the OpenAQ API.
+
+    Raises:
+        IdentifierOutOfBoundsError: Client validation error, identifier outside support int32 range.
+        ApiKeyMissingError: Authentication error, missing API Key credentials.
+        BadRequestError: Raised for HTTP 400 error, indicating a client request error.
+        NotAuthorizedError: Raised for HTTP 401 error, indicating the client is not authorized.
+        ForbiddenError: Raised for HTTP 403 error, indicating the request is forbidden.
+        NotFoundError: Raised for HTTP 404 error, indicating a resource is not found.
+        TimeoutError: Raised for HTTP 408 error, indicating the request has timed out.
+        ValidationError: Raised for HTTP 422 error, indicating invalid request parameters.
+        RateLimitError: Raised when managed client exceeds rate limit.
+        HTTPRateLimitError: Raised for HTTP 429 error, indicating rate limit exceeded.
+        ServerError: Raised for HTTP 500 error, indicating an internal server error or unexpected server-side issue.
+        BadGatewayError: Raised for HTTP 502, indicating that the gateway or proxy received an invalid response from the upstream server.
+        ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
+        GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
+
+    """
+
+    def __init__(
+        self,
+        api_key: str | None = None,
+        headers: Mapping[str, str] = {},
+        base_url: str = DEFAULT_BASE_URL,
+        transport: AsyncTransport = AsyncTransport(),
+    ) -> None:
+        super().__init__(transport, headers, api_key, base_url)
+
+        self.countries = Countries(self)
+        self.instruments = Instruments(self)
+        self.licenses = Licenses(self)
+        self.locations = Locations(self)
+        self.manufacturers = Manufacturers(self)
+        self.measurements = Measurements(self)
+        self.owners = Owners(self)
+        self.providers = Providers(self)
+        self.parameters = Parameters(self)
+        self.sensors = Sensors(self)
+
+    @property
+    def transport(self) -> AsyncTransport:
+        return self._transport
+
+    async def _do(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: (
+            httpx.QueryParams | Mapping[str, str | int | float | bool] | None
+        ) = None,
+        headers: httpx.Headers | Mapping[str, str] | None = None,
+    ) -> httpx.Response:
+        self._check_rate_limit()
+        request_headers = self.build_request_headers(headers)
+        url = self._base_url + path
+        data = await self.transport.send_request(
+            method=method, url=url, params=params, headers=request_headers
+        )
+        return data
+
+    async def _get(
+        self,
+        path: str,
+        *,
+        params: (
+            httpx.QueryParams | Mapping[str, str | int | float | bool] | None
+        ) = None,
+        headers: httpx.Headers | Mapping[str, str] | None = None,
+    ) -> httpx.Response:
+        return await self._do("get", path, params=params, headers=headers)
+
+    async def close(self) -> None:
+        """Closes transport connection."""
+        return await self.transport.close()
+
+    async def __aenter__(self) -> AsyncOpenAQ:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        await self.close()
+```
+
+#### `close()` 
+
+Closes transport connection.
+
+**Source code in** `openaq/_async/client.py`
+```python
+async def close(self) -> None:
+    """Closes transport connection."""
+    return await self.transport.close()
 ```

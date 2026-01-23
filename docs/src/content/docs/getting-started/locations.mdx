@@ -4,20 +4,21 @@ title: Locations
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-
-
-
+## Overview
 
 ## Methods
 
-### get a single location
+### Get a single location
 
 ```py
-get(locations_id: int) -> LocationsResponse
+get(
+  locations_id: int
+  ) -> LocationsResponse
 ```
 
-Arguments:
-- locations_id: a number representing 
+| argument | type |
+| -------- | ---- |
+| locations_id | `int` |
 
 #### Example
 
@@ -42,31 +43,44 @@ Arguments:
 </Tabs>
 
 
-### iterate through multiple locations
+###  List multiple locations
 
 ```py
 list(
-  limit: int = 100, 
-  page:int = 1, 
+  page: int = 1,
+  limit: int = 100,
   radius: int | None = None,
-  iso: str | None = None
-  coordinate: tuple[float, float] | None = None
-  countries_id: list[int] | int
+  coordinates: tuple[float, float] | None = None,
+  bbox: tuple[float, float, float, float] | None = None,
+  providers_id: int | list[int] | None = None,
+  countries_id: int | list[int] | None = None,
+  parameters_id: int | list[int] | None = None,
+  licenses_id: int | list[int] | None = None,
+  iso: str | None = None,
+  monitor: bool | None = None,
+  mobile: bool | None = None,
+  order_by: str | None = None,
+  sort_order: SortOrder | None = None
   ) -> LocationsResponse
 ```
 
-Arguments:
+| argument | description | rules |
+| -------- | ---- | ---- |
+| page | `int` | |
+| limit | `int` | |
+| radius | `int \| None` | Must be accompanied by coordinates, cannot be accompanied by bbox.  |
+| coordinates | `tuple[float, float] \| None` | Must be accompanied by radius, cannot be accompanied by bbox.  |
+| bbox | `tuple[float, float, float, float] \| None` | Cannot be accompanied by either coordinate or radius |
+| providers_id | `int \| list[int] \| None` | |
+| countries_id | `int \| list[int] \| None` | |
+| parameters_id | `int \| list[int] \| None` | |
+| licenses_id | `int \| list[int] \| None` | |
+| iso | `str \| None` | |
+| monitor | `bool \| None` | |
+| mobile | `bool \| None` | |
+| order_by | `str \| None` | |
+| sort_order | `SortOrder \| None` | |
 
-| name   | description  |  rules | 
-|---|---|---|
-|  countries_id | ``` list[int] \| int ```   |  cannot be used with `iso`  | 
-|   |   |   |   
-|   |   |   |   
-
-- radius: a number representing the meters around a point to search, is optional
-must be accompanied by `coordinates`.
-  - WARNING: cannot be used in combination with `bbox`
-- countries_id: cannot be used with `iso`
 
 
 <Tabs syncKey="client">
@@ -88,7 +102,18 @@ must be accompanied by `coordinates`.
   </TabItem>
 </Tabs>
 
-### get latest measuremetns from a location
+### List latest measurements from a location
+
+
+```py
+latest(
+  locations_id: int
+  ) -> LatestResponse
+```
+
+| argument | description | rules |
+| -------- | ----------- | ----- |
+| locations_id | `int` | |
 
 
 <Tabs syncKey="client">
@@ -112,49 +137,44 @@ must be accompanied by `coordinates`.
 
 ## Response
 
-
 ```
 Location[]
-└── [Location]
     ├── id: int
     ├── name: str
     ├── locality: str | None
     ├── timezone: str
-    ├── country: CountryBase
+    ├── country: 
     │   ├── id: int
     │   ├── code: str
     │   └── name: str
-    ├── owner: OwnerBase
+    ├── owner: 
     │   ├── id: int
     │   └── name: str
-    ├── provider: ProviderBase
+    ├── provider: 
     │   ├── id: int
     │   └── name: str
     ├── is_mobile: bool
     ├── is_monitor: bool
-    ├── instruments: InstrumentBase[]
-    │   └── [InstrumentBase]
-    │       ├── id: int
-    │       └── name: str
-    ├── sensors: SensorBase[]
-    │   └── [SensorBase]
+    ├── instruments: []
+    │    ├── id: int
+    │    └── name: str
+    ├── sensors: []
+    │   ├── id: int
+    │   ├── name: str
+    │   └── parameter:
     │       ├── id: int
     │       ├── name: str
-    │       └── parameter: ParameterBase
-    │           ├── id: int
-    │           ├── name: str
-    │           ├── units: str
-    │           └── display_name: str | None
-    ├── coordinates: Coordinates
+    │       ├── units: str
+    │       └── display_name: str | None
+    ├── coordinates: 
     │   ├── latitude: float
     │   └── longitude: float
     ├── bounds: tuple[float, float, float, float]
     ├── distance: float | None
-    ├── datetime_first: Datetime
+    ├── datetime_first: 
     │   ├── utc: str
     │   └── local: str
-    └── datetime_last: Datetime├── utc: str└── local: str
+    └── datetime_last: 
+        ├── utc: str
+        └── local: str
 ```
-
-
-

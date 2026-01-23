@@ -1,3 +1,92 @@
 ---
 title: Instruments
 ---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Overview
+
+## Methods
+
+### Get a single instrument
+
+```py
+get(
+  instruments_id: int
+  ) -> InstrumentsResponse
+```
+
+| argument | type |
+| -------- | ---- |
+| instruments_id | `int` |
+
+#### Example
+
+<Tabs syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    with OpenAQ() as client:
+        client.instruments.get(instruments_id=1)
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    async with AsyncOpenAQ() as client:
+        await client.instruments.get(instruments_id=1)
+    ```
+  </TabItem>
+</Tabs>
+
+### List multiple instruments
+
+```py
+list(
+  page: int = 1,
+  limit: int = 1000,
+  order_by: str | None = None,
+  sort_order: SortOrder | None = None
+  ) -> InstrumentsResponse
+```
+
+| argument | type | description |
+| -------- | ---- | ----------- |
+| page | `int` | The page number, must be greater than zero. Page count is instruments found / limit. |
+| limit | `int` | The number of results returned per page. Must be between 1 and 1,000. |
+| order_by | `str \| None` | Order by operators for results. |
+| sort_order | `SortOrder \| None` | Order for sorting results (asc/desc). |
+
+#### Example
+
+<Tabs syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    with OpenAQ() as client:
+        client.instruments.list()
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    async with AsyncOpenAQ() as client:
+        await client.instruments.list()
+    ```
+  </TabItem>
+</Tabs>
+
+## Response
+
+```
+Instrument[]
+    ├── id: int
+    ├── name: str
+    └── manufacturer: 
+        ├── id: int
+        └── name: str
+```

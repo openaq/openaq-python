@@ -1,0 +1,64 @@
+---
+import BorderedIcon from './BorderedIcon.astro';
+
+interface Props {
+  title: string;
+  color: string;
+}
+
+const { title, color } = Astro.props;
+---
+
+<article class="card sl-flex">
+  <div class="title sl-flex">
+    <span class="icon-wrapper">
+     <BorderedIcon color={color}>
+        <slot name="icon" slot="icon"/>
+    </BorderedIcon>
+    </span>
+    <span set:html={title} />
+  </div>
+  <div class="body">
+    <slot />
+  </div>
+</article>
+
+<style>
+  .card {
+    --sl-card-border: var(--sl-color-gray-5);
+    --sl-card-bg: var(--sl-color-black);
+    border: 1px solid var(--sl-card-border);
+    background-color: var(--sl-card-bg);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    position: relative;
+  }
+
+  .title {
+    font-weight: 600;
+    font-size: var(--sl-text-h4);
+    color: var(--sl-color-white);
+    line-height: var(--sl-line-height-headings);
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .icon {
+    color: var(--sl-color-accent-high);
+    fill: currentColor;
+    width: 1.333em;
+    height: 1.333em;
+  }
+
+  .body {
+    margin: 0;
+    font-size: var(--sl-text-base);
+  }
+
+  .sl-flex {
+    display: flex;
+  }
+</style>

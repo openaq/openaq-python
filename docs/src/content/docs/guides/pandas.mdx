@@ -1,3 +1,94 @@
 ---
 title: Working with Pandas
+description: Transform OpenAQ API responses into Pandas DataFrames for data analysis workflows.
 ---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+
+## Overview
+
+The OpenAQ Python SDK returns data as deserialized Python objects rather than
+Pandas DataFrames. This guide shows you how to convert OpenAQ API responses into
+DataFrames by first serializing the response objects, then using Pandas'
+`json_normalize()` function to flatten the nested structure into tabular format.
+
+Get location data into a DataFrame
+
+<Tabs syncKey="client">
+  <TabItem label="sync">
+    ```py
+        from openaq import OpenAQ
+        from pandas import json_normalize
+
+        # Initialize client
+        client = OpenAQ(api_key='your-api-key')
+
+        # Fetch locations around Accra, Ghana
+        response = client.locations.list(
+            bbox=[-0.464172, 5.449908, 0.030212, 5.691491]
+        )
+
+        # read the results into a dataframe
+        data = response.dict()
+        df = json_normalize(data['results'])
+
+        # close the connection when done
+        client.close()
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    import asyncio
+    from openaq import AsyncOpenAQ
+    from pandas import json_normalize
+
+    async def fetch_locations():
+        client = AsyncOpenAQ(api_key='your-api-key')
+        
+        response = await client.locations.list(
+            bbox=[-0.464172, 5.449908, 0.030212, 5.691491]
+        )
+        
+        data = response.dict()
+        # read the results into a dataframe
+        df = json_normalize(data['results'])
+        
+        # close the connection when done
+        await client.close()
+        return df
+
+    df = asyncio.run(fetch_locations())
+    ```
+  </TabItem>
+</Tabs>
+
+
+
+What this does: The `response.dict()` method converts the OpenAQ response object
+to a Python dictionary. The `json_normalize()` function then flattens the nested
+results array into a two-dimensional DataFrame where nested fields become
+columns with dot notation (e.g., coordinates.latitude).
+
+
+Convert measurements data
+For time-series analysis of air quality measurements:
+pyfrom openaq import OpenAQ
+from pandas import json_normalize
+
+```
+client = OpenAQ(api_key='your-api-key')
+```
+
+# Fetch measurements for a specific location and parameter
+```
+response = client.measurements.list(
+    locations_id=1234,
+    parameters_id=2,
+    date_from='2024-01-01',
+    date_to='2024-01-31'
+)
+
+df = json_normalize(response.dict()['results'])
+client.close()
+```

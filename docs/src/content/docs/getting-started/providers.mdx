@@ -1,4 +1,116 @@
 ---
 title: Providers
-
 ---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Overview
+
+## Methods
+
+### Get a single provider
+
+```py
+get(
+  providers_id: int
+  ) -> ProvidersResponse
+```
+
+| argument | type |
+| -------- | ---- |
+| providers_id | `int` |
+
+#### Example
+
+<Tabs syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    with OpenAQ() as client:
+        client.providers.get(providers_id=1)
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    async with AsyncOpenAQ() as client:
+        await client.providers.get(providers_id=1)
+    ```
+  </TabItem>
+</Tabs>
+
+### List multiple providers
+
+```py
+list(
+  page: int = 1,
+  limit: int = 1000,
+  order_by: str | None = None,
+  sort_order: SortOrder | None = None,
+  parameters_id: int | list[int] | None = None,
+  monitor: bool | None = None,
+  coordinates: tuple[float, float] | None = None,
+  radius: int | None = None,
+  bbox: tuple[float, float, float, float] | None = None,
+  iso: str | None = None,
+  countries_id: int | list[int] | None = None
+  ) -> ProvidersResponse
+```
+
+| argument | type | description | rules |
+| -------- | ---- | ----------- | ----- |
+| page | `int` | The page number, must be greater than zero. Page count is providers found / limit. | |
+| limit | `int` | The number of results returned per page. Must be between 1 and 1,000. | |
+| order_by | `str \| None` | Order by operators for results. | |
+| sort_order | `SortOrder \| None` | Order for sorting results (asc/desc). | |
+| parameters_id | `int \| list[int] \| None` | Single parameters ID or an array of IDs. | |
+| monitor | `bool \| None` | Boolean for reference grade monitors (true) or air sensors (false). | |
+| coordinates | `tuple[float, float] \| None` | WGS 84 coordinate pair in form latitude, longitude (y,x). | Must be accompanied by radius, cannot be accompanied by bbox. |
+| radius | `int \| None` | A distance value in meters to search around the given coordinates value, must be between 1 and 25,000 (25km). | Must be accompanied by coordinates, cannot be accompanied by bbox. |
+| bbox | `tuple[float, float, float, float] \| None` | Geospatial bounding box of min X, min Y, max X, max Y in WGS 84 coordinates. Limited to four decimals precision. | Cannot be accompanied by either coordinate or radius. |
+| iso | `str \| None` | 2 letter ISO 3166-alpha-2 country code. | |
+| countries_id | `int \| list[int] \| None` | Single countries ID or an array of IDs. | |
+
+#### Example
+
+<Tabs syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    with OpenAQ() as client:
+        client.providers.list()
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    async with AsyncOpenAQ() as client:
+        await client.providers.list()
+    ```
+  </TabItem>
+</Tabs>
+
+## Response
+
+```
+Provider[]
+    ├── id: int
+    ├── name: str
+    ├── source_name: str
+    ├── export_prefix: str
+    ├── license: str
+    ├── datetime_added: str
+    ├── datetime_first: str
+    ├── datetime_last: str
+    ├── entity_type: str
+    └── parameters: []
+        ├── id: int
+        ├── name: str
+        ├── units: str
+        ├── display_name: str | None
+        └── description: str | None
+```

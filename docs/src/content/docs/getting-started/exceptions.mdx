@@ -14,12 +14,16 @@ catching errors and identifying the specific class of error thrown.
 OpenAQ SDK client or methods has found an issue and throws an exception _before_
 making a request to the API.
 
+OpenAQErrors always include a `message` field which provides a human-readable 
+explanation of the error.
+
 ```py
 try:
     client = OpenAQ() # raises ApiKeyMissingError since no key is provided
 except ApiKeyMissingError as e:
-    print(e)
+    print(e.message)
 ```
+
 
 ### APIError
 
@@ -27,6 +31,9 @@ except ApiKeyMissingError as e:
 error has occured _after_ the request to the API has been made. `APIError` 
 exceptions are all wrappers around HTTP Error codes (4xx and 5xx) and provide
 access to the `status_code` in the body of the exception:
+
+OpenAQErrors always include `message` and `status_code` fields which provides a human-readable 
+explanation of the error and the HTTP status code number, respectively.
 
 ```py
 from openaq import OpenAQ 
@@ -40,7 +47,5 @@ with client as OpenAQ(api_key='replace-with-valid-openaq-api-key'):
 ```
 
 ### TODO link to https://docs.openaq.org/errors/unprocessable-content
-
-## TODO show except class common shape 
 
 See the Exception reference documentation for a detailed lists of Exceptions.

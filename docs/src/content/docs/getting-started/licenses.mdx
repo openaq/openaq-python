@@ -1,5 +1,5 @@
 ---
-title: Manufacturers
+title: Licenses
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -8,17 +8,17 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Methods
 
-### Get a single manufacturer
+### Get a single license
 
 ```py
 get(
-  manufacturers_id: int
-  ) -> ManufacturersResponse
+  licenses_id: int
+  ) -> LicensesResponse
 ```
 
 | argument | type |
 | -------- | ---- |
-| manufacturers_id | `int` |
+| licenses_id | `int` |
 
 #### Example
 
@@ -28,7 +28,7 @@ get(
     from openaq import OpenAQ
 
     with OpenAQ() as client:
-        client.manufacturers.get(manufacturers_id=1)
+        client.licenses.get(licenses_id=1)
     ```
   </TabItem>
   <TabItem label="async">
@@ -36,12 +36,12 @@ get(
     from openaq import AsyncOpenAQ
 
     async with AsyncOpenAQ() as client:
-        await client.manufacturers.get(manufacturers_id=1)
+        await client.licenses.get(licenses_id=1)
     ```
   </TabItem>
 </Tabs>
 
-### List multiple manufacturers
+### List multiple licenses
 
 ```py
 list(
@@ -49,12 +49,12 @@ list(
   limit: int = 1000,
   order_by: str | None = None,
   sort_order: SortOrder | None = None
-  ) -> ManufacturersResponse
+  ) -> LicensesResponse
 ```
 
 | argument | type | description |
 | -------- | ---- | ----------- |
-| page | `int` | The page number, must be greater than zero. Page count is manufacturers found / limit. |
+| page | `int` | The page number, must be greater than zero. Page count is licenses found / limit. |
 | limit | `int` | The number of results returned per page. Must be between 1 and 1,000. |
 | order_by | `str \| None` | Order by operators for results. |
 | sort_order | `SortOrder \| None` | Order for sorting results (asc/desc). |
@@ -67,7 +67,7 @@ list(
     from openaq import OpenAQ
 
     with OpenAQ() as client:
-        client.manufacturers.list()
+        client.licenses.list()
     ```
   </TabItem>
   <TabItem label="async">
@@ -75,40 +75,7 @@ list(
     from openaq import AsyncOpenAQ
 
     async with AsyncOpenAQ() as client:
-        await client.manufacturers.list()
-    ```
-  </TabItem>
-</Tabs>
-
-### List instruments from a manufacturer
-
-```py
-instruments(
-  manufacturers_id: int
-  ) -> InstrumentsResponse
-```
-
-| argument | type |
-| -------- | ---- |
-| manufacturers_id | `int` |
-
-#### Example
-
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
-
-    with OpenAQ() as client:
-        client.manufacturers.instruments(manufacturers_id=1)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    async with AsyncOpenAQ() as client:
-        await client.manufacturers.instruments(manufacturers_id=1)
+        await client.licenses.list()
     ```
   </TabItem>
 </Tabs>
@@ -116,7 +83,14 @@ instruments(
 ## Response
 
 ```
-Manufacturer[]
+License[]
     ├── id: int
-    └── name: str
+    ├── name: str
+    ├── commercial_use_allowed: bool
+    ├── attribution_required: bool
+    ├── share_alike_required: bool
+    ├── modification_allowed: bool
+    ├── redistribution_allowed: bool
+    ├── source_url: str
+    └── date_from: str | None
 ```

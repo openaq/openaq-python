@@ -13,7 +13,11 @@
     "@astrojs/starlight": "^0.36.3",
     "@plausible-analytics/tracker": "^0.4.4",
     "astro": "^5.6.1",
+    "astro-icon": "^1.1.5",
     "plausible-tracker": "^0.3.9",
     "sharp": "^0.34.2"
+  },
+  "devDependencies": {
+    "sass-embedded": "^1.97.2"
   }
 }

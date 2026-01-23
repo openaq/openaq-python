@@ -2,10 +2,73 @@
 title: Sensors
 ---
 
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+## Overview
 
+## Methods
 
-### Sensors
+### Get a single sensor
 
+```py
+get(
+  sensors_id: int
+  ) -> SensorsResponse
+```
 
-sensors are a child of a location and hold the meau
+| argument | type |
+| -------- | ---- |
+| sensors_id | `int` |
+
+#### Example
+
+<Tabs syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    with OpenAQ() as client:
+        client.sensors.get(sensors_id=1)
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    async with AsyncOpenAQ() as client:
+        await client.sensors.get(sensors_id=1)
+    ```
+  </TabItem>
+</Tabs>
+
+## Response
+
+```
+Sensor[]
+    ├── id: int
+    ├── name: str
+    ├── parameter: 
+    │   ├── id: int
+    │   ├── name: str
+    │   ├── units: str
+    │   └── display_name: str | None
+    ├── datetime_first: 
+    │   ├── utc: str
+    │   └── local: str
+    ├── datetime_last: 
+    │   ├── utc: str
+    │   └── local: str
+    └── coverage: 
+        ├── expected_count: int
+        ├── expected_interval: str
+        ├── observed_count: int
+        ├── observed_interval: str
+        ├── percent_complete: float
+        ├── percent_coverage: float
+        ├── datetime_from:
+        │   ├── utc: str
+        │   └── local: str
+        └── datetime_to:
+            ├── utc: str
+            └── local: str
+```

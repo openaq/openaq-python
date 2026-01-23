@@ -10,3 +10,8 @@ To
 For access to large amounts of data the OpenAQ Python SDK provides the `page` 
 and `limit` arguments for all resources that use a `list()` method. 
 Combining `limit` and `page` 
+
+
+The total number of records found in a request can be found in the `meta` object
+under the `found` key. In cases where the result is too large for the system to 
+count
