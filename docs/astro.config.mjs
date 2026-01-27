@@ -6,6 +6,8 @@ import icon from 'astro-icon';
 
 // https://astro.build/config
 export default defineConfig({
+        site: 'https://openaq.github.io',
+    base: '/openaq-python',
     integrations: [starlight({
         title: 'OpenAQ Python SDK',
         social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/openaq/openaq-python' }],
