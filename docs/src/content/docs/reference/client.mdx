@@ -17,7 +17,7 @@ OpenAQ syncronous client.
 
 | Name | Type | Description | Default |
 | --- | --- | --- | --- |
-| `api_key` | `str | None` | The API key for accessing the service. | `None` |
+| `api_key` | `str \| None` | The API key for accessing the service. | `None` |
 | `headers` | `Mapping[str, str]` | Additional headers to be sent with the request. | `{}` |
 | `base_url` | `str` | The base URL for the API endpoint. | `DEFAULT_BASE_URL` |
 
@@ -180,7 +180,7 @@ OpenAQ asynchronous client.
 
 | Name | Type | Description | Default |
 | --- | --- | --- | --- |
-| `api_key` | `str | None` | The API key for accessing the service. | `None` |
+| `api_key` | `str \| None` | The API key for accessing the service. | `None` |
 | `headers` | `Mapping[str, str]` | Additional headers to be sent with the request. | `{}` |
 | `base_url` | `str` | The base URL for the API endpoint. | `DEFAULT_BASE_URL` |
 | `transport` | `AsyncTransport` | The async transport layer for HTTP communication. | `AsyncTransport()` |
