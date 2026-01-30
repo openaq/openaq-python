@@ -1,9 +1,13 @@
-from openaq.shared.exceptions import IdentifierOutOfBoundsError, InvalidParameterError
-from openaq._sync.models.countries import Countries
-from openaq.shared.responses import CountriesResponse
+from unittest.mock import Mock
 
 import pytest
-from unittest.mock import Mock
+
+from openaq._sync.models.countries import Countries
+from openaq.shared.exceptions import (
+    IdentifierOutOfBoundsError,
+    InvalidParameterError,
+)
+from openaq.shared.responses import CountriesResponse
 
 
 @pytest.fixture

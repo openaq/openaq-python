@@ -1,11 +1,16 @@
 import datetime
-from openaq.shared.exceptions import IdentifierOutOfBoundsError, InvalidParameterError
+
 import pytest
+from freezegun import freeze_time
 
-
+from openaq.shared.exceptions import (
+    IdentifierOutOfBoundsError,
+    InvalidParameterError,
+)
 from openaq.shared.validators import (
     data_check,
     datetime_check,
+    datetime_from_lesser_check,
     geospatial_params_exclusivity_check,
     integer_id_check,
     is_int_list,
@@ -1003,6 +1008,67 @@ def test_to_datetime(value: datetime.datetime | str, expected: datetime.datetime
 
 
 @pytest.mark.parametrize(
+    "datetime_from,datetime_to,frozen_time,expected",
+    [
+        (
+            datetime.datetime(2024, 1, 1, 12, 0, 0),
+            datetime.datetime(2024, 1, 2, 12, 0, 0),
+            None,
+            True,
+        ),
+        (
+            datetime.datetime(2024, 1, 2, 12, 0, 0),
+            datetime.datetime(2024, 1, 1, 12, 0, 0),
+            None,
+            False,
+        ),
+        (
+            datetime.datetime(2024, 1, 1, 12, 0, 0),
+            datetime.datetime(2024, 1, 1, 12, 0, 0),
+            None,
+            False,
+        ),
+        (
+            datetime.datetime(2024, 1, 1, 12, 0, 0, 0),
+            datetime.datetime(2024, 1, 1, 12, 0, 0, 1),
+            None,
+            True,
+        ),
+        (datetime.datetime.min, datetime.datetime(2024, 1, 1), None, True),
+        (datetime.datetime.max, datetime.datetime(2024, 1, 1), None, False),
+        (datetime.datetime(2024, 1, 14, 12, 0, 0), None, "2024-01-15 12:00:00", True),
+        (datetime.datetime(2024, 1, 16, 12, 0, 0), None, "2024-01-15 12:00:00", False),
+        (datetime.datetime(2024, 1, 15, 12, 0, 0), None, "2024-01-15 12:00:00", False),
+        (
+            datetime.datetime(2024, 1, 15, 11, 59, 59, 999999),
+            None,
+            "2024-01-15 12:00:00",
+            True,
+        ),
+    ],
+    ids=[
+        "from_beforeto",
+        "from_after_to",
+        "equal_datetimes",
+        "microsecond_difference",
+        "min_datetime",
+        "max_datetime",
+        "past_vs_now",
+        "future_vs_now",
+        "equal_to_now",
+        "microsecond_before_now",
+    ],
+)
+def test_datetime_from_lesser_check(datetime_from, datetime_to, frozen_time, expected):
+    """Test datetime_from_lesser_check with various datetime combinations."""
+    if frozen_time:
+        with freeze_time(frozen_time):
+            assert datetime_from_lesser_check(datetime_from, datetime_to) == expected
+    else:
+        assert datetime_from_lesser_check(datetime_from, datetime_to) == expected
+
+
+@pytest.mark.parametrize(
     "datetime_from,datetime_to,expected_from,expected_to",
     [
         pytest.param(
@@ -1090,6 +1156,8 @@ def test_validate_datetime_params_from_only(
         pytest.param(None, "2024-12-31", id="none-from"),
         pytest.param(True, False, id="bool-values"),
         pytest.param([], {}, id="invalid-types"),
+        pytest.param("2025-12-31", "2025-01-01", id="from-after-to"),
+        pytest.param("2025-01-01", "2025-01-01", id="from-equals-to"),
     ],
 )
 def test_validate_datetime_params_throws_with_both(
@@ -1097,6 +1165,38 @@ def test_validate_datetime_params_throws_with_both(
 ):
     with pytest.raises(Exception):
         validate_datetime_params(datetime_from, datetime_to)
+
+
+@pytest.mark.parametrize(
+    "datetime_from",
+    [
+        pytest.param("invalid-date", id="invalid-from-string"),
+        pytest.param(123, id="invalid-from-integer"),
+        pytest.param(None, id="none-from"),
+        pytest.param([], id="invalid-type"),
+    ],
+)
+def test_validate_datetime_params_throws_from_only_invalid_type(datetime_from: object):
+    """Test that invalid types raise exception when datetime_to is None."""
+    with pytest.raises(Exception):
+        validate_datetime_params(datetime_from, None)
+
+
+@freeze_time("2024-01-15 12:00:00")
+@pytest.mark.parametrize(
+    "datetime_from",
+    [
+        pytest.param("2024-01-16", id="future-string"),
+        pytest.param(datetime.datetime(2024, 1, 16), id="future-datetime"),
+        pytest.param("2024-12-31T23:59:59", id="future-with-time"),
+    ],
+)
+def test_validate_datetime_params_throws_from_only_future_datetime(
+    datetime_from: object,
+):
+    """Test that future datetime_from raises exception when datetime_to is None."""
+    with pytest.raises(Exception):
+        validate_datetime_params(datetime_from, None)
 
 
 @pytest.mark.parametrize(

@@ -111,7 +111,7 @@ dependencies = ["ruff", "black", "isort", "pydocstyle"]
 check = ["ruff check", "black --check --diff .", "isort --check-only --diff ."]
 fmt = [
     "ruff check --select F401 --fix openaq",
-    "isort openaq", 
+    "isort openaq tests", 
     "black .", 
     "check"
 ]

@@ -1,14 +1,14 @@
-from http import HTTPStatus
-from datetime import datetime
-from freezegun import freeze_time
 import os
 import platform
+from datetime import datetime
+from http import HTTPStatus
 from pathlib import Path
 from unittest import mock
 from unittest.mock import mock_open, patch
 
 import httpx
 import pytest
+from freezegun import freeze_time
 
 from openaq.shared.client import (
     DEFAULT_USER_AGENT,
