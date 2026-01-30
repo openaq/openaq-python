@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import time
+import time
 from types import TracebackType
 from typing import Mapping
 
