@@ -18,7 +18,7 @@ from openaq._sync.transport import Transport
 from openaq.shared.exceptions import ApiKeyMissingError, RateLimitError
 from openaq.shared.types import OpenAQConfig
 
-logger = logging.getLogger('openaq')
+logger = logging.getLogger(__name__)
 
 # for Python versions <3.11 tomllib is not part of std. library
 _has_toml = True
@@ -49,13 +49,17 @@ class BaseClient(ABC, Generic[TTransport]):
         _transport: The transport instance to make requests.
         _api_key: API key
         _user_agent: User-Agent HTTP header
+        _auto_wait: Whether the client should automatically wait when rate
+            limited instead of raising an exception.
         _base_url: The base URL of the OpenAQ API.
+        _rate_limit_reset_datetime: When the current rate limit resets.
+        _rate_limit_remaining: Number of requests remaining in the current rate limit window.
 
     Args:
         transport: The transport mechanism used for making requests to the OpenAQ API.
         headers: mapping of HTTP headers to be sent with request.
         api_key: OpenAQ API key string.
-        user_agent: User-Agent header value to be sent with HTTP requests.
+        auto_wait: Whether to automatically wait when rate limited. Defaults to True.
         base_url: The base URL for the OpenAQ API. Defaults to "https://api.openaq.org/v3/".
     """
 
@@ -63,6 +67,8 @@ class BaseClient(ABC, Generic[TTransport]):
     _api_key: str | None
     _base_url: str
     _user_agent: str
+    _auto_wait: bool
+    _transport: TTransport
     _rate_limit_reset_datetime: datetime
     _rate_limit_remaining: float
 
@@ -71,6 +77,7 @@ class BaseClient(ABC, Generic[TTransport]):
         transport: TTransport,
         headers: Mapping[str, str] = {},
         api_key: str | None = None,
+        auto_wait: bool = True,
         base_url: str = "https://api.openaq.org/v3/",
     ) -> None:
         """Initialize a new instance of BaseClient.
@@ -79,7 +86,7 @@ class BaseClient(ABC, Generic[TTransport]):
             transport: The transport mechanism used for making requests to the OpenAQ API.
             headers: mapping of HTTP headers to be sent with request.
             api_key: OpenAQ API key string.
-            user_agent: User-Agent header value to be sent with HTTP requests.
+            auto_wait: defaults to True.
             base_url: The base URL for the OpenAQ API. Defaults to "https://api.openaq.org/v3/".
         """
         if api_key:
@@ -93,6 +100,7 @@ class BaseClient(ABC, Generic[TTransport]):
         self.resolve_headers()
         self._rate_limit_reset_datetime = datetime.min
         self._rate_limit_remaining = math.inf
+        self._auto_wait = auto_wait
         self._check_api_key_url()
 
     def _check_api_key_url(self) -> None:
@@ -204,9 +212,10 @@ class BaseClient(ABC, Generic[TTransport]):
 
     def _check_rate_limit(self) -> None:
         if self._is_rate_limited():
-            logger.exception(f"Rate limit exceeded")
-            message = f"Rate limit exceeded. Limit resets in {self._rate_limit_reset_seconds} seconds"
-            raise RateLimitError(message)
+            if not self._auto_wait:
+                message = f"Rate limit exceeded. Limit resets in {self._rate_limit_reset_seconds} seconds"
+                logger.error(message)
+                raise RateLimitError(message)
 
     @property
     def _rate_limit_reset_seconds(self) -> int:

@@ -21,7 +21,7 @@ from openaq.shared.exceptions import (
     ValidationError,
 )
 
-logger = logging.getLogger("transport")
+logger = logging.getLogger(__name__)
 
 
 def check_response(res: httpx.Response) -> httpx.Response:

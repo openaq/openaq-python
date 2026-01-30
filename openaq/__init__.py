@@ -5,7 +5,7 @@ import logging
 __version__ = "1.0.0rc"
 
 
-logger = logging.getLogger("openaq")
+logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
