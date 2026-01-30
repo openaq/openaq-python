@@ -16,9 +16,9 @@ get(
   ) -> LocationsResponse
 ```
 
-| argument | type |
-| -------- | ---- |
-| locations_id | `int` |
+| argument | description |
+| -------- | ----------- |
+| locations_id | `int` a unique identifier for each location |
 
 #### Example
 
@@ -66,18 +66,18 @@ list(
 
 | argument | description | rules |
 | -------- | ---- | ---- |
-| page | `int` | |
-| limit | `int` | |
-| radius | `int \| None` | Must be accompanied by coordinates, cannot be accompanied by bbox.  |
-| coordinates | `tuple[float, float] \| None` | Must be accompanied by radius, cannot be accompanied by bbox.  |
-| bbox | `tuple[float, float, float, float] \| None` | Cannot be accompanied by either coordinate or radius |
-| providers_id | `int \| list[int] \| None` | |
-| countries_id | `int \| list[int] \| None` | |
-| parameters_id | `int \| list[int] \| None` | |
-| licenses_id | `int \| list[int] \| None` | |
-| iso | `str \| None` | |
-| monitor | `bool \| None` | |
-| mobile | `bool \| None` | |
+| page | `int` The page number from which the subsetted resulting locations will be returned | |
+| limit | `int` The maximum number of locations to be returned per page | Must be less than or equal to 1,000 |
+| coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for locations | Must be in WGS84 (EPSG:4326), (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be accompanied by bbox. |
+| radius | `int \| None` The search distance (in meters) from the coordinate pair to look for locations | Must be accompanied by coordinates, cannot be accompanied by bbox. |
+| bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format. Cannot be accompanied by either coordinate or radius |
+| providers_id | `int \| list[int] \| None` The organization(s) or individual(s) that facilitates the sharing of data | Must be OpenAQ unique identifier for the data provider |
+| countries_id | `int \| list[int] \| None` The country where the location operates | Must be the ISO 3166-1 alpha-2 code representation of the country |
+| parameters_id | `int \| list[int] \| None` The type of pollutants or meteorological reading(s) by which to search for locations | Must be OpenAQ unique identifier for the pollutant or meteorlogical parameter(s) |
+| licenses_id | `int \| list[int] \| None` The license that governs the usage and sharing of data at these locations | Must be OpenAQ unique identifier for the license(s) |
+| iso | `str \| None`  | |
+| monitor | `bool \| None` Indicator that locations returned must be reference-grade if True, air sensor if False | |
+| mobile | `bool \| None` Indicator that locations returned must be mobile if True, stationary if False | |
 | order_by | `str \| None` | |
 | sort_order | `SortOrder \| None` | |
 
