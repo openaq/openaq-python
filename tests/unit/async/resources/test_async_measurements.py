@@ -1,14 +1,15 @@
+import datetime
+from unittest.mock import AsyncMock, Mock
+
+import pytest
+
+from openaq._async.models.measurements import Measurements
 from openaq.shared.exceptions import (
     IdentifierOutOfBoundsError,
     InvalidParameterError,
     NotFoundError,
 )
-from openaq._async.models.measurements import Measurements
 from openaq.shared.responses import MeasurementsResponse
-
-import pytest
-from unittest.mock import AsyncMock, Mock
-import datetime
 
 
 @pytest.fixture
