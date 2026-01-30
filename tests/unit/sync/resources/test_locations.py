@@ -1,9 +1,17 @@
-from openaq.shared.exceptions import IdentifierOutOfBoundsError, InvalidParameterError
-from openaq._sync.models.locations import Locations
-from openaq.shared.responses import LatestResponse, LocationsResponse, SensorsResponse
+from unittest.mock import Mock
 
 import pytest
-from unittest.mock import Mock
+
+from openaq._sync.models.locations import Locations
+from openaq.shared.exceptions import (
+    IdentifierOutOfBoundsError,
+    InvalidParameterError,
+)
+from openaq.shared.responses import (
+    LatestResponse,
+    LocationsResponse,
+    SensorsResponse,
+)
 
 
 @pytest.fixture

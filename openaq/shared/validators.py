@@ -591,6 +591,23 @@ def to_datetime(value: datetime.datetime | str) -> datetime.datetime:
     return datetime.datetime.fromisoformat(value)
 
 
+def datetime_from_lesser_check(
+    datetime_from: datetime.datetime, datetime_to: datetime.datetime | None = None
+) -> bool:
+    """Checks that datetime_from is either less than now or less than datetime_to.
+
+    Args:
+        datetime_from: Value representing the datetime_from query parameter (start date/time).
+        datetime_to: Value representing the datetime_to query parameter (end date/time), or None.
+
+    Returns:
+        True if datetime_from is in the past or less than datetime_to.
+    """
+    if not datetime_to:
+        return datetime_from < datetime.datetime.now()
+    return datetime_from < datetime_to
+
+
 def validate_datetime_params(
     datetime_from: object, datetime_to: object
 ) -> tuple[datetime.datetime, datetime.datetime | None]:
@@ -609,15 +626,26 @@ def validate_datetime_params(
     if datetime_to:
         if not datetime_check(datetime_from) or not datetime_check(datetime_to):
             raise InvalidParameterError(
-                f"Invalid datetime_from of datetime_to, must be either datetime type or ISO8601 formatted string, got {type(datetime_from) and type(datetime_to)}"
+                f"Invalid datetime_from or datetime_to, must be either datetime type or ISO8601 formatted string, got {type(datetime_from) and type(datetime_to)}"
             )
-        return (to_datetime(datetime_from), to_datetime(datetime_to))
+        datetime_from_datetime = to_datetime(datetime_from)
+        datetime_to_datetime = to_datetime(datetime_to)
+        if not datetime_from_lesser_check(datetime_from_datetime, datetime_to_datetime):
+            raise InvalidParameterError(
+                "Invalid  datetime_from or datetime_to, datetime_from must be less than datetime_to"
+            )
+        return (datetime_from_datetime, datetime_to_datetime)
     else:
         if not datetime_check(datetime_from):
             raise InvalidParameterError(
                 f"Invalid datetime_from, must be either datetime type or ISO8601 formatted string, got {type(datetime_from)}"
             )
-        return (to_datetime(datetime_from), None)
+        datetime_from_datetime = to_datetime(datetime_from)
+        if not datetime_from_lesser_check(datetime_from_datetime):
+            raise InvalidParameterError(
+                "Invalid datetime_from, datetime_from must be in the past."
+            )
+        return (datetime_from_datetime, None)
 
 
 def parameter_type_check(parameter_type: object) -> TypeGuard[ParameterType]:
