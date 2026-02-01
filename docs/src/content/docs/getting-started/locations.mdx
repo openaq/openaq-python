@@ -4,40 +4,49 @@ title: Locations
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Overview
+Talk about overview here
 
 ## Methods
 
+You can access location details and the latest measurement readings across all sensors at a location by using methods. Three methods are available for the locations resource:
+- `get()`
+- `list()`
+- `latest()`
+
 ### Get a single location
 
+The `get()` method accepts one single `locations_id` as an argument and returns all details about that location in a LocationsResponse object.
+
+#### Query arguments
 ```py
-get(
+.get(
   locations_id: int
   ) -> LocationsResponse
 ```
 
-| argument | description |
-| -------- | ----------- |
-| locations_id | `int` a unique identifier for each location |
+| argument | description | input requirements |
+| -------- | ----------- | ---- |
+| locations_id | `int` OpenAQ's unique identifier for each location | Required |
 
 #### Example
-
 
 <Tabs  syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
-    with OpenAQ() as client:
-        client.locations.get()
+    # Retrieve the location with ID 4845127
+    with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+        client.locations.get(4845127)
     ```
   </TabItem>
   <TabItem label="async">
     ```py
     from openaq import AsyncOpenAQ
 
-    async with AsyncOpenAQ() as client:
-        await client.locations.get()
+    # Retrieve the location with ID 4845127
+    async with AsyncOpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+        await client.locations.get(4845127)
     ```
   </TabItem>
 </Tabs>
@@ -45,8 +54,10 @@ get(
 
 ###  List multiple locations
 
+The `list()` method takes multiple optional arguments and returns all air monitoring locations on OpenAQ platform that meet the conditions specified in the arguments. If no argument is included, the method returns all locations on the platform using the default arguments.
+
 ```py
-list(
+.list(
   page: int = 1,
   limit: int = 100,
   radius: int | None = None,
@@ -64,78 +75,99 @@ list(
   ) -> LocationsResponse
 ```
 
-| argument | description | rules |
-| -------- | ---- | ---- |
-| page | `int` The page number from which the subsetted resulting locations will be returned | |
-| limit | `int` The maximum number of locations to be returned per page | Must be less than or equal to 1,000 |
-| coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for locations | Must be in WGS84 (EPSG:4326), (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be accompanied by bbox. |
-| radius | `int \| None` The search distance (in meters) from the coordinate pair to look for locations | Must be accompanied by coordinates, cannot be accompanied by bbox. |
-| bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format. Cannot be accompanied by either coordinate or radius |
+#### Query arguments
+
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| page | `int` The page number from which the subsetted resulting locations will be returned | Must be greater than 0 |
+| limit | `int` The maximum number of locations returned per page | Must be between 1 and 1,000 |
+| radius | `int \| None` The search distance value (in meters) around the coordinate pair to look for locations | Must be between 1 and 25,000. Must be accompanied by coordinates. Cannot be accompanied by bbox |
+| coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for locations | Must be in WGS84 (EPSG:4326) in (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be accompanied by bbox. |
+| bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be accompanied by either coordinate or radius |
 | providers_id | `int \| list[int] \| None` The organization(s) or individual(s) that facilitates the sharing of data | Must be OpenAQ unique identifier for the data provider |
-| countries_id | `int \| list[int] \| None` The country where the location operates | Must be the ISO 3166-1 alpha-2 code representation of the country |
+| countries_id | `int \| list[int] \| None` The countr(ies) or territor(ies) where the location operates | Must be OpenAQ unique identifier for the countr(ies) or territor(ies). Cannot be accompanied by iso |
 | parameters_id | `int \| list[int] \| None` The type of pollutants or meteorological reading(s) by which to search for locations | Must be OpenAQ unique identifier for the pollutant or meteorlogical parameter(s) |
 | licenses_id | `int \| list[int] \| None` The license that governs the usage and sharing of data at these locations | Must be OpenAQ unique identifier for the license(s) |
-| iso | `str \| None`  | |
+| iso | `str \| None` The country or territory where the location operates | Must be the ISO 3166-1 alpha-2 code representation of the country, cannot be accompanied by countries_id |
 | monitor | `bool \| None` Indicator that locations returned must be reference-grade if True, air sensor if False | |
 | mobile | `bool \| None` Indicator that locations returned must be mobile if True, stationary if False | |
-| order_by | `str \| None` | |
+| order_by | `str \| None`  | |
 | sort_order | `SortOrder \| None` | |
 
-
+#### Example
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
-    with OpenAQ() as client:
-        client.locations.get()
+    # List all locations in Morocco where there is a PM2.5 reading
+    with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+        client.locations.list(countries_id=27,
+                              parameters_id=2)
     ```
   </TabItem>
   <TabItem label="async">
     ```py
     from openaq import AsyncOpenAQ
 
+    # List all locations in Morocco where there is a PM2.5 reading
     async with AsyncOpenAQ() as client:
-        await client.locations.get()
+        await client.locations.list(countries_id=27,
+                                    parameters_id=2)
     ```
   </TabItem>
 </Tabs>
 
 ### List latest measurements from a location
 
+The `latest()` method takes one single `locations_id` as an argument and returns the latest measurement readings of all sensors at that location in a LatestResponse object.
+
+#### Query arguments
 
 ```py
-latest(
+.latest(
   locations_id: int
   ) -> LatestResponse
 ```
 
-| argument | description | rules |
-| -------- | ----------- | ----- |
-| locations_id | `int` | |
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| locations_id | `int` OpenAQ's unique identifier for each location | Required |
 
+#### Example
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
-    with OpenAQ() as client:
-        client.locations.list()
+    # Retrieve the latest measurement readings at the location with ID 4845127
+    with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+        client.locations.latest(4845127)
     ```
   </TabItem>
   <TabItem label="async">
     ```py
     from openaq import AsyncOpenAQ
 
-    async with AsyncOpenAQ() as client:
-        await client.locations.list()
+    # Retrieve the latest measurement readings at the location with ID 4845127
+    async with AsyncOpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+        await client.locations.latest(4845127)
     ```
   </TabItem>
 </Tabs>
 
-## Response
+## Response objects
+
+By default, query response objects have 3 attributes that could be accessed by dot notation: headers, meta, and results. The results attribute is where the location data lives in; it is a list containing Location or Latest objects depending on which method is used.
+
+```py
+LocationsResponse.results -> [Location]
+LatestResponse.results -> [Latest]
+```
+
+These Location and Latest objects contain attributes that have all data about them. The hierarchy below presents the depth of the attributes and their datatypes.
 
 ```
 Location[]
@@ -177,4 +209,17 @@ Location[]
     └── datetime_last: 
         ├── utc: str
         └── local: str
+```
+
+```
+Latest[]
+    ├── datetime:
+    │   ├── utc: str
+    │   └── local: str
+    ├── value: float
+    ├── coordinates: 
+    │   ├── latitude: float
+    │   └── longitude: float
+    ├── sensors_id: int
+    └── locations_id: int
 ```
