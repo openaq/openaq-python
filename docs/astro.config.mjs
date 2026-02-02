@@ -17,9 +17,11 @@ export default defineConfig({
         customCss: ['./src/assets/landing.css'],
         sidebar: [
                                             {
-                label: 'About',
+                label: 'Introduction',
                 items: [
-                    {label: 'About', slug : 'about/about'},
+                    {label: 'About', slug : 'introduction/about'},
+                    {label: 'Navigating the docs', slug : 'introduction/navigating-the-docs'},
+                    {label: 'Contributing', slug : 'introduction/contributing'},
                 ]},
                             {
                 label: 'Getting started',
@@ -31,31 +33,38 @@ export default defineConfig({
                     {label: 'Exceptions', slug : 'getting-started/exceptions'},
                     {label: 'Responses', slug : 'getting-started/responses'},
                     {label: 'Resources', slug : 'getting-started/resources'},
-                    {label: 'Locations', slug : 'getting-started/locations'},
-                    {label: 'Sensors', slug : 'getting-started/sensors'},
-                    {label: 'Measurements', slug : 'getting-started/measurements'},
-                    {label: 'Licenses', slug : 'getting-started/licenses'},
-                    {label: 'Manufacturers', slug : 'getting-started/manufacturers'},
-                    {label: 'Instruments', slug : 'getting-started/instruments'},
-                    {label: 'Parameters', slug : 'getting-started/parameters'},
-                    {label: 'Providers', slug : 'getting-started/providers'},
-                    {label: 'Owners', slug : 'getting-started/owners'},
-                    {label: 'Countries', slug : 'getting-started/countries'},
 
                 ],
             },
                             {
-                label: 'Advanced',
+                label: 'Working with resources',
                 items: [
-                    {label: 'Custom serialization', slug : 'advanced/json'},
+                    {label: 'Locations', slug : 'working-with-resources/locations'},
+                    {label: 'Sensors', slug : 'working-with-resources/sensors'},
+                    {label: 'Measurements', slug : 'working-with-resources/measurements'},
+                    {label: 'Licenses', slug : 'working-with-resources/licenses'},
+                    {label: 'Manufacturers', slug : 'working-with-resources/manufacturers'},
+                    {label: 'Instruments', slug : 'working-with-resources/instruments'},
+                    {label: 'Parameters', slug : 'working-with-resources/parameters'},
+                    {label: 'Providers', slug : 'working-with-resources/providers'},
+                    {label: 'Owners', slug : 'working-with-resources/owners'},
+                    {label: 'Countries', slug : 'working-with-resources/countries'},
 
                 ],
             },
-            {
-                label: 'Guides',
+                            {
+                label: 'Advanced usage',
                 items: [
-                    {label: 'Integrating with Pandas', slug : 'guides/pandas'},
-
+                    {label: 'Custom serialization', slug : 'advanced-usage/json'},
+                    {label: 'Logging', slug : 'advanced-usage/logging'},
+                    {label: 'Custom rate limiting', slug : 'advanced-usage/rate-limiting'},
+                ],
+            },
+            {
+                label: 'Common workflows',
+                items: [
+                    {label: 'Integrating with Pandas', slug : 'common-workflows/pandas'},
+                    {label: 'Querying around a city', slug : 'common-workflows/querying-around-a-city'},
                 ],
             },
             {
