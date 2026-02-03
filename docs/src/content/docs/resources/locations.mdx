@@ -4,7 +4,7 @@ title: Locations
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Talk about overview here
+Locations is the most central resource for it connects to various others, and is often the starting point to understanding OpenAQ data infrastructure. With a Location object serving as a proxy for 'an air monitoring station', the Locations resource as a whole provides details about individual air quality monitoring stations, such as their name, geographic coordinates, and timezone. It also identifies the responsible organization (when known) and data provider. The Location resource also provides information about the parameters being measured and the sensors that measure them at that Location. Licensing and attribution details clarify data usage rights. A more detailed look at what information is provided when accessing this resource could be found in Location object section.
 
 ## Methods
 
@@ -12,6 +12,7 @@ You can access location details and the latest measurement readings across all s
 - `get()`
 - `list()`
 - `latest()`
+- `sensors()`
 
 ### Get a single location
 
@@ -51,7 +52,6 @@ The `get()` method accepts one single `locations_id` as an argument and returns 
   </TabItem>
 </Tabs>
 
-
 ###  List multiple locations
 
 The `list()` method takes multiple optional arguments and returns all air monitoring locations on OpenAQ platform that meet the conditions specified in the arguments. If no argument is included, the method returns all locations on the platform using the default arguments.
@@ -79,8 +79,8 @@ The `list()` method takes multiple optional arguments and returns all air monito
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| page | `int` The page number from which the subsetted resulting locations will be returned | Must be greater than 0 |
-| limit | `int` The maximum number of locations returned per page | Must be between 1 and 1,000 |
+| page | `int` The page number from which the subsetted resulting locations will be returned. Defaults to 1 | Must be greater than 0 |
+| limit | `int` The maximum number of locations returned per page. Defaults to 100 | Must be between 1 and 1,000 |
 | radius | `int \| None` The search distance value (in meters) around the coordinate pair to look for locations | Must be between 1 and 25,000. Must be accompanied by coordinates. Cannot be accompanied by bbox |
 | coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for locations | Must be in WGS84 (EPSG:4326) in (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be accompanied by bbox. |
 | bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be accompanied by either coordinate or radius |
@@ -91,8 +91,8 @@ The `list()` method takes multiple optional arguments and returns all air monito
 | iso | `str \| None` The country or territory where the location operates | Must be the ISO 3166-1 alpha-2 code representation of the country, cannot be accompanied by countries_id |
 | monitor | `bool \| None` Indicator that locations returned must be reference-grade if True, air sensor if False | |
 | mobile | `bool \| None` Indicator that locations returned must be mobile if True, stationary if False | |
-| order_by | `str \| None`  | |
-| sort_order | `SortOrder \| None` | |
+| order_by | `str \| None` The Location attribute by which to order the returning LocationsResponse results. Defaults to ' | Currently only takes 'id' for input |
+| sort_order | `str \| None` The order by which to sort the Location attribute. Defaults to 'desc' | Must be one of the following: 'asc', 'desc', 'ASC', 'DESC' |
 
 #### Example
 
@@ -158,6 +158,44 @@ The `latest()` method takes one single `locations_id` as an argument and returns
   </TabItem>
 </Tabs>
 
+### Retrieve all sensors at a location
+
+The `sensors()` method accepts one single `locations_id` as an argument and returns all sensors at that location in a SensorsResponse object.
+
+#### Query arguments
+```py
+.sensors(
+  locations_id: int
+  ) -> LocationsResponse
+```
+
+| argument | description | input requirements |
+| -------- | ----------- | ---- |
+| locations_id | `int` OpenAQ's unique identifier for each location | Required |
+
+#### Example
+
+<Tabs  syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    # Retrieve all sensors at location with ID 4845127
+    with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+        client.locations.sensors(4845127)
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    # Retrieve all sensors at location with ID 4845127
+    async with AsyncOpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+        await client.locations.sensors(4845127)
+    ```
+  </TabItem>
+</Tabs>
+
 ## Response objects
 
 By default, query response objects have 3 attributes that could be accessed by dot notation: headers, meta, and results. The results attribute is where the location data lives in; it is a list containing Location or Latest objects depending on which method is used.
@@ -165,10 +203,12 @@ By default, query response objects have 3 attributes that could be accessed by d
 ```py
 LocationsResponse.results -> [Location]
 LatestResponse.results -> [Latest]
+SensorsResponse.results -> [Sensor]
 ```
 
 These Location and Latest objects contain attributes that have all data about them. The hierarchy below presents the depth of the attributes and their datatypes.
 
+### Location object
 ```
 Location[]
     ├── id: int
@@ -211,6 +251,7 @@ Location[]
         └── local: str
 ```
 
+### Latest object
 ```
 Latest[]
     ├── datetime:
@@ -222,4 +263,53 @@ Latest[]
     │   └── longitude: float
     ├── sensors_id: int
     └── locations_id: int
+```
+
+### Sensor object
+```
+Sensor[]
+├── id: int
+├── name: str
+├── parameter
+│   ├── id: int
+│   ├── name: str
+│   ├── units: str
+│   └── displayName: str
+├── datetime_first
+│   ├── utc: str
+│   └── local: str
+├── datetime_last
+│   ├── utc: str
+│   └── local: str
+├── coverage
+│   ├── expectedCount: int
+│   ├── expectedInterval: str
+│   ├── observedCount: int
+│   ├── observedInterval: str
+│   ├── percentComplete: float
+│   ├── percentCoverage: float
+│   ├── datetimeFrom
+│   │   ├── utc: str
+│   │   └── local: str
+│   └── datetimeTo
+│       ├── utc: str
+│       └── local: str
+├── latest
+│   ├── datetime
+│   │   ├── utc: str
+│   │   └── local: str
+│   ├── value: float
+│   └── coordinates
+│       ├── latitude: float
+│       └── longitude: float
+└── summary
+    ├── min: float
+    ├── q02: float | None
+    ├── q25: float | None
+    ├── median: float | None
+    ├── q75: float | None
+    ├── q98: float | None
+    ├── max: float
+    ├── avg: float
+    └── sd: float
 ```
