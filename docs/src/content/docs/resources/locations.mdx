@@ -4,23 +4,33 @@ title: Locations
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Locations is the most central resource for it connects to various others, and is often the starting point to understanding OpenAQ data infrastructure. With a Location object serving as a proxy for 'an air monitoring station', the Locations resource as a whole provides details about individual air quality monitoring stations, such as their name, geographic coordinates, and timezone. It also identifies the responsible organization (when known) and data provider. The Location resource also provides information about the parameters being measured and the sensors that measure them at that Location. Licensing and attribution details clarify data usage rights. A more detailed look at what information is provided when accessing this resource could be found in Location object section.
+
+The locations resource gives you access to air quality monitoring station data
+from the OpenAQ database. Use it to get details about stations: their
+geographic information, what instruments they use, what pollutants they measure,
+and who owns or manages them. The resource has methods to query single stations,
+search many stations, and access live sensor data. This resource helps you work
+with station information and current conditions.
 
 ## Methods
 
-You can access location details and the latest measurement readings across all sensors at a location by using methods. Three methods are available for the locations resource:
-- `get()`
-- `list()`
-- `latest()`
-- `sensors()`
+The `locations` resource provides the following methods:
+
+- `get()` - For accessing a single location by location ID.
+- `list()` - For accessing multiple locations.
+- `latest()` - For accessing the latest measurements for all sensors for a given
+  location ID.
+- `sensors()` - For accessing a list of available sensors at the location for a
+  given location ID.
 
 ### Get a single location
 
-The `get()` method accepts one single `locations_id` as an argument and returns all details about that location in a LocationsResponse object.
+The `get()` method accepts one single `locations_id` as an argument and returns
+details about that location in a LocationsResponse object.
 
 #### Query arguments
 ```py
-.get(
+get(
   locations_id: int
   ) -> LocationsResponse
 ```
@@ -54,10 +64,13 @@ The `get()` method accepts one single `locations_id` as an argument and returns 
 
 ###  List multiple locations
 
-The `list()` method takes multiple optional arguments and returns all air monitoring locations on OpenAQ platform that meet the conditions specified in the arguments. If no argument is included, the method returns all locations on the platform using the default arguments.
+The `list()` method takes multiple optional arguments and returns all air
+monitoring locations on the OpenAQ platform that meet the conditions specified
+in the arguments. If no argument is included, the method returns all locations
+on the platform using the default arguments.
 
 ```py
-.list(
+list(
   page: int = 1,
   limit: int = 100,
   radius: int | None = None,
@@ -71,7 +84,7 @@ The `list()` method takes multiple optional arguments and returns all air monito
   monitor: bool | None = None,
   mobile: bool | None = None,
   order_by: str | None = None,
-  sort_order: SortOrder | None = None
+  sort_order: str | None = None
   ) -> LocationsResponse
 ```
 
@@ -79,18 +92,18 @@ The `list()` method takes multiple optional arguments and returns all air monito
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| page | `int` The page number from which the subsetted resulting locations will be returned. Defaults to 1 | Must be greater than 0 |
-| limit | `int` The maximum number of locations returned per page. Defaults to 100 | Must be between 1 and 1,000 |
-| radius | `int \| None` The search distance value (in meters) around the coordinate pair to look for locations | Must be between 1 and 25,000. Must be accompanied by coordinates. Cannot be accompanied by bbox |
+| page | `int` The page number from which the subsetted resulting locations will be returned, defaults to 1 | Must be greater than 0 |
+| limit | `int` The maximum number of locations returned per page, defaults to 100 | Must be between 1 and 1,000 |
+| radius | `int \| None` The search distance value (in meters) around the coordinate pair to search for locations | Must be between 1 and 25,000. Must be accompanied by coordinates. Cannot be accompanied by bbox |
 | coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for locations | Must be in WGS84 (EPSG:4326) in (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be accompanied by bbox. |
 | bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be accompanied by either coordinate or radius |
-| providers_id | `int \| list[int] \| None` The organization(s) or individual(s) that facilitates the sharing of data | Must be OpenAQ unique identifier for the data provider |
+| providers_id | `int \| list[int] \| None` Filter the locations by the ID of one or multiple organizations/individuals that facilitate the sharing of data at those locations |
 | countries_id | `int \| list[int] \| None` The countr(ies) or territor(ies) where the location operates | Must be OpenAQ unique identifier for the countr(ies) or territor(ies). Cannot be accompanied by iso |
 | parameters_id | `int \| list[int] \| None` The type of pollutants or meteorological reading(s) by which to search for locations | Must be OpenAQ unique identifier for the pollutant or meteorlogical parameter(s) |
 | licenses_id | `int \| list[int] \| None` The license that governs the usage and sharing of data at these locations | Must be OpenAQ unique identifier for the license(s) |
-| iso | `str \| None` The country or territory where the location operates | Must be the ISO 3166-1 alpha-2 code representation of the country, cannot be accompanied by countries_id |
-| monitor | `bool \| None` Indicator that locations returned must be reference-grade if True, air sensor if False | |
-| mobile | `bool \| None` Indicator that locations returned must be mobile if True, stationary if False | |
+| iso | `str \| None` The ISO 3166-1 alpha-2 code for country or territory of the location | Must be a valid ISO 3166-1 alpha-2 code representation of the country, cannot be accompanied by countries_id |
+| monitor | `bool \| None` Filter for for reference grade (True) or air sensor (False) locations | |
+| mobile | `bool \| None` Filter for for mobile (True) or stationary (False) locations | |
 | order_by | `str \| None` The Location attribute by which to order the returning LocationsResponse results. Defaults to ' | Currently only takes 'id' for input |
 | sort_order | `str \| None` The order by which to sort the Location attribute. Defaults to 'desc' | Must be one of the following: 'asc', 'desc', 'ASC', 'DESC' |
 
@@ -121,7 +134,9 @@ The `list()` method takes multiple optional arguments and returns all air monito
 
 ### List latest measurements from a location
 
-The `latest()` method takes one single `locations_id` as an argument and returns the latest measurement readings of all sensors at that location in a LatestResponse object.
+The `latest()` method takes one single `locations_id` as an argument and returns
+the latest measurement readings of all sensors at that location in a
+LatestResponse object.
 
 #### Query arguments
 
@@ -133,7 +148,7 @@ The `latest()` method takes one single `locations_id` as an argument and returns
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| locations_id | `int` OpenAQ's unique identifier for each location | Required |
+| locations_id | `int`  unique identifier for a location in OpenAQ | Required |
 
 #### Example
 
@@ -160,7 +175,8 @@ The `latest()` method takes one single `locations_id` as an argument and returns
 
 ### Retrieve all sensors at a location
 
-The `sensors()` method accepts one single `locations_id` as an argument and returns all sensors at that location in a SensorsResponse object.
+The `sensors()` method accepts one single `locations_id` as an argument and
+returns all sensors at that location in a SensorsResponse object.
 
 #### Query arguments
 ```py
@@ -171,7 +187,7 @@ The `sensors()` method accepts one single `locations_id` as an argument and retu
 
 | argument | description | input requirements |
 | -------- | ----------- | ---- |
-| locations_id | `int` OpenAQ's unique identifier for each location | Required |
+| locations_id | `int`  unique identifier for a location in OpenAQ | Required |
 
 #### Example
 
@@ -198,7 +214,7 @@ The `sensors()` method accepts one single `locations_id` as an argument and retu
 
 ## Response objects
 
-By default, query response objects have 3 attributes that could be accessed by dot notation: headers, meta, and results. The results attribute is where the location data lives in; it is a list containing Location or Latest objects depending on which method is used.
+
 
 ```py
 LocationsResponse.results -> [Location]
@@ -206,9 +222,11 @@ LatestResponse.results -> [Latest]
 SensorsResponse.results -> [Sensor]
 ```
 
-These Location and Latest objects contain attributes that have all data about them. The hierarchy below presents the depth of the attributes and their datatypes.
+These Location and Latest objects contain attributes that have all data about
+them. The hierarchy below presents the depth of the attributes and their
+datatypes.
 
-### Location object
+### LocationsResponse
 ```
 Location[]
     ├── id: int
