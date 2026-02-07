@@ -174,9 +174,7 @@ class Locations(AsyncResourceBase):
                 'manufacturers_id', manufacturers_id
             )
         if owners_id:
-            licenses_id = validate_integer_or_list_integer_params(
-                'owners_id', owners_id
-            )
+            owners_id = validate_integer_or_list_integer_params('owners_id', owners_id)
         if iso:
             iso = validate_iso_param(iso)
         if monitor is not None:
