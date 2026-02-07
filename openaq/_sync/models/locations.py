@@ -93,6 +93,9 @@ class Locations(SyncResourceBase):
         countries_id: int | list[int] | None = None,
         parameters_id: int | list[int] | None = None,
         licenses_id: int | list[int] | None = None,
+        instruments_id: int | list[int] | None = None,
+        manufacturers_id: int | list[int] | None = None,
+        owners_id: int | list[int] | None = None,
         iso: str | None = None,
         monitor: bool | None = None,
         mobile: bool | None = None,
@@ -102,20 +105,35 @@ class Locations(SyncResourceBase):
         """List locations based on provided filters.
 
         Args:
-            page: The page number, must be greater than zero. Page count is locations found / limit.
-            limit: The number of results returned per page. Must be between 1 and 1,000.
-            radius: A distance value in meters to search around the given coordinates value, must be between 1 and 25,000 (25km).
-            coordinates: WGS 84 coordinate pair in form latitude, longitude (y,x).
-            bbox: Geospatial bounding box of min X, min Y, max X, max Y in WGS 84 coordinates. Limited to four decimals precision.
-            providers_id: Single providers ID or an array of IDs.
-            countries_id: Single countries ID or an array of IDs.
-            parameters_id: Single parameters ID or an array of IDs.
-            licenses_id: Single licenses ID or an array of IDs.
-            iso: 2 letter ISO 3166-alpha-2 country code.
-            monitor: Boolean for reference grade monitors (true) or air sensors (false)
-            mobile: Boolean mobile locations (true) or not mobile locations (false).
-            order_by: Order by operators for results.
-            sort_order: Order for sorting results (asc/desc).
+            page: Page number to retrieve, must be greater than zero.
+                Page count is calculated as total locations / limit.
+            limit: Number of results per page. Must be between 1 and 1,000.
+            radius: Search radius in meters around the coordinates point.
+                Must be between 1 and 25,000 (25km).
+            coordinates: WGS 84 coordinate pair as (latitude, longitude).
+            bbox: Geospatial bounding box as (min_x, min_y, max_x, max_y)
+                in WGS 84 coordinates. Limited to four decimal places.
+            providers_id: Filter locations by provider ID(s).
+                Accepts a single ID or list of IDs.
+            countries_id: Filter locations by country ID(s).
+                Accepts a single ID or list of IDs.
+            parameters_id: Filter locations by parameter ID(s).
+                Accepts a single ID or list of IDs.
+            licenses_id: Filter locations by license ID(s).
+                Accepts a single ID or list of IDs.
+            instruments_id: Filter locations by instrument ID(s).
+                Accepts a single ID or list of IDs.
+            manufacturers_id: Filter locations by manufacturer ID(s).
+                Accepts a single ID or list of IDs.
+            owners_id: Filter locations by owner ID(s).
+                Accepts a single ID or list of IDs.
+            iso: Filter locations by 2-letter ISO 3166-alpha-2 country code.
+            monitor: Filter by monitor type. True for reference grade monitors,
+                False for air sensors.
+            mobile: Filter by mobility. True for mobile locations,
+                False for stationary locations.
+            order_by: Field name to sort results by.
+            sort_order: Sort direction, either 'asc' or 'desc'.
 
         Returns:
             LocationsResponse: An instance representing the list of retrieved locations.
@@ -156,6 +174,16 @@ class Locations(SyncResourceBase):
             licenses_id = validate_integer_or_list_integer_params(
                 'licenses_id', licenses_id
             )
+        if instruments_id:
+            instruments_id = validate_integer_or_list_integer_params(
+                'instruments_id', instruments_id
+            )
+        if manufacturers_id:
+            manufacturers_id = validate_integer_or_list_integer_params(
+                'manufacturers_id', manufacturers_id
+            )
+        if owners_id:
+            owners_id = validate_integer_or_list_integer_params('owners_id', owners_id)
         if iso is not None:
             iso = validate_iso_param(iso)
         if monitor is not None:
@@ -176,6 +204,9 @@ class Locations(SyncResourceBase):
             countries_id=countries_id,
             parameters_id=parameters_id,
             licenses_id=licenses_id,
+            instruments_id=instruments_id,
+            manufacturers_id=manufacturers_id,
+            owners_id=owners_id,
             iso=iso,
             monitor=monitor,
             mobile=mobile,
