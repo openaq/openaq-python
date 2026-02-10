@@ -538,6 +538,60 @@ def validate_rollup(rollup: object) -> Rollup:
     return rollup
 
 
+def check_data_rollup_compatibility(data: Data, rollup: Rollup) -> bool:
+    """Check that data and rollup path parameters are compatible.
+
+    Args:
+        data: Value representing the data path parameter.
+        rollup: Value representing the rollup path parameter.
+
+    Returns:
+        True if the data and rollup values can be paired, False if not.
+    """
+    valid_combinations = {
+        "measurements": ["hourly", "daily"],
+        "hours": [
+            "daily",
+            "monthly",
+            "yearly",
+            "hourofday",
+            "dayofweek",
+            "monthofyear",
+        ],
+        "days": ["monthly", "yearly", "dayofweek", "monthofyear"],
+        "years": [],
+    }
+    return rollup in valid_combinations.get(data, [])
+
+
+def validate_data_rollup_compatibility(
+    data: object, rollup: object | None
+) -> tuple[Data, Rollup | None]:
+    """Validate data and rollup parameters and their compatibility.
+
+    Args:
+        data: Value representing the data path parameter.
+        rollup: Value representing the rollup path parameter (optional).
+
+    Returns:
+        Tuple of validated (data, rollup) values.
+
+    Raises:
+        InvalidParameterError: If data or rollup are invalid, or if the combination is incompatible.
+    """
+    validated_data = validate_data(data)
+    validated_rollup = validate_rollup(rollup) if rollup is not None else None
+
+    if validated_rollup is not None and not check_data_rollup_compatibility(
+        validated_data, validated_rollup
+    ):
+        raise InvalidParameterError(
+            f"Invalid combination: data='{validated_data}' cannot be paired with rollup='{validated_rollup}'"
+        )
+
+    return validated_data, validated_rollup
+
+
 def iso8601_check(value: object) -> TypeGuard[str]:
     """Check if value is a valid ISO-8601 datetime string.
 

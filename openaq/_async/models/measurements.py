@@ -4,12 +4,11 @@ from openaq.shared.models import build_measurements_path, build_query_params
 from openaq.shared.responses import MeasurementsResponse
 from openaq.shared.types import Data, Rollup
 from openaq.shared.validators import (
-    validate_data,
+    validate_data_rollup_compatibility,
     validate_datetime_params,
     validate_integer_id,
     validate_limit_param,
     validate_page_param,
-    validate_rollup,
 )
 
 from .base import AsyncResourceBase
@@ -62,10 +61,7 @@ class Measurements(AsyncResourceBase):
         sensors_id = validate_integer_id(sensors_id)
         page = validate_page_param(page)
         limit = validate_limit_param(limit)
-        if data is not None:
-            data = validate_data(data)
-        if rollup is not None:
-            rollup = validate_rollup(rollup)
+        data, rollup = validate_data_rollup_compatibility(data, rollup)
         datetime_from, datetime_to = validate_datetime_params(
             datetime_from, datetime_to
         )
