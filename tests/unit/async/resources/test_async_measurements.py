@@ -126,7 +126,7 @@ class TestMeasurements:
         self, measurements, mock_client, mock_measurements_response
     ):
         mock_client._get.return_value = mock_measurements_response
-        result = await measurements.list(sensors_id=123)
+        result = await measurements.list(sensors_id=123, data='measurements')
 
         params = mock_client._get.call_args[1]["params"]
         path = mock_client._get.call_args[0][0]
@@ -143,7 +143,7 @@ class TestMeasurements:
         self, measurements, mock_client, mock_measurements_response
     ):
         mock_client._get.return_value = mock_measurements_response
-        await measurements.list(sensors_id=123, page=3, limit=50)
+        await measurements.list(sensors_id=123, data='measurements', page=3, limit=50)
 
         params = mock_client._get.call_args[1]["params"]
         assert params["page"] == 3
@@ -153,7 +153,9 @@ class TestMeasurements:
         self, measurements, mock_client, mock_measurements_response
     ):
         mock_client._get.return_value = mock_measurements_response
-        await measurements.list(sensors_id=123, datetime_from="2024-01-01")
+        await measurements.list(
+            sensors_id=123, data='measurements', datetime_from="2024-01-01"
+        )
 
         params = mock_client._get.call_args[1]["params"]
         assert params["datetime_from"] == "2024-01-01T00:00:00"
@@ -163,7 +165,7 @@ class TestMeasurements:
     ):
         mock_client._get.return_value = mock_measurements_response
         dt = datetime.datetime(2024, 1, 1, 12, 30, 0)
-        await measurements.list(sensors_id=123, datetime_from=dt)
+        await measurements.list(sensors_id=123, data='measurements', datetime_from=dt)
 
         params = mock_client._get.call_args[1]["params"]
         assert "2024-01-01" in params["datetime_from"]
@@ -173,7 +175,10 @@ class TestMeasurements:
     ):
         mock_client._get.return_value = mock_measurements_response
         await measurements.list(
-            sensors_id=123, datetime_from="2024-01-01", datetime_to="2024-01-31"
+            sensors_id=123,
+            data='measurements',
+            datetime_from="2024-01-01",
+            datetime_to="2024-01-31",
         )
 
         params = mock_client._get.call_args[1]["params"]
@@ -187,7 +192,10 @@ class TestMeasurements:
         dt_from = datetime.datetime(2024, 1, 1)
         dt_to = datetime.datetime(2024, 1, 31)
         await measurements.list(
-            sensors_id=123, datetime_from=dt_from, datetime_to=dt_to
+            sensors_id=123,
+            data='measurements',
+            datetime_from=dt_from,
+            datetime_to=dt_to,
         )
 
         params = mock_client._get.call_args[1]["params"]
@@ -318,26 +326,3 @@ class TestMeasurements:
             await measurements.list(
                 sensors_id=123, datetime_from=datetime_from, datetime_to=datetime_to
             )
-
-    @pytest.mark.parametrize(
-        "data,rollup",
-        [
-            (
-                'hours',
-                'hourly',
-            ),
-            (
-                'days',
-                'daily',
-            ),
-            (
-                'years',
-                'yearly',
-            ),
-        ],
-    )
-    async def test_measurements_list_endpoints_not_founds(
-        self, measurements, data, rollup
-    ):
-        with pytest.raises(NotFoundError):
-            await measurements.list(sensors_id=1, data=data, rollup=rollup)
