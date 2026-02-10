@@ -7,7 +7,9 @@ from openaq.shared.exceptions import (
     IdentifierOutOfBoundsError,
     InvalidParameterError,
 )
+from openaq.shared.types import Data, Rollup
 from openaq.shared.validators import (
+    check_data_rollup_compatibility,
     data_check,
     datetime_check,
     datetime_from_lesser_check,
@@ -25,6 +27,7 @@ from openaq.shared.validators import (
     validate_bbox,
     validate_coordinates,
     validate_data,
+    validate_data_rollup_compatibility,
     validate_datetime_params,
     validate_geospatial_params,
     validate_integer_id,
@@ -909,6 +912,113 @@ def test_validate_rollup_throws(rollup: object):
 )
 def test_validate_rollup_returns_rollup(rollup: object):
     assert validate_rollup(rollup) == rollup
+
+
+@pytest.mark.parametrize(
+    "data,rollup,valid",
+    [
+        pytest.param("measurements", 'hourly', True, id="measurements-hourly"),
+        pytest.param("measurements", 'daily', True, id="measurements-daily"),
+        pytest.param("measurements", 'monthly', False, id="measurements-hourmonthlyly"),
+        pytest.param("measurements", 'yearly', False, id="measurements-yearly"),
+        pytest.param("measurements", 'hourofday', False, id="measurements-hourofday"),
+        pytest.param("measurements", 'dayofweek', False, id="measurements-dayofweek"),
+        pytest.param(
+            "measurements", 'monthofyear', False, id="measurements-monthofyearurly"
+        ),
+        pytest.param("hours", 'hourly', False, id="hours-hourly"),
+        pytest.param("hours", 'daily', True, id="hours-daily"),
+        pytest.param("hours", 'monthly', True, id="hours-monthly"),
+        pytest.param("hours", 'yearly', True, id="hours-yearly"),
+        pytest.param("hours", 'hourofday', True, id="hours-hourofday"),
+        pytest.param("hours", 'dayofweek', True, id="hours-dayofweek"),
+        pytest.param("hours", 'monthofyear', True, id="hours-monthofyear"),
+        pytest.param("days", 'hourly', False, id="days-hourly"),
+        pytest.param("days", 'daily', False, id="days-daily"),
+        pytest.param("days", 'monthly', True, id="days-monthly"),
+        pytest.param("days", 'yearly', True, id="days-yearly"),
+        pytest.param("days", 'hourofday', False, id="days-hourofday"),
+        pytest.param("days", 'dayofweek', True, id="days-dayofweek"),
+        pytest.param("days", 'monthofyear', True, id="days-monthofyear"),
+        pytest.param("years", 'hourly', False, id="years-hourly"),
+        pytest.param("years", 'daily', False, id="years-daily"),
+        pytest.param("years", 'monthly', False, id="years-monthly"),
+        pytest.param("years", 'yearly', False, id="years-yearly"),
+        pytest.param("years", 'hourofday', False, id="years-hourofday"),
+        pytest.param("years", 'dayofweek', False, id="years-dayofweek"),
+        pytest.param("years", 'monthofyear', False, id="years-monthofyear"),
+    ],
+)
+def test_check_data_rollup_compatibility(data: Data, rollup: Rollup, valid: bool):
+    assert check_data_rollup_compatibility(data, rollup) == valid
+
+
+@pytest.mark.parametrize(
+    "data,rollup",
+    [
+        # Valid combinations with rollup
+        pytest.param("measurements", "hourly", id="measurements-hourly"),
+        pytest.param("measurements", "daily", id="measurements-daily"),
+        pytest.param("hours", "daily", id="hours-daily"),
+        pytest.param("hours", "monthly", id="hours-monthly"),
+        pytest.param("hours", "yearly", id="hours-yearly"),
+        pytest.param("hours", "hourofday", id="hours-hourofday"),
+        pytest.param("hours", "dayofweek", id="hours-dayofweek"),
+        pytest.param("hours", "monthofyear", id="hours-monthofyear"),
+        pytest.param("days", "monthly", id="days-monthly"),
+        pytest.param("days", "yearly", id="days-yearly"),
+        pytest.param("days", "dayofweek", id="days-dayofweek"),
+        pytest.param("days", "monthofyear", id="days-monthofyear"),
+        # Valid combinations with None rollup
+        pytest.param("measurements", None, id="measurements-none"),
+        pytest.param("hours", None, id="hours-none"),
+        pytest.param("days", None, id="days-none"),
+        pytest.param("years", None, id="years-none"),
+    ],
+)
+def test_validate_data_rollup_compatibility_returns_validated_values(
+    data: Data, rollup: Rollup | None
+):
+    validated_data, validated_rollup = validate_data_rollup_compatibility(data, rollup)
+    assert validated_data == data
+    assert validated_rollup == rollup
+
+
+@pytest.mark.parametrize(
+    "data,rollup",
+    [
+        pytest.param("measurements", "monthly", id="measurements-monthly-incompatible"),
+        pytest.param("measurements", "yearly", id="measurements-yearly-incompatible"),
+        pytest.param(
+            "measurements", "hourofday", id="measurements-hourofday-incompatible"
+        ),
+        pytest.param(
+            "measurements", "dayofweek", id="measurements-dayofweek-incompatible"
+        ),
+        pytest.param(
+            "measurements", "monthofyear", id="measurements-monthofyear-incompatible"
+        ),
+        pytest.param("hours", "hourly", id="hours-hourly-incompatible"),
+        pytest.param("days", "hourly", id="days-hourly-incompatible"),
+        pytest.param("days", "daily", id="days-daily-incompatible"),
+        pytest.param("days", "hourofday", id="days-hourofday-incompatible"),
+        pytest.param("years", "hourly", id="years-hourly-incompatible"),
+        pytest.param("years", "daily", id="years-daily-incompatible"),
+        pytest.param("years", "monthly", id="years-monthly-incompatible"),
+        pytest.param("years", "yearly", id="years-yearly-incompatible"),
+        pytest.param("years", "hourofday", id="years-hourofday-incompatible"),
+        pytest.param("years", "dayofweek", id="years-dayofweek-incompatible"),
+        pytest.param("years", "monthofyear", id="years-monthofyear-incompatible"),
+        pytest.param("invalid", None, id="invalid-data"),
+        pytest.param("invalid", "daily", id="invalid-data-with-rollup"),
+        pytest.param("hours", "invalid", id="invalid-rollup"),
+    ],
+)
+def test_validate_data_rollup_compatibility_raises_exception(
+    data: object, rollup: object | None
+):
+    with pytest.raises(InvalidParameterError):
+        validate_data_rollup_compatibility(data, rollup)
 
 
 @pytest.mark.parametrize(

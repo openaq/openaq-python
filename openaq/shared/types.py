@@ -1,6 +1,6 @@
 """Shared custom types."""
 
-from typing import Literal, TypeAlias, TypedDict
+from typing import Literal, TypeAlias, TypedDict, get_args
 
 _ROLLUP_VALUES = (
     'hourly',
@@ -15,14 +15,15 @@ Rollup: TypeAlias = Literal[
     'hourly', 'daily', 'monthly', 'yearly', 'hourofday', 'dayofweek', 'monthofyear'
 ]
 
-_DATA_VALUES = ('measurements', 'hours', 'days', 'years')
 Data: TypeAlias = Literal['measurements', 'hours', 'days', 'years']
+_DATA_VALUES = get_args(Data)
 
-_PARAMETER_TYPE_VALUES = ('pollutant', 'meteorological')
 ParameterType: TypeAlias = Literal['pollutant', 'meteorological']
+_PARAMETER_TYPE_VALUES = get_args(ParameterType)
 
-_SORT_ORDER_VALUES = ('ASC', 'DESC', 'asc', 'desc')
 SortOrder: TypeAlias = Literal['ASC', 'DESC', 'asc', 'desc']
+_SORT_ORDER_VALUES = get_args(SortOrder)
+
 
 CoordinatesRadius: TypeAlias = tuple[tuple[float, float], int, None]
 
