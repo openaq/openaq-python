@@ -596,8 +596,8 @@ def check_valid_date_parameter(
     data: Data,
     date_from: datetime.date | str | None,
     date_to: datetime.date | str | None,
-    datetime_from: datetime.datetime | str | None,
-    datetime_to: datetime.datetime | str | None,
+    datetime_from: datetime.datetime | datetime.date | str | None,
+    datetime_to: datetime.datetime | datetime.date | str | None,
 ) -> bool:
     """Validate data and date/datetime query parameters and their compatibility.
 
@@ -613,7 +613,7 @@ def check_valid_date_parameter(
     """
     if data in ['days', 'years']:
         return datetime_from is not None or datetime_to is not None
-    if data not in ['days', 'years']:
+    else:
         return date_from is not None or date_to is not None
 
 
@@ -755,10 +755,10 @@ def datetime_from_lesser_check(
 
 def validate_datetime_params(
     data: Data,
-    datetime_from: object,
-    datetime_to: object,
-    date_from: object,
-    date_to: object,
+    datetime_from: datetime.datetime | datetime.date | str | None,
+    datetime_to: datetime.datetime | datetime.date | str | None,
+    date_from: datetime.date | str | None,
+    date_to: datetime.date | str | None,
 ) -> tuple[
     datetime.datetime | None,
     datetime.datetime | None,
