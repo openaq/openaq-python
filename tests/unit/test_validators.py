@@ -9,6 +9,7 @@ from openaq.shared.exceptions import (
     InvalidParameterError,
 )
 from openaq.shared.validators import (
+    countries_id_iso_exclusivity_check,
     data_check,
     date_from_lesser_check,
     datetime_check,
@@ -273,6 +274,19 @@ def test_validate_bbox(bbox):
 def test_validate_bbox_throws(bbox):
     with pytest.raises(InvalidParameterError):
         validate_bbox(bbox)
+
+
+@pytest.mark.parametrize(
+    "countries_id,iso,valid",
+    [
+        pytest.param(42, 'US', False, id="both-values-provided"),
+        pytest.param(42, None, True, id="only-countries_id-provided"),
+        pytest.param(None, 'US', True, id="only-iso-provided"),
+        pytest.param(None, None, True, id="neither-provided"),
+    ],
+)
+def test_countries_id_iso_exclusivity_check(countries_id: int, iso: str, valid: bool):
+    assert countries_id_iso_exclusivity_check(countries_id, iso) == valid
 
 
 @pytest.mark.parametrize(

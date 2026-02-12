@@ -539,3 +539,30 @@ class TestLocations:
         mock_params = {parameter: value}
         with pytest.raises(InvalidParameterError):
             locations.list(**mock_params)
+
+    @pytest.mark.parametrize(
+        "mock_params,expected_error",
+        [
+            (
+                {'iso': 'US', 'countries_id': 42},
+                'iso cannot be used with countries_id',
+            ),
+            (
+                {
+                    'bbox': (-43.549381, -23.157246, -42.560611, -22.719029),
+                    'coordinates': (42, 42),
+                    'radius': 42,
+                },
+                'bbox cannot be used with coordinates/radius parameters',
+            ),
+        ],
+        ids=[
+            'countries query params',
+            'bbox with coordinates/radius query params',
+        ],
+    )
+    def test_locations_list_mutually_exclusive_params_throws(
+        self, locations, mock_params, expected_error
+    ):
+        with pytest.raises(InvalidParameterError, match=expected_error):
+            locations.list(**mock_params)
