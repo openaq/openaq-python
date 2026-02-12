@@ -179,6 +179,45 @@ def validate_bbox(bbox: object) -> tuple[float, float, float, float]:
     return bbox
 
 
+def countries_id_iso_exclusivity_check(
+    countries_id: int | list[int] | None, iso: str | None
+) -> bool:
+    """Check if countries_id and iso are mutually exclusive.
+
+    Returns:
+        True if parameters are mutually exclusive (at most one provided), False otherwise.
+    """
+    return not (countries_id is not None and iso is not None)
+
+
+def validate_countries_query_parameters(
+    countries_id: int | list[int] | None, iso: str | None
+) -> tuple[int | list[int] | None, str | None]:
+    """Validate countries_id and iso query parameters and raise error if invalid.
+
+    Args:
+        countries_id: countries_id query parameter value.
+        iso: iso query parameter value.
+
+    Returns:
+        tuple of the input values
+
+    Raises:
+        InvalidParameterError: If parameter combination is invalid.
+    """
+    if not countries_id_iso_exclusivity_check(countries_id, iso):
+        raise InvalidParameterError("iso cannot be used with countries_id")
+
+    if iso is not None:
+        iso = validate_iso_param(iso)
+
+    if countries_id is not None:
+        countries_id = validate_integer_or_list_integer_params(
+            'countries_id', countries_id
+        )
+    return (countries_id, iso)
+
+
 def geospatial_params_exclusivity_check(
     coordinates: object | None, radius: object | None, bbox: object | None
 ) -> bool:
