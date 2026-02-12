@@ -133,8 +133,10 @@ class TestMeasurements:
         assert path == "/sensors/123/measurements"
         assert params["page"] == 1
         assert params["limit"] == 1000
-        assert params["datetime_from"] == "2016-10-10T00:00:00"
+        assert "datetime_from" not in params
         assert "datetime_to" not in params
+        assert "date_from" not in params
+        assert "date_to" not in params
         assert isinstance(result, MeasurementsResponse)
         assert len(result.results) == 2
 
@@ -293,7 +295,7 @@ class TestMeasurements:
     )
     def test_list_invalid_rollup_param(self, measurements, rollup_value):
         with pytest.raises(InvalidParameterError):
-            measurements.list(sensors_id=123, rollup=rollup_value)
+            measurements.list(sensors_id=123, data="measurements", rollup=rollup_value)
 
     @pytest.mark.parametrize(
         "datetime_from,datetime_to",
@@ -323,5 +325,8 @@ class TestMeasurements:
     ):
         with pytest.raises(InvalidParameterError):
             measurements.list(
-                sensors_id=123, datetime_from=datetime_from, datetime_to=datetime_to
+                sensors_id=123,
+                data="measurements",
+                datetime_from=datetime_from,
+                datetime_to=datetime_to,
             )
