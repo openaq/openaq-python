@@ -1,8 +1,12 @@
+import logging
 from typing import Mapping
 
 import httpx
 
 from ..shared.transport import check_response
+
+
+logger = logging.getLogger(__name__)
 
 
 class AsyncTransport:
@@ -22,7 +26,16 @@ class AsyncTransport:
             params=params,
             headers=headers,
         )
+        logger.debug(
+            f"Sending request to: {request.url}",
+            extra={
+                'method': method,
+                'url': str(request.url),
+                'params': params,
+            },
+        )
         res = await self.client.send(request)
+        logger.debug(f"Received response: {res.status_code} from {request.url}")
         return check_response(res)
 
     async def close(self) -> None:
