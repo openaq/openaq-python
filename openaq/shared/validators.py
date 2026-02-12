@@ -180,7 +180,7 @@ def validate_bbox(bbox: object) -> tuple[float, float, float, float]:
 
 
 def countries_id_iso_exclusivity_check(
-    countries_id: int | None, iso: str | None
+    countries_id: int | list[int] | None, iso: str | None
 ) -> bool:
     """Check if countries_id and iso are mutually exclusive.
 
@@ -191,8 +191,8 @@ def countries_id_iso_exclusivity_check(
 
 
 def validate_countries_query_parameters(
-    countries_id: int | None, iso: str | None
-) -> tuple[int | None, str | None]:
+    countries_id: int | list[int] | None, iso: str | None
+) -> tuple[int | list[int] | None, str | None]:
     """Validate countries_id and iso query parameters and raise error if invalid.
 
     Args:
