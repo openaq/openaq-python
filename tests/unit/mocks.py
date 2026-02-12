@@ -22,6 +22,22 @@ class MockTransport:
     def close(self): ...
 
 
+class AsyncMockTransport:
+    def __init__(self, response: httpx.Response = None):
+        self.response = response
+
+    async def send_request(
+        self,
+        method: str,
+        url: str,
+        params: Mapping[str, str],
+        headers: Mapping[str, Any],
+    ):
+        return self.response
+
+    async def close(self): ...
+
+
 @pytest.fixture(scope='class')
 def mock_openaq_api_key_env_vars(scope='class'):
     with mock.patch.dict(

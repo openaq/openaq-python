@@ -1,5 +1,6 @@
 import os
 import platform
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
 
@@ -9,7 +10,7 @@ from openaq import __version__
 from openaq._sync.client import OpenAQ
 from openaq.shared.exceptions import ApiKeyMissingError
 
-from .mocks import MockTransport
+from ..mocks import MockTransport
 
 
 @pytest.fixture
@@ -100,3 +101,91 @@ class TestClient:
         tests that api_key argument overrides api key value set in config file and system environment variable
         """
         assert self.client.api_key == "abc123-def456-ghi789"
+
+    @mock.patch('openaq.shared.client.datetime')
+    @mock.patch('time.sleep')
+    @mock.patch('openaq._sync.client.logger')
+    def test_wait_for_rate_limit_reset_waits_when_positive(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        """Test that sleep is called with correct duration when wait_seconds > 0."""
+        now = datetime(2026, 2, 12, 0, 0, 0)
+        mock_datetime.now.return_value = now
+
+        # Set reset time to 5 seconds in the future
+        self.client._rate_limit_reset_datetime = now + timedelta(seconds=5)
+
+        self.client._wait_for_rate_limit_reset()
+
+        mock_sleep.assert_called_once_with(5)
+        mock_logger.info.assert_called_once_with(
+            "Rate limit hit. Waiting 5 seconds for reset."
+        )
+
+    @mock.patch('openaq.shared.client.datetime')
+    @mock.patch('time.sleep')
+    @mock.patch('openaq._sync.client.logger')
+    def test_wait_for_rate_limit_reset_does_not_wait_when_zero(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        """Test that sleep is not called when wait_seconds is 0."""
+        now = datetime(2026, 2, 12, 0, 0, 0)
+        mock_datetime.now.return_value = now
+
+        # Set reset time to now (0 seconds wait)
+        self.client._rate_limit_reset_datetime = now
+
+        self.client._wait_for_rate_limit_reset()
+
+        mock_sleep.assert_not_called()
+        mock_logger.info.assert_not_called()
+
+    @mock.patch('openaq.shared.client.datetime')
+    @mock.patch('time.sleep')
+    @mock.patch('openaq._sync.client.logger')
+    def test_wait_for_rate_limit_reset_does_not_wait_when_negative(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        """Test that sleep is not called when wait_seconds is negative."""
+        now = datetime(2026, 2, 12, 0, 0, 0)
+        mock_datetime.now.return_value = now
+
+        # Set reset time to 5 seconds in the past
+        self.client._rate_limit_reset_datetime = now - timedelta(seconds=5)
+
+        self.client._wait_for_rate_limit_reset()
+
+        mock_sleep.assert_not_called()
+        mock_logger.info.assert_not_called()
+
+    def test_close_closes_transport(self, setup):
+        """Test that close() calls transport.close()."""
+        self.client.transport.close = mock.Mock()
+
+        self.client.close()
+
+        self.client.transport.close.assert_called_once()
+
+    def test_context_manager_enter_returns_client(self, setup):
+        """Test that __enter__ returns the client instance."""
+        with self.client as ctx_client:
+            assert ctx_client is self.client
+
+    def test_context_manager_exit_closes_transport(self, setup):
+        """Test that __exit__ calls close() which closes transport."""
+        self.client.transport.close = mock.Mock()
+
+        with self.client:
+            pass
+
+        self.client.transport.close.assert_called_once()
+
+    def test_context_manager_exit_closes_even_with_exception(self, setup):
+        """Test that transport is closed even when exception occurs in context."""
+        self.client.transport.close = mock.Mock()
+
+        with pytest.raises(ValueError):
+            with self.client:
+                raise ValueError("Test exception")
+
+        self.client.transport.close.assert_called_once()
