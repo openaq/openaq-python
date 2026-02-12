@@ -1,8 +1,9 @@
 import datetime
+from typing import overload
 
 from openaq.shared.models import build_measurements_path, build_query_params
 from openaq.shared.responses import MeasurementsResponse
-from openaq.shared.types import Data, Rollup
+from openaq.shared.types import Data, DateData, DatetimeData, Rollup
 from openaq.shared.validators import (
     validate_data_rollup_compatibility,
     validate_datetime_params,
@@ -17,13 +18,43 @@ from .base import AsyncResourceBase
 class Measurements(AsyncResourceBase):
     """This provides methods to retrieve and list the air quality measurements from the OpenAQ API."""
 
+    @overload
     async def list(
         self,
         sensors_id: int,
-        data: Data | None = None,
+        data: DatetimeData,
         rollup: Rollup | None = None,
-        datetime_from: datetime.datetime | str | None = "2016-10-10",
-        datetime_to: datetime.datetime | str | None = None,
+        datetime_from: datetime.datetime | datetime.date | str | None = None,
+        datetime_to: datetime.datetime | datetime.date | str | None = None,
+        date_from: None = None,
+        date_to: None = None,
+        page: int = 1,
+        limit: int = 1000,
+    ) -> MeasurementsResponse: ...
+
+    @overload
+    async def list(
+        self,
+        sensors_id: int,
+        data: DateData,
+        rollup: Rollup | None = None,
+        datetime_from: None = None,
+        datetime_to: None = None,
+        date_from: datetime.date | str | None = None,
+        date_to: datetime.date | str | None = None,
+        page: int = 1,
+        limit: int = 1000,
+    ) -> MeasurementsResponse: ...
+
+    async def list(
+        self,
+        sensors_id: int,
+        data: Data,
+        rollup: Rollup | None = None,
+        datetime_from: datetime.datetime | datetime.date | str | None = None,
+        datetime_to: datetime.datetime | datetime.date | str | None = None,
+        date_from: datetime.date | str | None = None,
+        date_to: datetime.date | str | None = None,
         page: int = 1,
         limit: int = 1000,
     ) -> MeasurementsResponse:
@@ -33,8 +64,10 @@ class Measurements(AsyncResourceBase):
             sensors_id: The ID of the sensor for which measurements should be retrieved.
             data: The base measurement unit to query
             rollup: The period by which to rollup the base measurement data.
-            datetime_from: Starting date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
-            datetime_to: Ending date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string.
+            datetime_from: Starting datetime for the measurement retrieval. Can be a datetime.datetime object, datetime.date object, or ISO-8601 formatted string. Only used with data='measurements' or data='hours'.
+            datetime_to: Ending datetime for the measurement retrieval. Can be a datetime.datetime object, datetime.date object, or ISO-8601 formatted string. Only used with data='measurements' or data='hours'.
+            date_from: Starting date for the measurement retrieval. Can be a datetime.date object or ISO-8601 formatted date string. Only used with data='days' or data='years'.
+            date_to: Ending date for the measurement retrieval. Can be a datetime.date object or ISO-8601 formatted date string. Only used with data='days' or data='years'.
             page: The page number, must be greater than zero. Page count is measurements found / limit.
             limit: The number of results returned per page. Must be between 1 and 1,000.
 
@@ -62,14 +95,16 @@ class Measurements(AsyncResourceBase):
         page = validate_page_param(page)
         limit = validate_limit_param(limit)
         data, rollup = validate_data_rollup_compatibility(data, rollup)
-        datetime_from, datetime_to = validate_datetime_params(
-            datetime_from, datetime_to
+        datetime_from, datetime_to, date_from, date_to = validate_datetime_params(
+            data, datetime_from, datetime_to, date_from, date_to
         )
         params = build_query_params(
             page=page,
             limit=limit,
             datetime_from=datetime_from,
             datetime_to=datetime_to,
+            date_from=date_from,
+            date_to=date_to,
         )
         path = build_measurements_path(sensors_id, data, rollup)
         measurements = await self._client._get(path, params=params)

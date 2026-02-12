@@ -15,8 +15,12 @@ Rollup: TypeAlias = Literal[
     'hourly', 'daily', 'monthly', 'yearly', 'hourofday', 'dayofweek', 'monthofyear'
 ]
 
-Data: TypeAlias = Literal['measurements', 'hours', 'days', 'years']
-_DATA_VALUES = get_args(Data)
+DatetimeData: TypeAlias = Literal['measurements', 'hours']
+
+DateData: TypeAlias = Literal['days', 'years']
+
+Data: TypeAlias = DatetimeData | DateData
+_DATA_VALUES = get_args(DatetimeData) + get_args(DateData)
 
 ParameterType: TypeAlias = Literal['pollutant', 'meteorological']
 _PARAMETER_TYPE_VALUES = get_args(ParameterType)

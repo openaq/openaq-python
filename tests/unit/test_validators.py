@@ -1,5 +1,6 @@
 import datetime
 
+from openaq.shared.types import Data
 import pytest
 from freezegun import freeze_time
 
@@ -7,16 +8,16 @@ from openaq.shared.exceptions import (
     IdentifierOutOfBoundsError,
     InvalidParameterError,
 )
-from openaq.shared.types import Data, Rollup
 from openaq.shared.validators import (
-    check_data_rollup_compatibility,
     data_check,
+    date_from_lesser_check,
     datetime_check,
     datetime_from_lesser_check,
     geospatial_params_exclusivity_check,
     integer_id_check,
     is_int_list,
-    iso8601_check,
+    iso8601_datetime_check,
+    iso8601_date_check,
     iso_check,
     limit_check,
     page_check,
@@ -27,7 +28,6 @@ from openaq.shared.validators import (
     validate_bbox,
     validate_coordinates,
     validate_data,
-    validate_data_rollup_compatibility,
     validate_datetime_params,
     validate_geospatial_params,
     validate_integer_id,
@@ -915,113 +915,6 @@ def test_validate_rollup_returns_rollup(rollup: object):
 
 
 @pytest.mark.parametrize(
-    "data,rollup,valid",
-    [
-        pytest.param("measurements", 'hourly', True, id="measurements-hourly"),
-        pytest.param("measurements", 'daily', True, id="measurements-daily"),
-        pytest.param("measurements", 'monthly', False, id="measurements-hourmonthlyly"),
-        pytest.param("measurements", 'yearly', False, id="measurements-yearly"),
-        pytest.param("measurements", 'hourofday', False, id="measurements-hourofday"),
-        pytest.param("measurements", 'dayofweek', False, id="measurements-dayofweek"),
-        pytest.param(
-            "measurements", 'monthofyear', False, id="measurements-monthofyearurly"
-        ),
-        pytest.param("hours", 'hourly', False, id="hours-hourly"),
-        pytest.param("hours", 'daily', True, id="hours-daily"),
-        pytest.param("hours", 'monthly', True, id="hours-monthly"),
-        pytest.param("hours", 'yearly', True, id="hours-yearly"),
-        pytest.param("hours", 'hourofday', True, id="hours-hourofday"),
-        pytest.param("hours", 'dayofweek', True, id="hours-dayofweek"),
-        pytest.param("hours", 'monthofyear', True, id="hours-monthofyear"),
-        pytest.param("days", 'hourly', False, id="days-hourly"),
-        pytest.param("days", 'daily', False, id="days-daily"),
-        pytest.param("days", 'monthly', True, id="days-monthly"),
-        pytest.param("days", 'yearly', True, id="days-yearly"),
-        pytest.param("days", 'hourofday', False, id="days-hourofday"),
-        pytest.param("days", 'dayofweek', True, id="days-dayofweek"),
-        pytest.param("days", 'monthofyear', True, id="days-monthofyear"),
-        pytest.param("years", 'hourly', False, id="years-hourly"),
-        pytest.param("years", 'daily', False, id="years-daily"),
-        pytest.param("years", 'monthly', False, id="years-monthly"),
-        pytest.param("years", 'yearly', False, id="years-yearly"),
-        pytest.param("years", 'hourofday', False, id="years-hourofday"),
-        pytest.param("years", 'dayofweek', False, id="years-dayofweek"),
-        pytest.param("years", 'monthofyear', False, id="years-monthofyear"),
-    ],
-)
-def test_check_data_rollup_compatibility(data: Data, rollup: Rollup, valid: bool):
-    assert check_data_rollup_compatibility(data, rollup) == valid
-
-
-@pytest.mark.parametrize(
-    "data,rollup",
-    [
-        # Valid combinations with rollup
-        pytest.param("measurements", "hourly", id="measurements-hourly"),
-        pytest.param("measurements", "daily", id="measurements-daily"),
-        pytest.param("hours", "daily", id="hours-daily"),
-        pytest.param("hours", "monthly", id="hours-monthly"),
-        pytest.param("hours", "yearly", id="hours-yearly"),
-        pytest.param("hours", "hourofday", id="hours-hourofday"),
-        pytest.param("hours", "dayofweek", id="hours-dayofweek"),
-        pytest.param("hours", "monthofyear", id="hours-monthofyear"),
-        pytest.param("days", "monthly", id="days-monthly"),
-        pytest.param("days", "yearly", id="days-yearly"),
-        pytest.param("days", "dayofweek", id="days-dayofweek"),
-        pytest.param("days", "monthofyear", id="days-monthofyear"),
-        # Valid combinations with None rollup
-        pytest.param("measurements", None, id="measurements-none"),
-        pytest.param("hours", None, id="hours-none"),
-        pytest.param("days", None, id="days-none"),
-        pytest.param("years", None, id="years-none"),
-    ],
-)
-def test_validate_data_rollup_compatibility_returns_validated_values(
-    data: Data, rollup: Rollup | None
-):
-    validated_data, validated_rollup = validate_data_rollup_compatibility(data, rollup)
-    assert validated_data == data
-    assert validated_rollup == rollup
-
-
-@pytest.mark.parametrize(
-    "data,rollup",
-    [
-        pytest.param("measurements", "monthly", id="measurements-monthly-incompatible"),
-        pytest.param("measurements", "yearly", id="measurements-yearly-incompatible"),
-        pytest.param(
-            "measurements", "hourofday", id="measurements-hourofday-incompatible"
-        ),
-        pytest.param(
-            "measurements", "dayofweek", id="measurements-dayofweek-incompatible"
-        ),
-        pytest.param(
-            "measurements", "monthofyear", id="measurements-monthofyear-incompatible"
-        ),
-        pytest.param("hours", "hourly", id="hours-hourly-incompatible"),
-        pytest.param("days", "hourly", id="days-hourly-incompatible"),
-        pytest.param("days", "daily", id="days-daily-incompatible"),
-        pytest.param("days", "hourofday", id="days-hourofday-incompatible"),
-        pytest.param("years", "hourly", id="years-hourly-incompatible"),
-        pytest.param("years", "daily", id="years-daily-incompatible"),
-        pytest.param("years", "monthly", id="years-monthly-incompatible"),
-        pytest.param("years", "yearly", id="years-yearly-incompatible"),
-        pytest.param("years", "hourofday", id="years-hourofday-incompatible"),
-        pytest.param("years", "dayofweek", id="years-dayofweek-incompatible"),
-        pytest.param("years", "monthofyear", id="years-monthofyear-incompatible"),
-        pytest.param("invalid", None, id="invalid-data"),
-        pytest.param("invalid", "daily", id="invalid-data-with-rollup"),
-        pytest.param("hours", "invalid", id="invalid-rollup"),
-    ],
-)
-def test_validate_data_rollup_compatibility_raises_exception(
-    data: object, rollup: object | None
-):
-    with pytest.raises(InvalidParameterError):
-        validate_data_rollup_compatibility(data, rollup)
-
-
-@pytest.mark.parametrize(
     "value,valid",
     [
         pytest.param("2024-01-01", True, id="valid-date"),
@@ -1037,9 +930,12 @@ def test_validate_data_rollup_compatibility_raises_exception(
             "2024-01-01T12:30:45-05:00", True, id="valid-datetime-with-negative-offset"
         ),
         pytest.param("2024-01-01T12:30:45Z", True, id="invalid-zulu-time"),
+        pytest.param("2024-02-29", True, id="valid-leap-year-date"),
+        pytest.param("2024-02-29T12:30:45", True, id="valid-leap-year-datetime"),
         pytest.param("2024-13-01", False, id="invalid-month"),
         pytest.param("2024-01-32", False, id="invalid-day"),
         pytest.param("2024-02-30", False, id="invalid-feb-30"),
+        pytest.param("2023-02-29", False, id="invalid-non-leap-year-feb-29"),
         pytest.param("2024/01/01", False, id="invalid-slashes"),
         pytest.param("01-01-2024", False, id="invalid-format"),
         pytest.param("not a date", False, id="invalid-string"),
@@ -1054,8 +950,52 @@ def test_validate_data_rollup_compatibility_raises_exception(
         pytest.param((), False, id="empty-tuple"),
     ],
 )
-def test_iso8601_check(value: object, valid: bool):
-    assert iso8601_check(value) == valid
+def test_iso8601_datetime_check(value: object, valid: bool):
+    assert iso8601_datetime_check(value) == valid
+
+
+@pytest.mark.parametrize(
+    "value,valid",
+    [
+        pytest.param("2024-01-01", True, id="valid-date"),
+        pytest.param("2024-12-31", True, id="valid-date-end-of-year"),
+        pytest.param("2024-02-29", True, id="valid-leap-year"),
+        pytest.param("2023-02-28", True, id="valid-non-leap-year-feb"),
+        pytest.param("2024-01-01T00:00:00", False, id="invalid-datetime-with-time"),
+        pytest.param("2024-01-01T12:30:45", False, id="invalid-datetime"),
+        pytest.param(
+            "2024-01-01T12:30:45.123456", False, id="invalid-datetime-with-microseconds"
+        ),
+        pytest.param(
+            "2024-01-01T12:30:45+00:00", False, id="invalid-datetime-with-utc-offset"
+        ),
+        pytest.param(
+            "2024-01-01T12:30:45-05:00",
+            False,
+            id="invalid-datetime-with-negative-offset",
+        ),
+        pytest.param("2024-01-01T12:30:45Z", False, id="invalid-zulu-time"),
+        pytest.param("2024-13-01", False, id="invalid-month"),
+        pytest.param("2024-01-32", False, id="invalid-day"),
+        pytest.param("2024-02-30", False, id="invalid-feb-30"),
+        pytest.param("2023-02-29", False, id="invalid-non-leap-year-feb-29"),
+        pytest.param("2024/01/01", False, id="invalid-slashes"),
+        pytest.param("01-01-2024", False, id="invalid-format"),
+        pytest.param("not a date", False, id="invalid-string"),
+        pytest.param("", False, id="empty-string"),
+        pytest.param("2024-1-1", False, id="invalid-no-padding"),
+        pytest.param("24-01-01", False, id="invalid-two-digit-year"),
+        pytest.param(123, False, id="integer"),
+        pytest.param(True, False, id="bool-true"),
+        pytest.param(False, False, id="bool-false"),
+        pytest.param(None, False, id="none"),
+        pytest.param([], False, id="empty-list"),
+        pytest.param({}, False, id="empty-dict"),
+        pytest.param((), False, id="empty-tuple"),
+    ],
+)
+def test_iso8601_date_check(value: object, valid: bool):
+    assert iso8601_date_check(value) == valid
 
 
 @pytest.mark.parametrize(
@@ -1179,149 +1119,408 @@ def test_datetime_from_lesser_check(datetime_from, datetime_to, frozen_time, exp
 
 
 @pytest.mark.parametrize(
-    "datetime_from,datetime_to,expected_from,expected_to",
+    "date_from,date_to,frozen_time,expected",
+    [
+        (
+            datetime.date(2024, 1, 1),
+            datetime.date(2024, 1, 2),
+            None,
+            True,
+        ),
+        (
+            datetime.date(2024, 1, 2),
+            datetime.date(2024, 1, 1),
+            None,
+            False,
+        ),
+        (
+            datetime.date(2024, 1, 1),
+            datetime.date(2024, 1, 1),
+            None,
+            False,
+        ),
+        (datetime.date.min, datetime.date(2024, 1, 1), None, True),
+        (datetime.date.max, datetime.date(2024, 1, 1), None, False),
+        (datetime.date(2024, 1, 14), None, "2024-01-15", True),
+        (datetime.date(2024, 1, 16), None, "2024-01-15", False),
+        (datetime.date(2024, 1, 15), None, "2024-01-15", False),
+        (datetime.date(2024, 2, 28), datetime.date(2024, 2, 29), None, True),
+        (datetime.date(2024, 2, 29), datetime.date(2024, 3, 1), None, True),
+        (datetime.date(2023, 12, 31), datetime.date(2024, 1, 1), None, True),
+    ],
+    ids=[
+        "from_before_to",
+        "from_after_to",
+        "equal_dates",
+        "min_date",
+        "max_date",
+        "past_vs_today",
+        "future_vs_today",
+        "equal_to_today",
+        "leap_year_feb_28_29",
+        "leap_year_feb_29_mar_1",
+        "year_boundary",
+    ],
+)
+def test_date_from_lesser_check(date_from, date_to, frozen_time, expected):
+    """Test date_from_lesser_check with various date combinations."""
+    if frozen_time:
+        with freeze_time(frozen_time):
+            assert date_from_lesser_check(date_from, date_to) == expected
+    else:
+        assert date_from_lesser_check(date_from, date_to) == expected
+
+
+@pytest.mark.parametrize(
+    "data,datetime_from,datetime_to,date_from,date_to,expected",
     [
         pytest.param(
+            "measurements",
             "2024-01-01",
             "2024-12-31",
-            datetime.datetime(2024, 1, 1),
-            datetime.datetime(2024, 12, 31),
-            id="both-strings",
+            None,
+            None,
+            (
+                datetime.datetime(2024, 1, 1),
+                datetime.datetime(2024, 12, 31),
+                None,
+                None,
+            ),
+            id="measurements-both-datetime-strings",
         ),
         pytest.param(
+            "hours",
             datetime.datetime(2024, 1, 1),
             datetime.datetime(2024, 12, 31),
-            datetime.datetime(2024, 1, 1),
-            datetime.datetime(2024, 12, 31),
-            id="both-datetime-objects",
+            None,
+            None,
+            (
+                datetime.datetime(2024, 1, 1),
+                datetime.datetime(2024, 12, 31),
+                None,
+                None,
+            ),
+            id="hours-both-datetime-objects",
         ),
         pytest.param(
+            "measurements",
             "2024-01-01",
             datetime.datetime(2024, 12, 31),
-            datetime.datetime(2024, 1, 1),
-            datetime.datetime(2024, 12, 31),
-            id="mixed-string-and-datetime",
+            None,
+            None,
+            (
+                datetime.datetime(2024, 1, 1),
+                datetime.datetime(2024, 12, 31),
+                None,
+                None,
+            ),
+            id="measurements-mixed-string-and-datetime",
         ),
         pytest.param(
-            datetime.datetime(2024, 1, 1),
-            "2024-12-31",
-            datetime.datetime(2024, 1, 1),
-            datetime.datetime(2024, 12, 31),
-            id="mixed-datetime-and-string",
-        ),
-        pytest.param(
+            "hours",
             "2024-01-01T12:30:45",
             "2024-12-31T23:59:59",
-            datetime.datetime(2024, 1, 1, 12, 30, 45),
-            datetime.datetime(2024, 12, 31, 23, 59, 59),
-            id="datetime-strings-with-time",
+            None,
+            None,
+            (
+                datetime.datetime(2024, 1, 1, 12, 30, 45),
+                datetime.datetime(2024, 12, 31, 23, 59, 59),
+                None,
+                None,
+            ),
+            id="hours-datetime-strings-with-time",
+        ),
+        pytest.param(
+            "days",
+            None,
+            None,
+            "2024-01-01",
+            "2024-12-31",
+            (None, None, datetime.date(2024, 1, 1), datetime.date(2024, 12, 31)),
+            id="days-both-date-strings",
+        ),
+        pytest.param(
+            "years",
+            None,
+            None,
+            datetime.date(2024, 1, 1),
+            datetime.date(2024, 12, 31),
+            (None, None, datetime.date(2024, 1, 1), datetime.date(2024, 12, 31)),
+            id="years-both-date-objects",
+        ),
+        pytest.param(
+            "days",
+            None,
+            None,
+            "2024-01-01",
+            datetime.date(2024, 12, 31),
+            (None, None, datetime.date(2024, 1, 1), datetime.date(2024, 12, 31)),
+            id="days-mixed-string-and-date",
         ),
     ],
 )
 def test_validate_datetime_params_with_both(
+    data: Data,
     datetime_from: object,
     datetime_to: object,
-    expected_from: datetime.datetime,
-    expected_to: datetime.datetime,
+    date_from: object,
+    date_to: object,
+    expected: tuple[
+        datetime.datetime | None,
+        datetime.datetime | None,
+        datetime.date | None,
+        datetime.date | None,
+    ],
 ):
-    result_from, result_to = validate_datetime_params(datetime_from, datetime_to)
-    assert result_from == expected_from
-    assert result_to == expected_to
+    result = validate_datetime_params(
+        data, datetime_from, datetime_to, date_from, date_to
+    )
+    assert result == expected
 
 
 @pytest.mark.parametrize(
-    "datetime_from,expected_from",
+    "data,datetime_from,date_from,expected",
     [
         pytest.param(
-            "2024-01-01", datetime.datetime(2024, 1, 1), id="string-only-from"
+            "measurements",
+            "2024-01-01",
+            None,
+            (datetime.datetime(2024, 1, 1), None, None, None),
+            id="measurements-string-only-from",
         ),
         pytest.param(
+            "hours",
             datetime.datetime(2024, 1, 1),
-            datetime.datetime(2024, 1, 1),
-            id="datetime-object-only-from",
+            None,
+            (datetime.datetime(2024, 1, 1), None, None, None),
+            id="hours-datetime-object-only-from",
         ),
         pytest.param(
+            "measurements",
             "2024-01-01T12:30:45",
-            datetime.datetime(2024, 1, 1, 12, 30, 45),
-            id="datetime-string-with-time-only-from",
+            None,
+            (datetime.datetime(2024, 1, 1, 12, 30, 45), None, None, None),
+            id="measurements-datetime-string-with-time-only-from",
+        ),
+        pytest.param(
+            "days",
+            None,
+            "2024-01-01",
+            (None, None, datetime.date(2024, 1, 1), None),
+            id="days-string-only-from",
+        ),
+        pytest.param(
+            "years",
+            None,
+            datetime.date(2024, 1, 1),
+            (None, None, datetime.date(2024, 1, 1), None),
+            id="years-date-object-only-from",
         ),
     ],
 )
 def test_validate_datetime_params_from_only(
-    datetime_from: object, expected_from: datetime.datetime
+    data: Data,
+    datetime_from: object,
+    date_from: object,
+    expected: tuple[
+        datetime.datetime | None,
+        datetime.datetime | None,
+        datetime.date | None,
+        datetime.date | None,
+    ],
 ):
-    result_from, result_to = validate_datetime_params(datetime_from, None)
-    assert result_from == expected_from
-    assert result_to is None
+    result = validate_datetime_params(data, datetime_from, None, date_from, None)
+    assert result == expected
 
 
 @pytest.mark.parametrize(
-    "datetime_from,datetime_to",
+    "data,datetime_from,datetime_to,date_from,date_to",
     [
-        pytest.param("invalid-date", "2024-12-31", id="invalid-from-string"),
-        pytest.param("2024-01-01", "invalid-date", id="invalid-to-string"),
-        pytest.param("invalid", "also-invalid", id="both-invalid-strings"),
-        pytest.param(123, "2024-12-31", id="invalid-from-integer"),
-        pytest.param("2024-01-01", 123, id="invalid-to-integer"),
-        pytest.param(None, "2024-12-31", id="none-from"),
-        pytest.param(True, False, id="bool-values"),
-        pytest.param([], {}, id="invalid-types"),
-        pytest.param("2025-12-31", "2025-01-01", id="from-after-to"),
-        pytest.param("2025-01-01", "2025-01-01", id="from-equals-to"),
+        pytest.param(
+            "measurements",
+            "invalid-date",
+            "2024-12-31",
+            None,
+            None,
+            id="measurements-invalid-from-string",
+        ),
+        pytest.param(
+            "hours",
+            "2024-01-01",
+            "invalid-date",
+            None,
+            None,
+            id="hours-invalid-to-string",
+        ),
+        pytest.param(
+            "measurements",
+            "invalid",
+            "also-invalid",
+            None,
+            None,
+            id="measurements-both-invalid-strings",
+        ),
+        pytest.param(
+            "hours", 123, "2024-12-31", None, None, id="hours-invalid-from-integer"
+        ),
+        pytest.param(
+            "measurements",
+            "2024-01-01",
+            123,
+            None,
+            None,
+            id="measurements-invalid-to-integer",
+        ),
+        pytest.param("hours", True, False, None, None, id="hours-bool-values"),
+        pytest.param(
+            "measurements", [], {}, None, None, id="measurements-invalid-types"
+        ),
+        pytest.param(
+            "hours", "2025-12-31", "2025-01-01", None, None, id="hours-from-after-to"
+        ),
+        pytest.param(
+            "measurements",
+            "2025-01-01",
+            "2025-01-01",
+            None,
+            None,
+            id="measurements-from-equals-to",
+        ),
+        pytest.param(
+            "days",
+            None,
+            None,
+            "invalid-date",
+            "2024-12-31",
+            id="days-invalid-from-string",
+        ),
+        pytest.param(
+            "years",
+            None,
+            None,
+            "2024-01-01",
+            "invalid-date",
+            id="years-invalid-to-string",
+        ),
+        pytest.param(
+            "days", None, None, 123, "2024-12-31", id="days-invalid-from-integer"
+        ),
+        pytest.param(
+            "years", None, None, "2024-01-01", 123, id="years-invalid-to-integer"
+        ),
+        pytest.param(
+            "days", None, None, "2025-12-31", "2025-01-01", id="days-from-after-to"
+        ),
+        pytest.param(
+            "years", None, None, "2025-01-01", "2025-01-01", id="years-from-equals-to"
+        ),
+        pytest.param(
+            "measurements",
+            None,
+            None,
+            "2024-01-01",
+            "2024-12-31",
+            id="measurements-wrong-params-date",
+        ),
+        pytest.param(
+            "hours", None, None, "2024-01-01", None, id="hours-wrong-params-date"
+        ),
+        pytest.param(
+            "days",
+            "2024-01-01",
+            "2024-12-31",
+            None,
+            None,
+            id="days-wrong-params-datetime",
+        ),
+        pytest.param(
+            "years", "2024-01-01", None, None, None, id="years-wrong-params-datetime"
+        ),
     ],
 )
 def test_validate_datetime_params_throws_with_both(
-    datetime_from: object, datetime_to: object
+    data: Data,
+    datetime_from: object,
+    datetime_to: object,
+    date_from: object,
+    date_to: object,
 ):
     with pytest.raises(Exception):
-        validate_datetime_params(datetime_from, datetime_to)
+        validate_datetime_params(data, datetime_from, datetime_to, date_from, date_to)
 
 
 @pytest.mark.parametrize(
-    "datetime_from",
+    "data,datetime_from,date_from",
     [
-        pytest.param("invalid-date", id="invalid-from-string"),
-        pytest.param(123, id="invalid-from-integer"),
-        pytest.param(None, id="none-from"),
-        pytest.param([], id="invalid-type"),
+        pytest.param(
+            "measurements", "invalid-date", None, id="measurements-invalid-from-string"
+        ),
+        pytest.param("hours", 123, None, id="hours-invalid-from-integer"),
+        pytest.param("measurements", [], None, id="measurements-invalid-type"),
+        pytest.param("days", None, "invalid-date", id="days-invalid-from-string"),
+        pytest.param("years", None, 123, id="years-invalid-from-integer"),
+        pytest.param("days", None, [], id="days-invalid-type"),
     ],
 )
-def test_validate_datetime_params_throws_from_only_invalid_type(datetime_from: object):
-    """Test that invalid types raise exception when datetime_to is None."""
+def test_validate_datetime_params_throws_from_only_invalid_type(
+    data: Data, datetime_from: object, date_from: object
+):
+    """Test that invalid types raise exception when to parameters are None."""
     with pytest.raises(Exception):
-        validate_datetime_params(datetime_from, None)
+        validate_datetime_params(data, datetime_from, None, date_from, None)
 
 
 @freeze_time("2024-01-15 12:00:00")
 @pytest.mark.parametrize(
-    "datetime_from",
+    "data,datetime_from,date_from",
     [
-        pytest.param("2024-01-16", id="future-string"),
-        pytest.param(datetime.datetime(2024, 1, 16), id="future-datetime"),
-        pytest.param("2024-12-31T23:59:59", id="future-with-time"),
+        pytest.param(
+            "measurements", "2024-01-16", None, id="measurements-future-string"
+        ),
+        pytest.param(
+            "hours", datetime.datetime(2024, 1, 16), None, id="hours-future-datetime"
+        ),
+        pytest.param(
+            "measurements",
+            "2024-12-31T23:59:59",
+            None,
+            id="measurements-future-with-time",
+        ),
+        pytest.param("days", None, "2024-01-16", id="days-future-string"),
+        pytest.param("years", None, datetime.date(2024, 1, 16), id="years-future-date"),
     ],
 )
 def test_validate_datetime_params_throws_from_only_future_datetime(
-    datetime_from: object,
+    data: Data, datetime_from: object, date_from: object
 ):
-    """Test that future datetime_from raises exception when datetime_to is None."""
+    """Test that future from parameters raise exception when to parameters are None."""
     with pytest.raises(Exception):
-        validate_datetime_params(datetime_from, None)
+        validate_datetime_params(data, datetime_from, None, date_from, None)
 
 
 @pytest.mark.parametrize(
-    "datetime_from",
+    "data,datetime_from,datetime_to,date_from,date_to",
     [
-        pytest.param("invalid-date", id="invalid-from-string"),
-        pytest.param(123, id="invalid-from-integer"),
-        pytest.param(None, id="none-from"),
-        pytest.param(True, id="bool-true"),
-        pytest.param([], id="empty-list"),
+        pytest.param(
+            "measurements", None, None, None, None, id="measurements-all-none"
+        ),
+        pytest.param("hours", None, None, None, None, id="hours-all-none"),
+        pytest.param("days", None, None, None, None, id="days-all-none"),
+        pytest.param("years", None, None, None, None, id="years-all-none"),
     ],
 )
-def test_validate_datetime_params_throws_from_only(datetime_from: object):
-    with pytest.raises(Exception):
-        validate_datetime_params(datetime_from, None)
+def test_validate_datetime_params_all_none(
+    data: Data,
+    datetime_from: object,
+    datetime_to: object,
+    date_from: object,
+    date_to: object,
+):
+    """Test that all None parameters returns all None tuple."""
+    result = validate_datetime_params(
+        data, datetime_from, datetime_to, date_from, date_to
+    )
+    assert result == (None, None, None, None)
 
 
 @pytest.mark.parametrize(
