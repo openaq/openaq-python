@@ -6,6 +6,7 @@ from openaq.shared.responses import (
 )
 from openaq.shared.types import SortOrder
 from openaq.shared.validators import (
+    validate_countries_query_parameters,
     validate_geospatial_params,
     validate_integer_id,
     validate_integer_or_list_integer_params,
@@ -149,13 +150,10 @@ class Locations(AsyncResourceBase):
         page = validate_page_param(page)
         limit = validate_limit_param(limit)
         validate_geospatial_params(coordinates, radius, bbox)
+        countries_id, iso = validate_countries_query_parameters(countries_id, iso)
         if providers_id:
             providers_id = validate_integer_or_list_integer_params(
                 'providers_id', providers_id
-            )
-        if countries_id:
-            countries_id = validate_integer_or_list_integer_params(
-                'countries_id', countries_id
             )
         if parameters_id:
             parameters_id = validate_integer_or_list_integer_params(
@@ -175,8 +173,6 @@ class Locations(AsyncResourceBase):
             )
         if owners_id:
             owners_id = validate_integer_or_list_integer_params('owners_id', owners_id)
-        if iso:
-            iso = validate_iso_param(iso)
         if monitor is not None:
             monitor = validate_monitor(monitor)
         if mobile is not None:
