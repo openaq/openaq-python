@@ -15,6 +15,7 @@ def build_query_params(
         | bool
         | Sequence[str | int | float | bool]
         | datetime.datetime
+        | datetime.date
         | None
     ),
 ) -> dict[str, str | int | float | bool]:
@@ -38,7 +39,9 @@ def build_query_params(
             continue
         if isinstance(v, (list, tuple)):
             params[k] = ",".join(str(x) for x in v)
-        elif isinstance(v, datetime.datetime):
+        elif isinstance(
+            v, datetime.date
+        ):  # checks for both datetime and date since datetime is subclass of date
             params[k] = v.isoformat()
         elif isinstance(v, (str, int, float, bool)):
             params[k] = v
