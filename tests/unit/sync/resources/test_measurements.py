@@ -265,7 +265,7 @@ class TestMeasurements:
         ],
     )
     def test_list_invalid_pagination_params(self, measurements, parameter, value):
-        mock_params = {'sensors_id': 123, parameter: value}
+        mock_params = {'sensors_id': 123, "data": "measurements", parameter: value}
         with pytest.raises(InvalidParameterError):
             measurements.list(**mock_params)
 
@@ -330,3 +330,47 @@ class TestMeasurements:
                 datetime_from=datetime_from,
                 datetime_to=datetime_to,
             )
+
+    def test_list_date_overload_uses_date_params(
+        self, measurements, mock_client, mock_measurements_response
+    ):
+        mock_client._get.return_value = mock_measurements_response
+
+        measurements.list(
+            sensors_id=123,
+            data='days',
+            date_from="2026-01-01",
+            date_to="2026-02-12",
+        )
+
+        params = mock_client._get.call_args[1]["params"]
+        assert "date_from" in params
+        assert "date_to" in params
+        assert "datetime_from" not in params
+        assert "datetime_to" not in params
+
+    @pytest.mark.parametrize(
+        "data",
+        [
+            pytest.param("days", id="days-DateData"),
+            pytest.param("years", id="years-DateData"),
+        ],
+    )
+    def test_list_date_overload_accepts_date_params(
+        self, measurements, mock_client, mock_measurements_response, data
+    ):
+        mock_client._get.return_value = mock_measurements_response
+
+        date_from = datetime.date(2026, 1, 1)
+        date_to = datetime.date(2024, 2, 12)
+
+        measurements.list(
+            sensors_id=123,
+            data=data,
+            date_from=date_from,
+            date_to=date_to,
+        )
+
+        params = mock_client._get.call_args[1]["params"]
+        assert "date_from" in params
+        assert "date_to" in params
