@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.0rc1] - 2026-02-13
+
+**Breaking changes**
+
+### Added
+
+- `auto_wait` parameter for OpenAQ and AsyncOpenAQ to provide automatic waiting
+based on rate limit headers
+- New validation function to ensure `iso` and `countries_id` are not used
+together
+- New validation function to ensure `datetime_from` is always less than
+`datetime_to`
+- New validation function to ensure `date_to` is always less than
+`date_to`
+- New validation function to ensure `date_to`/`date_from` and
+`datetime_from`/`datetime_to` are correctly paired with correct data resource.
+- New validation function to ensure valid combinations of `data` and `rollup`
+
+### Fixed
+
+- Correctly pass `date_to` and `date_from` for `days` and `years` measurement
+resources.
+- Added missing arguments for `locations.list()` functions: `manufacturers_id`, 
+`instruments_id` and the `owners_id`
+
+### Updated
+
+- `data` argument no longer defaults to `measurements` in measurements.list()
+function, it is now a required argument.
+- `datetime_from` no longer defaults in the library.
+
 ## [0.7.0] - 2026-01-13
 
 ### Fixed
