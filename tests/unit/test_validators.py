@@ -1,6 +1,5 @@
 import datetime
 
-from openaq.shared.types import Data
 import pytest
 from freezegun import freeze_time
 
@@ -8,6 +7,7 @@ from openaq.shared.exceptions import (
     IdentifierOutOfBoundsError,
     InvalidParameterError,
 )
+from openaq.shared.types import Data
 from openaq.shared.validators import (
     countries_id_iso_exclusivity_check,
     data_check,
@@ -18,8 +18,8 @@ from openaq.shared.validators import (
     geospatial_params_exclusivity_check,
     integer_id_check,
     is_int_list,
-    iso8601_datetime_check,
     iso8601_date_check,
+    iso8601_datetime_check,
     iso_check,
     limit_check,
     page_check,

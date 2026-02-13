@@ -10,7 +10,6 @@ from openaq.shared.validators import (
     validate_geospatial_params,
     validate_integer_id,
     validate_integer_or_list_integer_params,
-    validate_iso_param,
     validate_limit_param,
     validate_mobile,
     validate_monitor,

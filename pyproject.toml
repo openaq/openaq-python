@@ -113,7 +113,6 @@ fmt = [
     "ruff check --select F401 --fix openaq",
     "isort openaq tests", 
     "black .", 
-    "check"
 ]
 
 [tool.hatch.envs.docs]

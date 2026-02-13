@@ -5,7 +5,6 @@ import httpx
 
 from ..shared.transport import check_response
 
-
 logger = logging.getLogger(__name__)
 
 
