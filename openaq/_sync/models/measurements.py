@@ -19,7 +19,7 @@ class Measurements(SyncResourceBase):
     """Provides methods to retrieve the measurements resource from the OpenAQ API."""
 
     @overload
-    async def list(
+    def list(
         self,
         sensors_id: int,
         data: DatetimeData,
