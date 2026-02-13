@@ -3,7 +3,6 @@
 import datetime
 from typing import Sequence
 
-from .exceptions import NotFoundError
 from .types import Data, Rollup
 
 
@@ -15,6 +14,7 @@ def build_query_params(
         | bool
         | Sequence[str | int | float | bool]
         | datetime.datetime
+        | datetime.date
         | None
     ),
 ) -> dict[str, str | int | float | bool]:
@@ -38,7 +38,9 @@ def build_query_params(
             continue
         if isinstance(v, (list, tuple)):
             params[k] = ",".join(str(x) for x in v)
-        elif isinstance(v, datetime.datetime):
+        elif isinstance(
+            v, datetime.date
+        ):  # checks for both datetime and date since datetime is subclass of date
             params[k] = v.isoformat()
         elif isinstance(v, (str, int, float, bool)):
             params[k] = v
@@ -46,47 +48,21 @@ def build_query_params(
 
 
 def build_measurements_path(
-    sensors_id: int, data: Data | None = None, rollup: Rollup | None = None
+    sensors_id: int, data: Data, rollup: Rollup | None = None
 ) -> str:
-    """Prepares and builds the path for measurements endpoint using data and rollup parameters.
+    """Builds the path for measurements endpoint using data and rollup parameters.
 
     Args:
         sensors_id: sensors ID
-        data: the base measurement unit to query. options are 'measurements', 'hours', 'days', 'years'
-        rollup: the period by which to rollup the base measurement data. Options are 'hourly', 'daily', 'yearly'
+        data: the base measurement unit to query. Options are 'measurements', 'hours', 'days', 'years'
+        rollup: the period by which to rollup the base measurement data.
 
     Returns:
         string of url path
-
-    Raises:
-        NotFoundError:
     """
-    base_path = f'/sensors/{sensors_id}'
-    if data == 'measurements' and rollup in (
-        'hourofday',
-        'dayofweek',
-        'monthofyear',
-        'yearly',
-    ):
-        raise NotFoundError()
-    if data == 'hours' and rollup == 'hourly':
-        raise NotFoundError()
-    if data == 'days' and rollup == 'daily':
-        raise NotFoundError()
-    if data == 'days' and rollup == 'hourofday':
-        raise NotFoundError()
-    if data == 'years' and rollup in ('monthly', 'yearly'):
-        raise NotFoundError()
-    if data == 'years' and rollup in ('hourofday', 'dayofweek', 'monthofyear'):
-        raise NotFoundError()
-    if data == 'measurements' or data == None:
-        path = base_path + '/measurements'
-    if data == 'hours':
-        path = base_path + '/hours'
-    if data == 'days':
-        path = base_path + '/days'
-    if data == 'years':
-        path = base_path + '/years'
+    path = f'/sensors/{sensors_id}/{data}'
+
     if rollup:
         path += f'/{rollup}'
+
     return path

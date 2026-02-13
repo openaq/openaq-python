@@ -1,8 +1,11 @@
+import logging
 from typing import Mapping
 
 import httpx
 
 from openaq.shared.transport import check_response
+
+logger = logging.getLogger(__name__)
 
 
 class Transport:
@@ -23,7 +26,16 @@ class Transport:
             params=params,
             headers=headers,
         )
+        logger.debug(
+            f"Sending request to: {request.url}",
+            extra={
+                'method': method,
+                'url': str(request.url),
+                'params': params,
+            },
+        )
         res = self.client.send(request)
+        logger.debug(f"Received response: {res.status_code} from {request.url}")
         return check_response(res)
 
     def close(self) -> None:

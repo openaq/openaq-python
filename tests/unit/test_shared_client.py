@@ -1,14 +1,14 @@
-from http import HTTPStatus
-from datetime import datetime
-from freezegun import freeze_time
 import os
 import platform
+from datetime import datetime
+from http import HTTPStatus
 from pathlib import Path
 from unittest import mock
 from unittest.mock import mock_open, patch
 
 import httpx
 import pytest
+from freezegun import freeze_time
 
 from openaq.shared.client import (
     DEFAULT_USER_AGENT,
@@ -74,6 +74,7 @@ class TestSharedClient:
             MockTransport,
             api_key='abc123-def456-ghi789',
             headers={'this': 'that'},
+            auto_wait=False,
         )
 
     @pytest.mark.usefixtures("mock_config_file")
@@ -241,3 +242,27 @@ class TestSharedClient:
                 year=2025, month=2, day=27, hour=1, minute=0, second=30
             )
             assert self.instance._is_rate_limited() == False
+
+    def test_auto_wait_default_is_true(self):
+        """Test that auto_wait defaults to True."""
+        instance = SharedClient(
+            MockTransport, api_key='openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p'
+        )
+        assert instance._auto_wait == True
+
+    def test_auto_wait_false_raises_rate_limit_error(self):
+        """Test that auto_wait=True doesn't raise RateLimitError when rate limited."""
+        instance = SharedClient(
+            MockTransport,
+            api_key='openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p',
+        )
+        mock_response = httpx.Response(
+            HTTPStatus.OK,
+            content="Test content",
+            headers={
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Reset': '60',
+            },
+        )
+        instance._set_rate_limit(mock_response.headers)
+        self.instance._check_rate_limit()  # Should not raise RateLimitError

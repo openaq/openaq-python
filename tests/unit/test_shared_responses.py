@@ -1,13 +1,11 @@
 import json
-from pathlib import Path
-
-import httpx
-
-from dataclasses import fields
-from typing import get_type_hints, get_origin, Union, get_args
 import numbers
 import types
+from dataclasses import fields
+from pathlib import Path
+from typing import Union, get_args, get_origin, get_type_hints
 
+import httpx
 import pytest
 
 from openaq.shared.responses import (

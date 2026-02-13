@@ -1,14 +1,14 @@
+import datetime
+from unittest.mock import Mock
+
+import pytest
+
+from openaq._sync.models.measurements import Measurements
 from openaq.shared.exceptions import (
     IdentifierOutOfBoundsError,
     InvalidParameterError,
-    NotFoundError,
 )
-from openaq._sync.models.measurements import Measurements
 from openaq.shared.responses import MeasurementsResponse
-
-import pytest
-from unittest.mock import Mock
-import datetime
 
 
 @pytest.fixture
@@ -124,7 +124,7 @@ class TestMeasurements:
         self, measurements, mock_client, mock_measurements_response
     ):
         mock_client._get.return_value = mock_measurements_response
-        result = measurements.list(sensors_id=123)
+        result = measurements.list(sensors_id=123, data='measurements')
 
         params = mock_client._get.call_args[1]["params"]
         path = mock_client._get.call_args[0][0]
@@ -132,8 +132,10 @@ class TestMeasurements:
         assert path == "/sensors/123/measurements"
         assert params["page"] == 1
         assert params["limit"] == 1000
-        assert params["datetime_from"] == "2016-10-10T00:00:00"
+        assert "datetime_from" not in params
         assert "datetime_to" not in params
+        assert "date_from" not in params
+        assert "date_to" not in params
         assert isinstance(result, MeasurementsResponse)
         assert len(result.results) == 2
 
@@ -141,7 +143,7 @@ class TestMeasurements:
         self, measurements, mock_client, mock_measurements_response
     ):
         mock_client._get.return_value = mock_measurements_response
-        measurements.list(sensors_id=123, page=3, limit=50)
+        measurements.list(sensors_id=123, data='measurements', page=3, limit=50)
 
         params = mock_client._get.call_args[1]["params"]
         assert params["page"] == 3
@@ -151,7 +153,9 @@ class TestMeasurements:
         self, measurements, mock_client, mock_measurements_response
     ):
         mock_client._get.return_value = mock_measurements_response
-        measurements.list(sensors_id=123, datetime_from="2024-01-01")
+        measurements.list(
+            sensors_id=123, data='measurements', datetime_from="2024-01-01"
+        )
 
         params = mock_client._get.call_args[1]["params"]
         assert params["datetime_from"] == "2024-01-01T00:00:00"
@@ -161,7 +165,7 @@ class TestMeasurements:
     ):
         mock_client._get.return_value = mock_measurements_response
         dt = datetime.datetime(2024, 1, 1, 12, 30, 0)
-        measurements.list(sensors_id=123, datetime_from=dt)
+        measurements.list(sensors_id=123, data='measurements', datetime_from=dt)
 
         params = mock_client._get.call_args[1]["params"]
         assert "2024-01-01" in params["datetime_from"]
@@ -171,7 +175,10 @@ class TestMeasurements:
     ):
         mock_client._get.return_value = mock_measurements_response
         measurements.list(
-            sensors_id=123, datetime_from="2024-01-01", datetime_to="2024-01-31"
+            sensors_id=123,
+            data='measurements',
+            datetime_from="2024-01-01",
+            datetime_to="2024-01-31",
         )
 
         params = mock_client._get.call_args[1]["params"]
@@ -184,7 +191,12 @@ class TestMeasurements:
         mock_client._get.return_value = mock_measurements_response
         dt_from = datetime.datetime(2024, 1, 1)
         dt_to = datetime.datetime(2024, 1, 31)
-        measurements.list(sensors_id=123, datetime_from=dt_from, datetime_to=dt_to)
+        measurements.list(
+            sensors_id=123,
+            data='measurements',
+            datetime_from=dt_from,
+            datetime_to=dt_to,
+        )
 
         params = mock_client._get.call_args[1]["params"]
         assert "2024-01-01" in params["datetime_from"]
@@ -228,7 +240,7 @@ class TestMeasurements:
     )
     def test_list_invalid_sensors_id(self, measurements, value):
         with pytest.raises(IdentifierOutOfBoundsError):
-            measurements.list(sensors_id=value)
+            measurements.list(sensors_id=value, data="measurements")
 
     @pytest.mark.parametrize(
         "parameter,value",
@@ -252,7 +264,7 @@ class TestMeasurements:
         ],
     )
     def test_list_invalid_pagination_params(self, measurements, parameter, value):
-        mock_params = {'sensors_id': 123, parameter: value}
+        mock_params = {'sensors_id': 123, "data": "measurements", parameter: value}
         with pytest.raises(InvalidParameterError):
             measurements.list(**mock_params)
 
@@ -282,7 +294,7 @@ class TestMeasurements:
     )
     def test_list_invalid_rollup_param(self, measurements, rollup_value):
         with pytest.raises(InvalidParameterError):
-            measurements.list(sensors_id=123, rollup=rollup_value)
+            measurements.list(sensors_id=123, data="measurements", rollup=rollup_value)
 
     @pytest.mark.parametrize(
         "datetime_from,datetime_to",
@@ -312,26 +324,52 @@ class TestMeasurements:
     ):
         with pytest.raises(InvalidParameterError):
             measurements.list(
-                sensors_id=123, datetime_from=datetime_from, datetime_to=datetime_to
+                sensors_id=123,
+                data="measurements",
+                datetime_from=datetime_from,
+                datetime_to=datetime_to,
             )
 
+    def test_list_date_overload_uses_date_params(
+        self, measurements, mock_client, mock_measurements_response
+    ):
+        mock_client._get.return_value = mock_measurements_response
+
+        measurements.list(
+            sensors_id=123,
+            data='days',
+            date_from="2026-01-01",
+            date_to="2026-02-12",
+        )
+
+        params = mock_client._get.call_args[1]["params"]
+        assert "date_from" in params
+        assert "date_to" in params
+        assert "datetime_from" not in params
+        assert "datetime_to" not in params
+
     @pytest.mark.parametrize(
-        "data,rollup",
+        "data",
         [
-            (
-                'hours',
-                'hourly',
-            ),
-            (
-                'days',
-                'daily',
-            ),
-            (
-                'years',
-                'yearly',
-            ),
+            pytest.param("days", id="days-DateData"),
+            pytest.param("years", id="years-DateData"),
         ],
     )
-    def test_measurements_list_endpoints_not_founds(self, measurements, data, rollup):
-        with pytest.raises(NotFoundError):
-            measurements.list(sensors_id=1, data=data, rollup=rollup)
+    def test_list_date_overload_accepts_date_params(
+        self, measurements, mock_client, mock_measurements_response, data
+    ):
+        mock_client._get.return_value = mock_measurements_response
+
+        date_from = datetime.date(2026, 1, 1)
+        date_to = datetime.date(2026, 2, 12)
+
+        measurements.list(
+            sensors_id=123,
+            data=data,
+            date_from=date_from,
+            date_to=date_to,
+        )
+
+        params = mock_client._get.call_args[1]["params"]
+        assert "date_from" in params
+        assert "date_to" in params

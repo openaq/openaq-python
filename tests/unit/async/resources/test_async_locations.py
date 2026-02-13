@@ -1,9 +1,17 @@
-from openaq.shared.exceptions import IdentifierOutOfBoundsError, InvalidParameterError
-from openaq._async.models.locations import Locations
-from openaq.shared.responses import LatestResponse, LocationsResponse, SensorsResponse
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from unittest.mock import AsyncMock, Mock
+
+from openaq._async.models.locations import Locations
+from openaq.shared.exceptions import (
+    IdentifierOutOfBoundsError,
+    InvalidParameterError,
+)
+from openaq.shared.responses import (
+    LatestResponse,
+    LocationsResponse,
+    SensorsResponse,
+)
 
 
 @pytest.fixture
@@ -449,6 +457,21 @@ class TestLocations:
             ('licenses_id', [1, 2, 3, '4']),
             ('licenses_id', [1, 2, 3, 2**31]),
             ('licenses_id', True),
+            ('instruments_id', 2**31),
+            ('instruments_id', '999'),
+            ('instruments_id', [1, 2, 3, '4']),
+            ('instruments_id', [1, 2, 3, 2**31]),
+            ('instruments_id', True),
+            ('manufacturers_id', 2**31),
+            ('manufacturers_id', '999'),
+            ('manufacturers_id', [1, 2, 3, '4']),
+            ('manufacturers_id', [1, 2, 3, 2**31]),
+            ('manufacturers_id', True),
+            ('owners_id', 2**31),
+            ('owners_id', '999'),
+            ('owners_id', [1, 2, 3, '4']),
+            ('owners_id', [1, 2, 3, 2**31]),
+            ('owners_id', True),
             ('iso', 42),
             ('iso', True),
             ('iso', 'USA'),
@@ -481,11 +504,26 @@ class TestLocations:
             'parameters_id list contains invalid type, string',
             'parameters_id list contains int out of range',
             'parameters_id invalid type, boolean',
-            'parameters_id out of int range',
-            'parameters_id invalid type, string',
-            'parameters_id list contains invalid type, string',
-            'parameters_id list contains int out of range',
-            'parameters_id invalid type, boolean',
+            'licenses_id out of int range',
+            'licenses_id invalid type, string',
+            'licenses_id list contains invalid type, string',
+            'licenses_id list contains int out of range',
+            'licenses_id invalid type, boolean',
+            'instruments_id out of int range',
+            'instruments_id invalid type, string',
+            'instruments_id list contains invalid type, string',
+            'instruments_id list contains int out of range',
+            'instruments_id invalid type, boolean',
+            'manufacturers_id out of int range',
+            'manufacturers_id invalid type, string',
+            'manufacturers_id list contains invalid type, string',
+            'manufacturers_id list contains int out of range',
+            'manufacturers_id invalid type, boolean',
+            'owners_id out of int range',
+            'owners_id invalid type, string',
+            'owners_id list contains invalid type, string',
+            'owners_id list contains int out of range',
+            'owners_id invalid type, boolean',
             'iso invalid type integer',
             'iso invalid type boolean',
             'iso string too many characters',
@@ -503,4 +541,31 @@ class TestLocations:
     async def test_locations_list_throws(self, locations, parameter, value):
         mock_params = {parameter: value}
         with pytest.raises(InvalidParameterError):
+            await locations.list(**mock_params)
+
+    @pytest.mark.parametrize(
+        "mock_params,expected_error",
+        [
+            (
+                {'iso': 'US', 'countries_id': 42},
+                'iso cannot be used with countries_id',
+            ),
+            (
+                {
+                    'bbox': (-43.549381, -23.157246, -42.560611, -22.719029),
+                    'coordinates': (42, 42),
+                    'radius': 42,
+                },
+                'bbox cannot be used with coordinates/radius parameters',
+            ),
+        ],
+        ids=[
+            'countries query params',
+            'bbox with coordinates/radius query params',
+        ],
+    )
+    async def test_locations_list_mutually_exclusive_params_throws(
+        self, locations, mock_params, expected_error
+    ):
+        with pytest.raises(InvalidParameterError, match=expected_error):
             await locations.list(**mock_params)

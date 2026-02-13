@@ -179,6 +179,45 @@ def validate_bbox(bbox: object) -> tuple[float, float, float, float]:
     return bbox
 
 
+def countries_id_iso_exclusivity_check(
+    countries_id: int | list[int] | None, iso: str | None
+) -> bool:
+    """Check if countries_id and iso are mutually exclusive.
+
+    Returns:
+        True if parameters are mutually exclusive (at most one provided), False otherwise.
+    """
+    return not (countries_id is not None and iso is not None)
+
+
+def validate_countries_query_parameters(
+    countries_id: int | list[int] | None, iso: str | None
+) -> tuple[int | list[int] | None, str | None]:
+    """Validate countries_id and iso query parameters and raise error if invalid.
+
+    Args:
+        countries_id: countries_id query parameter value.
+        iso: iso query parameter value.
+
+    Returns:
+        tuple of the input values
+
+    Raises:
+        InvalidParameterError: If parameter combination is invalid.
+    """
+    if not countries_id_iso_exclusivity_check(countries_id, iso):
+        raise InvalidParameterError("iso cannot be used with countries_id")
+
+    if iso is not None:
+        iso = validate_iso_param(iso)
+
+    if countries_id is not None:
+        countries_id = validate_integer_or_list_integer_params(
+            'countries_id', countries_id
+        )
+    return (countries_id, iso)
+
+
 def geospatial_params_exclusivity_check(
     coordinates: object | None, radius: object | None, bbox: object | None
 ) -> bool:
@@ -538,7 +577,152 @@ def validate_rollup(rollup: object) -> Rollup:
     return rollup
 
 
-def iso8601_check(value: object) -> TypeGuard[str]:
+def check_data_rollup_compatibility(data: Data, rollup: Rollup) -> bool:
+    """Check that data and rollup path parameters are compatible.
+
+    Args:
+        data: Value representing the data path parameter.
+        rollup: Value representing the rollup path parameter.
+
+    Returns:
+        True if the data and rollup values can be paired, False if not.
+    """
+    valid_combinations = {
+        "measurements": ["hourly", "daily"],
+        "hours": [
+            "daily",
+            "monthly",
+            "yearly",
+            "hourofday",
+            "dayofweek",
+            "monthofyear",
+        ],
+        "days": ["monthly", "yearly", "dayofweek", "monthofyear"],
+        "years": [],
+    }
+    return rollup in valid_combinations.get(data, [])
+
+
+def validate_data_rollup_compatibility(
+    data: object, rollup: object | None
+) -> tuple[Data, Rollup | None]:
+    """Validate data and rollup parameters and their compatibility.
+
+    Args:
+        data: Value representing the data path parameter.
+        rollup: Value representing the rollup path parameter (optional).
+
+    Returns:
+        Tuple of validated (data, rollup) values.
+
+    Raises:
+        InvalidParameterError: If data or rollup are invalid, or if the combination is incompatible.
+    """
+    validated_data = validate_data(data)
+    validated_rollup = validate_rollup(rollup) if rollup is not None else None
+
+    if validated_rollup is not None and not check_data_rollup_compatibility(
+        validated_data, validated_rollup
+    ):
+        raise InvalidParameterError(
+            f"Invalid combination: data='{validated_data}' cannot be paired with rollup='{validated_rollup}'"
+        )
+
+    return validated_data, validated_rollup
+
+
+def check_valid_date_parameter(
+    data: Data,
+    date_from: datetime.date | str | None,
+    date_to: datetime.date | str | None,
+    datetime_from: datetime.datetime | datetime.date | str | None,
+    datetime_to: datetime.datetime | datetime.date | str | None,
+) -> bool:
+    """Validate data and date/datetime query parameters and their compatibility.
+
+    Args:
+        data: Value representing the data path parameter.
+        date_from: Value representing the date_from query parameter
+        date_to: Value representing the date_to query parameter
+        datetime_from: Value representing the datetime_from query parameter
+        datetime_to: Value representing the datetime_to query parameter
+
+    Returns:
+        True if the data is paired with valie date query parameters, False if not.
+    """
+    if data in ['days', 'years']:
+        return datetime_from is not None or datetime_to is not None
+    else:
+        return date_from is not None or date_to is not None
+
+
+def date_check(value: object) -> TypeGuard[datetime.date | str]:
+    """Check if value is a valid date object or ISO-8601 date string.
+
+    Args:
+        value: Value to validate as a date query parameter.
+
+    Returns:
+        True if value is a date object or valid ISO-8601 date string, False otherwise.
+    """
+    if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
+        return True
+    if isinstance(value, str):
+        return iso8601_date_check(value)
+    return False
+
+
+def iso8601_date_check(value: str) -> bool:
+    """Check if value is a valid ISO-8601 date string (YYYY-MM-DD).
+
+    Args:
+        value: String to validate as an ISO-8601 date.
+
+    Returns:
+        True if value is a valid ISO-8601 formatted date string, False otherwise.
+    """
+    if not isinstance(value, str):
+        return False
+
+    try:
+        datetime.date.fromisoformat(value)
+        return True
+    except ValueError:
+        return False
+
+
+def to_date(value: datetime.date | str) -> datetime.date:
+    """Convert value to date object if not already a date.
+
+    Args:
+        value: Date object or ISO-8601 date string.
+
+    Returns:
+        Date object (converted from string if necessary).
+    """
+    if isinstance(value, datetime.date):
+        return value
+    return datetime.date.fromisoformat(value)
+
+
+def date_from_lesser_check(
+    date_from: datetime.date, date_to: datetime.date | None = None
+) -> bool:
+    """Checks that date_from is either less than today or less than date_to.
+
+    Args:
+        date_from: Value representing the date_from query parameter (start date).
+        date_to: Value representing the date_to query parameter (end date), or None.
+
+    Returns:
+        True if date_from is in the past or less than date_to.
+    """
+    if not date_to:
+        return date_from < datetime.date.today()
+    return date_from < date_to
+
+
+def iso8601_datetime_check(value: object) -> TypeGuard[str]:
     """Check if value is a valid ISO-8601 datetime string.
 
     Args:
@@ -573,7 +757,7 @@ def datetime_check(value: object) -> TypeGuard[datetime.datetime | str]:
     if not any([is_datetime, is_str]):
         return False
     if is_str:
-        return iso8601_check(value)
+        return iso8601_datetime_check(value)
     return True
 
 
@@ -591,33 +775,143 @@ def to_datetime(value: datetime.datetime | str) -> datetime.datetime:
     return datetime.datetime.fromisoformat(value)
 
 
-def validate_datetime_params(
-    datetime_from: object, datetime_to: object
-) -> tuple[datetime.datetime, datetime.datetime | None]:
-    """Validate datetime query parameters and raise error if invalid.
+def datetime_from_lesser_check(
+    datetime_from: datetime.datetime, datetime_to: datetime.datetime | None = None
+) -> bool:
+    """Checks that datetime_from is either less than now or less than datetime_to.
 
     Args:
         datetime_from: Value representing the datetime_from query parameter (start date/time).
         datetime_to: Value representing the datetime_to query parameter (end date/time), or None.
 
     Returns:
-        Tuple of validated datetime objects (datetime_from, datetime_to), where datetime_to may be None.
+        True if datetime_from is in the past or less than datetime_to.
+    """
+    if not datetime_to:
+        return datetime_from < datetime.datetime.now()
+    return datetime_from < datetime_to
+
+
+def datetime_date_params_exclusivity_check(
+    datetime_from: datetime.datetime | datetime.date | str | None,
+    datetime_to: datetime.datetime | datetime.date | str | None,
+    date_from: datetime.date | str | None,
+    date_to: datetime.date | str | None,
+) -> bool:
+    """Checks that datetime_from and/or datetime_to is not used with date_from and/or date_to.
+
+    Args:
+        datetime_from: Value representing the datetime_from query parameter (start date/time) or None.
+        datetime_to: Value representing the datetime_to query parameter (end date/time), or None.
+        date_from: Value representing the date_from query parameter or None.
+        date_to: Value representing the date_to query parameter or None.
+
+    Returns:
+        True if datetime_from and/or datetime_to is not used with date_from and/or date_to, otherwise False
+    """
+    date_params_used = (date_from is not None) or (date_to is not None)
+    datetime_params_used = (datetime_from is not None) or (datetime_to is not None)
+
+    return not (date_params_used and datetime_params_used)
+
+
+def validate_datetime_params(
+    data: Data,
+    datetime_from: datetime.datetime | datetime.date | str | None,
+    datetime_to: datetime.datetime | datetime.date | str | None,
+    date_from: datetime.date | str | None,
+    date_to: datetime.date | str | None,
+) -> tuple[
+    datetime.datetime | None,
+    datetime.datetime | None,
+    datetime.date | None,
+    datetime.date | None,
+]:
+    """Validate datetime and date query parameters based on data type.
+
+    Args:
+        data: Value representing the data path parameter.
+        datetime_from: Value representing the datetime_from query parameter.
+        datetime_to: Value representing the datetime_to query parameter.
+        date_from: Value representing the date_from query parameter.
+        date_to: Value representing the date_to query parameter.
+
+    Returns:
+        Tuple of (datetime_from, datetime_to, date_from, date_to).
 
     Raises:
-        Exception: If either datetime value is invalid.
+        InvalidParameterError: If parameters are invalid or incompatible with data value.
     """
-    if datetime_to:
-        if not datetime_check(datetime_from) or not datetime_check(datetime_to):
-            raise InvalidParameterError(
-                f"Invalid datetime_from of datetime_to, must be either datetime type or ISO8601 formatted string, got {type(datetime_from) and type(datetime_to)}"
-            )
-        return (to_datetime(datetime_from), to_datetime(datetime_to))
-    else:
-        if not datetime_check(datetime_from):
-            raise InvalidParameterError(
-                f"Invalid datetime_from, must be either datetime type or ISO8601 formatted string, got {type(datetime_from)}"
-            )
-        return (to_datetime(datetime_from), None)
+    if check_valid_date_parameter(data, date_from, date_to, datetime_from, datetime_to):
+        raise InvalidParameterError(
+            f"Invalid parameter combination for data='{data}'. "
+            f"Use datetime_from/datetime_to for 'measurements'/'hours', "
+            f"or date_from/date_to for 'days'/'years'."
+        )
+
+    if not datetime_date_params_exclusivity_check(
+        datetime_from, datetime_to, date_from, date_to
+    ):
+        raise InvalidParameterError(
+            "Cannot mix date and datetime parameters. "
+            "Use either date_from/date_to OR datetime_from/datetime_to, not both."
+        )
+
+    if data in ['days', 'years']:
+        if date_to:
+            if not date_check(date_from) or not date_check(date_to):
+                raise InvalidParameterError(
+                    f"Invalid date_from or date_to, must be either date type or ISO-8601 formatted date string, got {type(date_from)} and {type(date_to)}"
+                )
+            date_from_date = to_date(date_from)
+            date_to_date = to_date(date_to)
+            if not date_from_lesser_check(date_from_date, date_to_date):
+                raise InvalidParameterError(
+                    "Invalid date_from or date_to, date_from must be less than date_to"
+                )
+            return (None, None, date_from_date, date_to_date)
+        elif date_from is not None:
+            if not date_check(date_from):
+                raise InvalidParameterError(
+                    f"Invalid date_from, must be either date type or ISO-8601 formatted date string, got {type(date_from)}"
+                )
+            date_from_date = to_date(date_from)
+            if not date_from_lesser_check(date_from_date):
+                raise InvalidParameterError(
+                    "Invalid date_from, date_from must be in the past."
+                )
+            return (None, None, date_from_date, None)
+        else:
+            return (None, None, None, None)
+
+    else:  # data in ['measurements', 'hours']
+        if datetime_to is not None:
+            if not datetime_check(datetime_from) or not datetime_check(datetime_to):
+                raise InvalidParameterError(
+                    f"Invalid datetime_from or datetime_to, must be either datetime type or ISO-8601 formatted string, got {type(datetime_from)} and {type(datetime_to)}"
+                )
+            datetime_from_datetime = to_datetime(datetime_from)
+            datetime_to_datetime = to_datetime(datetime_to)
+            if not datetime_from_lesser_check(
+                datetime_from_datetime, datetime_to_datetime
+            ):
+                raise InvalidParameterError(
+                    "Invalid datetime_from or datetime_to, datetime_from must be less than datetime_to"
+                )
+            return (datetime_from_datetime, datetime_to_datetime, None, None)
+        elif datetime_from is not None:
+            if not datetime_check(datetime_from):
+                raise InvalidParameterError(
+                    f"Invalid datetime_from, must be either datetime type or ISO-8601 formatted string, got {type(datetime_from)}"
+                )
+            datetime_from_datetime = to_datetime(datetime_from)
+            if not datetime_from_lesser_check(datetime_from_datetime):
+                raise InvalidParameterError(
+                    "Invalid datetime_from, datetime_from must be in the past."
+                )
+            return (datetime_from_datetime, None, None, None)
+        else:
+            return (None, None, None, None)
 
 
 def parameter_type_check(parameter_type: object) -> TypeGuard[ParameterType]:

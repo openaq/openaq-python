@@ -1,9 +1,13 @@
-from openaq.shared.exceptions import IdentifierOutOfBoundsError, InvalidParameterError
-from openaq._async.models.parameters import Parameters
-from openaq.shared.responses import ParametersResponse, LatestResponse
+from unittest.mock import AsyncMock, Mock
 
 import pytest
-from unittest.mock import AsyncMock, Mock
+
+from openaq._async.models.parameters import Parameters
+from openaq.shared.exceptions import (
+    IdentifierOutOfBoundsError,
+    InvalidParameterError,
+)
+from openaq.shared.responses import LatestResponse, ParametersResponse
 
 
 @pytest.fixture
