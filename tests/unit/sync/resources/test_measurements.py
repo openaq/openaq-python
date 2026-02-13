@@ -7,7 +7,6 @@ from openaq._sync.models.measurements import Measurements
 from openaq.shared.exceptions import (
     IdentifierOutOfBoundsError,
     InvalidParameterError,
-    NotFoundError,
 )
 from openaq.shared.responses import MeasurementsResponse
 
