@@ -202,7 +202,7 @@ class Locations(SyncResourceBase):
             licenses_id=licenses_id,
             instruments_id=instruments_id,
             manufacturers_id=manufacturers_id,
-            owners_id=owners_id,
+            owner_contacts_id=owners_id,
             iso=iso,
             monitor=monitor,
             mobile=mobile,
