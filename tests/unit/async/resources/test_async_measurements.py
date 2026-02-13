@@ -365,7 +365,7 @@ class TestMeasurements:
         mock_client._get.return_value = mock_measurements_response
 
         date_from = datetime.date(2026, 1, 1)
-        date_to = datetime.date(2024, 2, 12)
+        date_to = datetime.date(2026, 2, 12)
 
         await measurements.list(
             sensors_id=123,
