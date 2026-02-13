@@ -792,6 +792,29 @@ def datetime_from_lesser_check(
     return datetime_from < datetime_to
 
 
+def datetime_date_params_exclusivity_check(
+    datetime_from: datetime.datetime | datetime.date | str | None,
+    datetime_to: datetime.datetime | datetime.date | str | None,
+    date_from: datetime.date | str | None,
+    date_to: datetime.date | str | None,
+) -> bool:
+    """Checks that datetime_from and/or datetime_to is not used with date_from and/or date_to.
+
+    Args:
+        datetime_from: Value representing the datetime_from query parameter (start date/time) or None.
+        datetime_to: Value representing the datetime_to query parameter (end date/time), or None.
+        date_from: Value representing the date_from query parameter or None.
+        date_to: Value representing the date_to query parameter or None.
+
+    Returns:
+        True if datetime_from and/or datetime_to is not used with date_from and/or date_to, otherwise False
+    """
+    date_params_used = (date_from is not None) or (date_to is not None)
+    datetime_params_used = (datetime_from is not None) or (datetime_to is not None)
+
+    return not (date_params_used and datetime_params_used)
+
+
 def validate_datetime_params(
     data: Data,
     datetime_from: datetime.datetime | datetime.date | str | None,
@@ -824,6 +847,14 @@ def validate_datetime_params(
             f"Invalid parameter combination for data='{data}'. "
             f"Use datetime_from/datetime_to for 'measurements'/'hours', "
             f"or date_from/date_to for 'days'/'years'."
+        )
+
+    if not datetime_date_params_exclusivity_check(
+        datetime_from, datetime_to, date_from, date_to
+    ):
+        raise InvalidParameterError(
+            "Cannot mix date and datetime parameters. "
+            "Use either date_from/date_to OR datetime_from/datetime_to, not both."
         )
 
     if data in ['days', 'years']:

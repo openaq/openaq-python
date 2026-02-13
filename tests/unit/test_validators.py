@@ -13,6 +13,7 @@ from openaq.shared.validators import (
     data_check,
     date_from_lesser_check,
     datetime_check,
+    datetime_date_params_exclusivity_check,
     datetime_from_lesser_check,
     geospatial_params_exclusivity_check,
     integer_id_check,
@@ -1617,3 +1618,115 @@ def test_validate_data_rollup_compatibility_invalid_combination_throws(
 ):
     with pytest.raises(InvalidParameterError):
         validate_data_rollup_compatibility(data, rollup)
+
+
+@pytest.mark.parametrize(
+    "datetime_from, datetime_to, date_from, date_to, valid",
+    [
+        pytest.param(
+            datetime.datetime(2026, 1, 1, 0, 0, 0, 0),
+            datetime.datetime(2026, 1, 2, 0, 0, 0, 0),
+            None,
+            None,
+            True,
+            id="both_datetime_params_only",
+        ),
+        pytest.param(
+            datetime.datetime(2026, 1, 1, 0, 0, 0, 0),
+            None,
+            None,
+            None,
+            True,
+            id="only_datetime_from",
+        ),
+        pytest.param(
+            None,
+            datetime.datetime(2026, 1, 2, 0, 0, 0, 0),
+            None,
+            None,
+            True,
+            id="only_datetime_to",
+        ),
+        pytest.param(
+            None,
+            None,
+            datetime.date(2026, 1, 1),
+            datetime.date(2026, 1, 2),
+            True,
+            id="both_date_params_only",
+        ),
+        pytest.param(
+            None,
+            None,
+            datetime.date(2026, 1, 1),
+            None,
+            True,
+            id="only_date_from",
+        ),
+        pytest.param(
+            None,
+            None,
+            None,
+            datetime.date(2026, 1, 2),
+            True,
+            id="only_date_to",
+        ),
+        pytest.param(
+            None,
+            None,
+            None,
+            None,
+            True,
+            id="all_none",
+        ),
+        pytest.param(
+            datetime.datetime(2026, 1, 1, 0, 0, 0, 0),
+            None,
+            datetime.date(2026, 1, 1),
+            None,
+            False,
+            id="datetime_from_and_date_from_mixed",
+        ),
+        pytest.param(
+            datetime.datetime(2026, 1, 1, 0, 0, 0, 0),
+            None,
+            None,
+            datetime.date(2026, 1, 2),
+            False,
+            id="datetime_from_and_date_to_mixed",
+        ),
+        pytest.param(
+            None,
+            datetime.datetime(2026, 1, 2, 0, 0, 0, 0),
+            datetime.date(2026, 1, 1),
+            None,
+            False,
+            id="datetime_to_and_date_from_mixed",
+        ),
+        pytest.param(
+            None,
+            datetime.datetime(2026, 1, 2, 0, 0, 0, 0),
+            None,
+            datetime.date(2026, 1, 2),
+            False,
+            id="datetime_to_and_date_to_mixed",
+        ),
+        pytest.param(
+            datetime.datetime(2026, 1, 1, 0, 0, 0, 0),
+            datetime.datetime(2026, 1, 2, 0, 0, 0, 0),
+            datetime.date(2026, 1, 1),
+            datetime.date(2026, 1, 2),
+            False,
+            id="all_params_mixed",
+        ),
+    ],
+)
+def test_datetime_date_params_exclusivity_check(
+    datetime_from, datetime_to, date_from, date_to, valid
+):
+    assert (
+        datetime_date_params_exclusivity_check(
+            datetime_from, datetime_to, date_from, date_to
+        )
+        == valid
+    )
