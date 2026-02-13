@@ -32,8 +32,9 @@ error has occured _after_ the request to the API has been made. `APIError`
 exceptions are all wrappers around HTTP Error codes (4xx and 5xx) and provide
 access to the `status_code` in the body of the exception:
 
-OpenAQErrors always include `message` and `status_code` fields which provides a human-readable 
-explanation of the error and the HTTP status code number, respectively.
+OpenAQErrors always include `message` and `status_code` fields which provides a 
+human-readable  explanation of the error and the HTTP status code number,
+respectively.
 
 ```py
 from openaq import OpenAQ 

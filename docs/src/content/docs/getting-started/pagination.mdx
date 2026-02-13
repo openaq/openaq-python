@@ -4,14 +4,14 @@ title: Pagination
 
 
 The OpenAQ platform contains a very large amount of data and the OpenAQ API 
-can only return a subset of data.
-To 
+can only return a subset of data in a single requests. The API uses pagination 
+to allow querying large result sets across multiple queries. 
 
-For access to large amounts of data the OpenAQ Python SDK provides the `page` 
+To access large amounts of data the OpenAQ Python SDK provides the `page` 
 and `limit` arguments for all resources that use a `list()` method. 
 Combining `limit` and `page` 
 
 
 The total number of records found in a request can be found in the `meta` object
 under the `found` key. In cases where the result is too large for the system to 
-count
+count, 

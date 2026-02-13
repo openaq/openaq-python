@@ -2,23 +2,23 @@
 title: Responses
 ---
 
-The OpenAQ API and in turn the Python SDK return a common format for the 
-responses to ensure a consistent and predictable interface. The Python SDK
-handles 
+The OpenAQ API and Python SDK use a common response format to ensure
+consistency. The Python SDK automatically deserializes API responses and
+transforms raw JSON into convenient Python objects with dot notation access.
+This design simplifies data retrieval and reduces boilerplate code while
+maintaining flexibility. You can still access raw JSON or dictionary formats
+when needed. Understanding this response structure helps you work effectively
+with any OpenAQ resource.
 
-## Response objects
 
-By default, resource methods return OpenAQ API JSON responses into deserialized
-data objects for easier access. These data objects support convenient dot
-notation access to attributes, allowing you to retrieve values like
-`response.meta.page` or `response.headers.x_ratelimit_remaining` instead of
-using dictionary-style key lookups.
+
+## Response structure
 
 All response objects follow a common top-level form, with specific data objects
-for each specific resources within the results. The results object in each
-response will _always_ be a `list` (or array in JSON), this applies even if 
-requesting a single object by keys, like in `get()` function call, or if
-filtering removes all possible results; you will recieve an empty list.
+for each resource within the results. The `results` object in each response
+remains a `list`, or array in JSON. This applies even when requesting a single
+object by keys, like in a `get()` function call, or when filtering removes all
+possible results. In those cases, you receive an empty list.
 
 ```
 ├── headers
@@ -35,35 +35,48 @@ filtering removes all possible results; you will recieve an empty list.
 └── results: list[]
 ```
 
-The structure of individual resource response objects can be found in their
-respective pages (locations, providers, measurements etc.)
+Find the structure of individual resource response results in their respective
+pages in next section of the docs.
 
+## Accessing response data
 
-## Dictionary
+The SDK provides three ways to access response data, depending on your needs.
 
-Responses can also be optionally returned as a Python dictionary. All resource 
-responses include a `dict()` method which will allow property access using 
-Python dictionary key syntax:
+### Response objects
+
+By default, resource methods deserialize OpenAQ API JSON responses into data
+objects for easier access. These data objects support convenient dot notation
+access to attributes. You can retrieve values directly from the response
+structure shown above.
+
+```py
+response.meta.page
+response.headers.x_ratelimit_remaining
+response.results[0]  # Access first item in results list
+```
+
+### Dictionary
+
+You can also return responses as a Python dictionary. All resource responses
+include a `dict()` method that allows property access using Python dictionary
+key syntax:
 
 ```py
 response.dict()['results']
 ```
 
 or using the built-in `get()`:
-
 ```py
 response.dict().get('results')
 ```
 
-Just like in the deserialized object, the `results` key will always be a Python
-`list`.
+Just like in the deserialized object, the `results` key stays a Python `list`.
 
 
-## JSON
+### JSON
 
-The response objects also provide the option to return the raw JSON string of 
-the response payload. This can be accessed on all response objects with the 
-`json()` method.
+Response objects also provide the option to return the raw JSON string of the 
+esponse payload. Access this on all response objects with the `json()` method:
 
 ```py
 response.json()

@@ -1,3 +1,29 @@
 ---
 title: Rate limiting
 ---
+
+By default the OpenAQ Python SDK provides automatic rate limiting, where the 
+client class will track and ensure that the API rate limit is not exceeded. For 
+more fine grained control of the client class this option can be toggled off 
+by setting the `auto_wait` option to `False`. e.g.
+
+```py 
+from openaq import OpenAQ
+
+client = OpenAQ(auto_wait=False)
+
+```
+
+:::caution
+Turning off automatic rate limiting removes protection to help ensure you do 
+not inadvently exceed the API rate limit. Only toggle this option off if you
+have a specific need for fine-grained timing of requests and understand how 
+to use the rate-limit headers to control your requests. Exceeding the rate limit
+will result in temporary or permanent account suspension.  
+:::
+
+
+## Rate limit headers
+
+The OpenAQ API provides HTTP headers that include information on current rate
+limit usage. 
