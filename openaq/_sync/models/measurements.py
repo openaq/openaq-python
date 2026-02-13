@@ -1,8 +1,9 @@
 import datetime
+from typing import overload
 
 from openaq.shared.models import build_measurements_path, build_query_params
 from openaq.shared.responses import MeasurementsResponse
-from openaq.shared.types import Data, Rollup
+from openaq.shared.types import Data, DateData, DatetimeData, Rollup
 from openaq.shared.validators import (
     validate_data_rollup_compatibility,
     validate_datetime_params,
@@ -17,10 +18,38 @@ from .base import SyncResourceBase
 class Measurements(SyncResourceBase):
     """Provides methods to retrieve the measurements resource from the OpenAQ API."""
 
+    @overload
+    async def list(
+        self,
+        sensors_id: int,
+        data: DatetimeData,
+        rollup: Rollup | None = None,
+        datetime_from: datetime.datetime | datetime.date | str | None = None,
+        datetime_to: datetime.datetime | datetime.date | str | None = None,
+        date_from: None = None,
+        date_to: None = None,
+        page: int = 1,
+        limit: int = 1000,
+    ) -> MeasurementsResponse: ...
+
+    @overload
     def list(
         self,
         sensors_id: int,
-        data: Data | None = None,
+        data: DateData,
+        rollup: Rollup | None = None,
+        datetime_from: None = None,
+        datetime_to: None = None,
+        date_from: datetime.date | str | None = None,
+        date_to: datetime.date | str | None = None,
+        page: int = 1,
+        limit: int = 1000,
+    ) -> MeasurementsResponse: ...
+
+    def list(
+        self,
+        sensors_id: int,
+        data: Data,
         rollup: Rollup | None = None,
         datetime_from: datetime.datetime | datetime.date | str | None = None,
         datetime_to: datetime.datetime | datetime.date | str | None = None,
