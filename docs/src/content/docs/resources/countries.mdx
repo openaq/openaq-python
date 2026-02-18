@@ -4,11 +4,18 @@ title: Countries
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+The Countries resource lists countries in the OpenAQ dataset and details the
+air quality parameters for each. The list only includes countries with
+monitoring locations from which OpenAQ ingests data. Country values come from
+the coordinates provided by the upstream provider. OpenAQ uses the
+[Natural Earth 10m dataset](https://www.naturalearthdata.com/) for country
+boundaries. Country codes follow the
+[ISO 3166-1 alpha-2](https://www.iso.org/iso-3166-country-codes.html)
+standard, which may differ from codes reported by the upstream provider.
 
 ## Methods
 
 ### Get a single country
-
 ```py
 get(
   countries_id: int
@@ -23,25 +30,24 @@ get(
 
 <Tabs syncKey="client">
   <TabItem label="sync">
-    ```py
+```py
     from openaq import OpenAQ
 
     with OpenAQ() as client:
         client.countries.get(countries_id=1)
-    ```
+```
   </TabItem>
   <TabItem label="async">
-    ```py
+```py
     from openaq import AsyncOpenAQ
 
     async with AsyncOpenAQ() as client:
         await client.countries.get(countries_id=1)
-    ```
+```
   </TabItem>
 </Tabs>
 
-### List multiple countries
-
+### List countries
 ```py
 list(
   page: int = 1,
@@ -53,38 +59,37 @@ list(
   ) -> CountriesResponse
 ```
 
-| argument | type | description |
-| -------- | ---- | ----------- |
-| page | `int` | The page number, must be greater than zero. Page count is countries found / limit. |
-| limit | `int` | The number of results returned per page. Must be between 1 and 1,000. |
-| order_by | `str \| None` | Order by operators for results. |
-| sort_order | `SortOrder \| None` | Order for sorting results (asc/desc). |
-| parameters_id | `int \| list[int] \| None` | Single parameters ID or an array of IDs. |
-| providers_id | `int \| list[int] \| None` | Single providers ID or an array of IDs. |
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| page | `int` The page number to retrieve, defaults to 1 | Must better greater than zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must range from 1 to 1,000 |
+| order_by | `str \| None` The attribute by which to order results, defaults to `id` | Currently only `id` is supported |
+| sort_order | `SortOrder \| None` The order by which to sort the attribute, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
+| parameters_id | `int \| list[int] \| None` Filter countries by the ID of one or multiple of pollutants or meteorological parameters |  |
+| providers_id | `int \| list[int] \| None` Filter countries by the ID of one or multiple data providers | |
 
 #### Example
 
 <Tabs syncKey="client">
   <TabItem label="sync">
-    ```py
+```py
     from openaq import OpenAQ
 
     with OpenAQ() as client:
         client.countries.list()
-    ```
+```
   </TabItem>
   <TabItem label="async">
-    ```py
+```py
     from openaq import AsyncOpenAQ
 
     async with AsyncOpenAQ() as client:
         await client.countries.list()
-    ```
+```
   </TabItem>
 </Tabs>
 
 ## Response
-
 ```
 Country[]
     ├── id: int

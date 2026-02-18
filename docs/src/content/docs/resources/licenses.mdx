@@ -4,44 +4,47 @@ title: Licenses
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+The Licenses resource lists the licenses that govern use of data in OpenAQ.
+Each license details permissions and restrictions, such as whether attribution
+is required and whether commercial use, modification, or redistribution is
+allowed. Use this resource to identify licensing requirements and ensure
+compliance with [OpenAQ's Terms of Use](https://docs.openaq.org/about/terms).
 
 ## Methods
 
 ### Get a single license
-
 ```py
 get(
   licenses_id: int
   ) -> LicensesResponse
 ```
 
-| argument | type |
-| -------- | ---- |
-| licenses_id | `int` |
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| licenses_id |  `int` OpenAQ's unique identifier for each license | Required |
 
 #### Example
 
 <Tabs syncKey="client">
   <TabItem label="sync">
-    ```py
+```py
     from openaq import OpenAQ
 
     with OpenAQ() as client:
         client.licenses.get(licenses_id=1)
-    ```
+```
   </TabItem>
   <TabItem label="async">
-    ```py
+```py
     from openaq import AsyncOpenAQ
 
     async with AsyncOpenAQ() as client:
         await client.licenses.get(licenses_id=1)
-    ```
+```
   </TabItem>
 </Tabs>
 
-### List multiple licenses
-
+### List licenses
 ```py
 list(
   page: int = 1,
@@ -51,36 +54,35 @@ list(
   ) -> LicensesResponse
 ```
 
-| argument | type | description |
-| -------- | ---- | ----------- |
-| page | `int` | The page number, must be greater than zero. Page count is licenses found / limit. |
-| limit | `int` | The number of results returned per page. Must be between 1 and 1,000. |
-| order_by | `str \| None` | Order by operators for results. |
-| sort_order | `SortOrder \| None` | Order for sorting results (asc/desc). |
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| page | `int` The page number to retrieve, defaults to 1 | Must exceed zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must range from 1 to 1,000 |
+| order_by | `str \| None` The license field by which to sort results, defaults to `id`. Currently only `id` is supported | |
+| sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
 
 #### Example
 
 <Tabs syncKey="client">
   <TabItem label="sync">
-    ```py
+```py
     from openaq import OpenAQ
 
     with OpenAQ() as client:
         client.licenses.list()
-    ```
+```
   </TabItem>
   <TabItem label="async">
-    ```py
+```py
     from openaq import AsyncOpenAQ
 
     async with AsyncOpenAQ() as client:
         await client.licenses.list()
-    ```
+```
   </TabItem>
 </Tabs>
 
 ## Response
-
 ```
 License[]
     ├── id: int

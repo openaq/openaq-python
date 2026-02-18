@@ -92,8 +92,8 @@ list(
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| page | `int` The page number from which the subsetted resulting locations will be returned, defaults to 1 | Must be greater than 0 |
-| limit | `int` The maximum number of locations returned per page, defaults to 100 | Must be between 1 and 1,000 |
+| page | `int` The page number to retrieve, defaults to 1 | Must better greater than zero |
+| limit | `int` The number of results returned per page, defaults to 100 | Must be between 1 and 1,000 |
 | radius | `int \| None` The search distance value (in meters) around the coordinate pair to search for locations | Must be between 1 and 25,000. Must be accompanied by coordinates. Cannot be accompanied by bbox |
 | coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for locations | Must be in WGS84 (EPSG:4326) in (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be accompanied by bbox. |
 | bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be accompanied by either coordinate or radius |
@@ -104,8 +104,8 @@ list(
 | iso | `str \| None` The ISO 3166-1 alpha-2 code for country or territory of the location | Must be a valid ISO 3166-1 alpha-2 code representation of the country, cannot be accompanied by countries_id |
 | monitor | `bool \| None` Filter for for reference grade (True) or air sensor (False) locations | |
 | mobile | `bool \| None` Filter for for mobile (True) or stationary (False) locations | |
-| order_by | `str \| None` The Location attribute by which to order the returning LocationsResponse results. Defaults to ' | Currently only takes 'id' for input |
-| sort_order | `str \| None` The order by which to sort the Location attribute. Defaults to 'desc' | Must be one of the following: 'asc', 'desc', 'ASC', 'DESC' |
+| order_by | `str \| None` The location field by which to sort results, defaults to `id`. Currently only `id` is supported | |
+| sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
 
 #### Example
 
