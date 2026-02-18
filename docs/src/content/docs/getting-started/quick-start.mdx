@@ -2,3 +2,136 @@
 title: Quick start 
 description: A tutorial to get started using the OpenAQ Python SDK
 ---
+
+import { Steps } from '@astrojs/starlight/components';
+
+
+This tutorial provide a quick start for making your first OpenAQ query using the 
+OpenAQ Python SDK. The simplest example we can query a single air quality
+monitoring location and get information, such as the location's name, from the
+response.
+
+## Tutorial
+
+<Steps>
+
+1. Install the openaq package from [PyPI](https://pypi.org/project/openaq/): 
+
+    ```sh
+    pip install openaq
+    ```
+
+2. Get an API key
+
+    Visit [explore.openaq.org/register](https://explore.openaq.org/register) and
+    copy your API key.
+
+
+3. Run the following code in a Python REPL or from a .py file:
+
+    ```py
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+    This will print out `Del Norte` in your console, the name of the location
+    with ID 2178.
+
+ </Steps>
+
+## Walkthrough
+
+
+Now we can walk through the code step by step:
+
+
+<Steps>
+
+1. Import the client class from the `openaq` package. The `OpenAQ` client
+provides all the options for querying resources.
+
+    ```py {1}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+2. Set up the client. Provide an API key to the client to authenticate with the 
+OpenAQ API. Replace the value `replace-me-with-a-valid-key` with you actual 
+API key, this placeholder **will not work**.
+
+    ```py {3}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+3. Query the location by ID. We've chose locations ID 2178, you can replace this 
+with another other OpenAQ locations ID.
+
+    ```py {5}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+4. Close the connection. 
+
+    ```py {7}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+5. Print the results. 
+
+    ```py {9}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+ </Steps>
+
+
+## Next Steps
+
+- Read the other getting started articles to familiarize yourself with 
+- Check out the common workflows for more real-world workflows
+- 
