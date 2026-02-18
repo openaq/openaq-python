@@ -2,16 +2,52 @@
 title: Pagination
 ---
 
+The OpenAQ platform contains a large amount of data, and the OpenAQ API
+can only return a subset in a single request. Pagination lets you query large
+result sets across many requests.
 
-The OpenAQ platform contains a very large amount of data and the OpenAQ API 
-can only return a subset of data in a single requests. The API uses pagination 
-to allow querying large result sets across multiple queries. 
+## Page and limit
 
-To access large amounts of data the OpenAQ Python SDK provides the `page` 
-and `limit` arguments for all resources that use a `list()` method. 
-Combining `limit` and `page` 
+The OpenAQ Python SDK provides `page` and `limit` arguments for all resources
+with a `list()` method.
 
+- `page` - the page number to retrieve. Defaults to `1`. Must exceed zero.
+- `limit` - the number of results per page. Defaults to `100`. Must range from
+`1` to `1000`.
 
-The total number of records found in a request can be found in the `meta` object
-under the `found` key. In cases where the result is too large for the system to 
-count, 
+To retrieve the first 50 results:
+```py
+locations = client.locations.list(page=1, limit=50)
+```
+
+To retrieve the next 50 results, increment `page`:
+```py
+locations = client.locations.list(page=2, limit=50)
+```
+
+To paginate through an entire result set, use a `for` loop:
+```py
+import math
+
+limit = 100
+locations = []
+
+first_page = client.locations.list(page=1, limit=limit)
+locations.extend(first_page.results)
+total_pages = math.ceil(first_page.meta.found / limit)
+
+for page in range(2, total_pages + 1):
+    response = client.locations.list(page=page, limit=limit)
+    locations.extend(response.results)
+```
+
+## The meta object
+
+All `list()` responses include a `meta` object with metadata about the result
+set. The `meta.found` field holds the total number of records matching your
+query, which you can use to calculate the total page count as shown preceding.
+
+When `meta.found` returns `'>1000'`, you can't calculate the exact page count
+ahead of time. Consider narrowing your query with filters like `countries_id`
+or `parameters_id` to reduce the result set. See the meta object reference for
+a full list of available fields.

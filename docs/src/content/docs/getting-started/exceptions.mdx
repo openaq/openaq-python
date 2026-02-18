@@ -2,19 +2,19 @@
 title: Exceptions
 ---
 
-The OpenAQ Python SDK raises exceptions when an error occurs. Custom exceptions
-included in the package include two main types: `OpenAQError` and `APIError`.
+The OpenAQ Python SDK raises exceptions when an error occurs. The package
+includes two main exception types: `OpenAQError` and `APIError`.
 
-Using `try` and `except` the exception allow a more predictable interface for 
-catching errors and identifying the specific class of error thrown. 
+Using `try` and `except` blocks gives you a predictable interface for catching
+errors and identifying the specific error class.
 
-### OpenAQError 
+### OpenAQ error
 
-`OpenAQError` is a superclass that is inherited by exceptions that indicate the
-OpenAQ SDK client or methods has found an issue and throws an exception _before_
-making a request to the API.
+The `OpenAQError` class serves as a superclass for exceptions that show the
+OpenAQ SDK client or methods found an issue and threw an exception _before_
+sending a request to the API.
 
-OpenAQErrors always include a `message` field which provides a human-readable 
+All `OpenAQError` exceptions include a `message` field with a human-readable
 explanation of the error.
 
 ```py
@@ -24,16 +24,14 @@ except ApiKeyMissingError as e:
     print(e.message)
 ```
 
+### API error
 
-### APIError
+The `APIError` class serves as a superclass for exceptions that show an error
+occurred _after_ the request to the API. All `APIError` exceptions wrap HTTP
+error codes (4xx and 5xx) and expose the `status_code` from the response body.
 
-`APIError` is a superclass that is inherited by exceptions that indicate an 
-error has occured _after_ the request to the API has been made. `APIError` 
-exceptions are all wrappers around HTTP Error codes (4xx and 5xx) and provide
-access to the `status_code` in the body of the exception:
-
-OpenAQErrors always include `message` and `status_code` fields which provides a 
-human-readable  explanation of the error and the HTTP status code number,
+All `APIError` exceptions include `message` and `status_code` fields with a
+human-readable explanation of the error and the HTTP status code number,
 respectively.
 
 ```py
@@ -47,6 +45,4 @@ with client as OpenAQ(api_key='replace-with-valid-openaq-api-key'):
         print(e.status_code) # 404
 ```
 
-### TODO link to https://docs.openaq.org/errors/unprocessable-content
-
-See the Exception reference documentation for a detailed lists of Exceptions.
+See the Exception reference documentation for a detailed list of exceptions.
