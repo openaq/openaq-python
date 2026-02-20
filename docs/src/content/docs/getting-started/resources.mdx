@@ -8,3 +8,44 @@ response corresponding to the endpoint. The OpenAQ Python SDK further simplifies
 this by providing convenient resources from the client with methods to call the 
 endpoints. All API responses through the SDK provide common features for reading
 data as convenient Python objects, a dictionary or a JSON string. 
+
+
+
+```d2
+grid-columns: 3
+grid-rows: 4
+grid-gap: 20
+
+1: "providers"
+2: "countries"
+3: "parameters"
+4: "licenses"
+5: "locations"
+6: ""
+7: "instruments"
+8: "owners"
+9: "sensors"
+10: "manufacturers"
+11: ""
+12: "measurements"
+
+1 -> 2
+3 -> 2
+3 -> 1
+1 -> 5
+2 -> 5
+3 -> 5
+4 -> 5
+9 -> 12
+2 -> 1
+2 -> 3
+10 -> 7
+
+5 -> 4
+5 -> 7
+5 -> 8
+5 -> 9
+5 -> 1
+5 -> 2
+10 -> 7
+```

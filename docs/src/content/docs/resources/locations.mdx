@@ -214,21 +214,13 @@ returns all sensors at that location in a SensorsResponse object.
 
 ## Response objects
 
-
-
-```py
-LocationsResponse.results -> [Location]
-LatestResponse.results -> [Latest]
-SensorsResponse.results -> [Sensor]
-```
-
 These Location and Latest objects contain attributes that have all data about
 them. The hierarchy below presents the depth of the attributes and their
 datatypes.
 
 ### LocationsResponse
 ```
-Location[]
+results[]
     ├── id: int
     ├── name: str
     ├── locality: str | None
@@ -271,7 +263,7 @@ Location[]
 
 ### Latest object
 ```
-Latest[]
+results[]
     ├── datetime:
     │   ├── utc: str
     │   └── local: str
@@ -285,7 +277,7 @@ Latest[]
 
 ### Sensor object
 ```
-Sensor[]
+results[]
 ├── id: int
 ├── name: str
 ├── parameter
