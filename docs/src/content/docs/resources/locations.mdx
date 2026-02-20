@@ -4,17 +4,15 @@ title: Locations
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-
-The locations resource gives you access to air quality monitoring station data
-from the OpenAQ database. Use it to get details about stations: their
-geographic information, what instruments they use, what pollutants they measure,
+The Locations resource provides air monitoring stations data from the OpenAQ database. You can use it to get details about stations:
+where they are located, what instruments they use, what pollutants they measure,
 and who owns or manages them. The resource has methods to query single stations,
 search many stations, and access live sensor data. This resource helps you work
 with station information and current conditions.
 
 ## Methods
 
-The `locations` resource provides the following methods:
+The Locations resource provides the following methods:
 
 - `get()` - For accessing a single location by location ID.
 - `list()` - For accessing multiple locations.
@@ -28,7 +26,7 @@ The `locations` resource provides the following methods:
 The `get()` method accepts one single `locations_id` as an argument and returns
 details about that location in a LocationsResponse object.
 
-#### Query arguments
+#### *Query arguments*
 ```py
 get(
   locations_id: int
@@ -37,9 +35,9 @@ get(
 
 | argument | description | input requirements |
 | -------- | ----------- | ---- |
-| locations_id | `int` OpenAQ's unique identifier for each location | Required |
+| locations_id | `int` OpenAQ's unique ID for each location | Required |
 
-#### Example
+#### *Example*
 
 <Tabs  syncKey="client">
   <TabItem label="sync">
@@ -64,10 +62,9 @@ get(
 
 ###  List multiple locations
 
-The `list()` method takes multiple optional arguments and returns all air
-monitoring locations on the OpenAQ platform that meet the conditions specified
-in the arguments. If no argument is included, the method returns all locations
-on the platform using the default arguments.
+The `list()` method takes optional arguments and returns locations on the
+OpenAQ platform that meet all the conditions specified. If no argument is included,
+the method returns all locations using the default arguments.
 
 ```py
 list(
@@ -88,26 +85,26 @@ list(
   ) -> LocationsResponse
 ```
 
-#### Query arguments
+#### *Query arguments*
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| page | `int` The page number to retrieve, defaults to 1 | Must better greater than zero |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
 | limit | `int` The number of results returned per page, defaults to 100 | Must be between 1 and 1,000 |
-| radius | `int \| None` The search distance value (in meters) around the coordinate pair to search for locations | Must be between 1 and 25,000. Must be accompanied by coordinates. Cannot be accompanied by bbox |
-| coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for locations | Must be in WGS84 (EPSG:4326) in (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be accompanied by bbox. |
-| bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be accompanied by either coordinate or radius |
-| providers_id | `int \| list[int] \| None` Filter the locations by the ID of one or multiple organizations/individuals that facilitate the sharing of data at those locations |
-| countries_id | `int \| list[int] \| None` The countr(ies) or territor(ies) where the location operates | Must be OpenAQ unique identifier for the countr(ies) or territor(ies). Cannot be accompanied by iso |
-| parameters_id | `int \| list[int] \| None` The type of pollutants or meteorological reading(s) by which to search for locations | Must be OpenAQ unique identifier for the pollutant or meteorlogical parameter(s) |
-| licenses_id | `int \| list[int] \| None` The license that governs the usage and sharing of data at these locations | Must be OpenAQ unique identifier for the license(s) |
-| iso | `str \| None` The ISO 3166-1 alpha-2 code for country or territory of the location | Must be a valid ISO 3166-1 alpha-2 code representation of the country, cannot be accompanied by countries_id |
-| monitor | `bool \| None` Filter for for reference grade (True) or air sensor (False) locations | |
-| mobile | `bool \| None` Filter for for mobile (True) or stationary (False) locations | |
+| radius | `int \| None` How far (in meters) to search for locations around the coordinate pair | Must be between 1 and 25,000. Must be accompanied by `coordinates` argument. Cannot be used at the same time as `bbox` |
+| coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for locations | Must be in WGS84 (EPSG:4326) in (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be used at the same time as `bbox` |
+| bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be used at the same time as `coordinates` or `radius` |
+| providers_id | `int \| list[int] \| None` Filter by the ID of the data provider | Must be OpenAQ unique ID for the provider that facilitates data sharing |
+| countries_id | `int \| list[int] \| None` Filter by the country or territory where the location operates | Must be OpenAQ unique ID for the country or territory. Cannot be used at the same time as `iso` |
+| parameters_id | `int \| list[int] \| None` Filter by a pollutant or meteorological parameter | Must be OpenAQ unique ID for the pollutant or meteorlogical parameter |
+| licenses_id | `int \| list[int] \| None` Filter by the license that governs the usage and sharing of data at the location | Must be OpenAQ unique ID for the license |
+| iso | `str \| None` The ISO 3166-1 alpha-2 code for the country or territory where the location operates | Must be a valid ISO 3166-1 alpha-2 code representation of the country. Cannot be used at the same time as `countries_id` |
+| monitor | `bool \| None` Filter for reference-grade monitors (`True`) or air sensor (`False`) locations | |
+| mobile | `bool \| None` Filter for mobile (`True`) or stationary (`False`) locations | |
 | order_by | `str \| None` The location field by which to sort results, defaults to `id`. Currently only `id` is supported | |
 | sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
 
-#### Example
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
@@ -138,19 +135,20 @@ The `latest()` method takes one single `locations_id` as an argument and returns
 the latest measurement readings of all sensors at that location in a
 LatestResponse object.
 
-#### Query arguments
-
 ```py
 .latest(
   locations_id: int
   ) -> LatestResponse
 ```
 
+
+#### *Query arguments*
+
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
 | locations_id | `int`  unique identifier for a location in OpenAQ | Required |
 
-#### Example
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
@@ -178,18 +176,19 @@ LatestResponse object.
 The `sensors()` method accepts one single `locations_id` as an argument and
 returns all sensors at that location in a SensorsResponse object.
 
-#### Query arguments
 ```py
 .sensors(
   locations_id: int
-  ) -> LocationsResponse
+  ) -> SensorsResponse
 ```
+
+#### *Query arguments*
 
 | argument | description | input requirements |
 | -------- | ----------- | ---- |
 | locations_id | `int`  unique identifier for a location in OpenAQ | Required |
 
-#### Example
+#### *Example*
 
 <Tabs  syncKey="client">
   <TabItem label="sync">
@@ -261,7 +260,7 @@ results[]
         └── local: str
 ```
 
-### Latest object
+### LatestResponse
 ```
 results[]
     ├── datetime:
@@ -275,7 +274,7 @@ results[]
     └── locations_id: int
 ```
 
-### Sensor object
+### SensorsResponse
 ```
 results[]
 ├── id: int

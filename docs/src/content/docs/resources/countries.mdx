@@ -4,50 +4,71 @@ title: Countries
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-The Countries resource lists countries in the OpenAQ dataset and details the
-air quality parameters for each. The list only includes countries with
-monitoring locations from which OpenAQ ingests data. Country values come from
-the coordinates provided by the upstream provider. OpenAQ uses the
-[Natural Earth 10m dataset](https://www.naturalearthdata.com/) for country
-boundaries. Country codes follow the
-[ISO 3166-1 alpha-2](https://www.iso.org/iso-3166-country-codes.html)
-standard, which may differ from codes reported by the upstream provider.
+The Countries resource provides details about countries and territories
+(henceforth referred to as countries for short) in the OpenAQ dataset and
+includes only those with monitoring locations from which OpenAQ ingests data.
+You can use it to get a country's air quality data information: the time of
+its first and most recent measurement on OpenAQ, the parameters
+that are being measured in the country. All country values come from the
+coordinates provided by the upstream provider. OpenAQ uses the [Natural Earth
+10m dataset](https://www.naturalearthdata.com/) for country boundaries. Country
+codes follow the [ISO 3166-1
+alpha-2](https://www.iso.org/iso-3166-country-codes.html) standard, which may
+differ from codes reported by the upstream provider.
 
 ## Methods
 
+The Countries resource provides the following methods:
+
+- `get()` - For accessing a single country by country ID.
+- `list()` - For accessing multiple countries.
+
 ### Get a single country
+
+The `get()` method accepts one single `countries_id` as an argument and returns
+details about that country in a CountriesResponse object.
+
 ```py
 get(
   countries_id: int
   ) -> CountriesResponse
 ```
 
-| argument | type |
-| -------- | ---- |
-| countries_id | `int` |
+#### *Query arguments*
 
-#### Example
+| argument | description | input requirements |
+| -------- | ----------- | ---- |
+| countries_id | `int` OpenAQ's unique ID for each country | Required |
+
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
 ```py
-    from openaq import OpenAQ
+from openaq import OpenAQ
 
-    with OpenAQ() as client:
-        client.countries.get(countries_id=1)
+# Retrieve information about Indonesia (ID=1) on OpenAQ
+with OpenAQ() as client:
+    client.countries.get(countries_id=1)
 ```
   </TabItem>
   <TabItem label="async">
 ```py
-    from openaq import AsyncOpenAQ
+from openaq import AsyncOpenAQ
 
-    async with AsyncOpenAQ() as client:
-        await client.countries.get(countries_id=1)
+# Retrieve information about Indonesia (ID=1) on OpenAQ
+async with AsyncOpenAQ() as client:
+    await client.countries.get(countries_id=1)
 ```
   </TabItem>
 </Tabs>
 
-### List countries
+### List multiple countries
+
+The `list()` method takes optional arguments and returns countries on the
+OpenAQ platform that meet all the conditions specified. If no argument is included,
+the method returns all countries using the default arguments.
+
 ```py
 list(
   page: int = 1,
@@ -59,37 +80,50 @@ list(
   ) -> CountriesResponse
 ```
 
+#### *Query arguments*
+
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| page | `int` The page number to retrieve, defaults to 1 | Must better greater than zero |
-| limit | `int` The number of results returned per page, defaults to 1,000 | Must range from 1 to 1,000 |
-| order_by | `str \| None` The attribute by which to order results, defaults to `id` | Currently only `id` is supported |
-| sort_order | `SortOrder \| None` The order by which to sort the attribute, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
-| parameters_id | `int \| list[int] \| None` Filter countries by the ID of one or multiple of pollutants or meteorological parameters |  |
-| providers_id | `int \| list[int] \| None` Filter countries by the ID of one or multiple data providers | |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must be between 1 and 1,000 |
+| order_by | `str \| None` The country field by which to sort results, defaults to `id`. Currently only `id` is supported | |
+| sort_order | `SortOrder \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
+| parameters_id | `int \| list[int] \| None` Filter by a pollutant or meteorological parameter | Must be OpenAQ unique ID for the pollutant or meteorlogical parameter |
+| providers_id | `int \| list[int] \| None` Filter by the ID of the data provider | Must be OpenAQ unique ID for the provider that facilitates data sharing |
 
-#### Example
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
 ```py
-    from openaq import OpenAQ
+from openaq import OpenAQ
 
-    with OpenAQ() as client:
-        client.countries.list()
+# List countries where there is a PM2.5 reading and where AirGradient is present 
+# as a data provider
+with OpenAQ() as client:
+    client.countries.list(parameters_id=2,
+                          providers_id=66)
 ```
   </TabItem>
   <TabItem label="async">
 ```py
-    from openaq import AsyncOpenAQ
+from openaq import AsyncOpenAQ
 
-    async with AsyncOpenAQ() as client:
-        await client.countries.list()
+# List countries where there is a PM2.5 reading and where AirGradient is present 
+# as a data provider
+async with AsyncOpenAQ() as client:
+    await client.countries.list(parameters_id=2,
+                                providers_id=66)
 ```
   </TabItem>
 </Tabs>
 
-## Response
+## Response objects
+
+The Country object contains attributes that have all data about
+them. The hierarchy below presents the depth of the attributes and their
+datatypes.
+
 ```
 results[]
     ├── id: int
@@ -101,13 +135,10 @@ results[]
     ├── datetime_last: 
     │   ├── utc: str
     │   └── local: str
-    ├── parameters: []
-    │   ├── id: int
-    │   ├── name: str
-    │   ├── units: str
-    │   ├── display_name: str | None
-    │   └── parameter_type: str
-    └── providers: []
+    └── parameters: []
         ├── id: int
-        └── name: str
+        ├── name: str
+        ├── units: str
+        └── display_name: str | None
+
 ```

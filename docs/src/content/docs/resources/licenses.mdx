@@ -4,47 +4,66 @@ title: Licenses
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-The Licenses resource lists the licenses that govern use of data in OpenAQ.
-Each license details permissions and restrictions, such as whether attribution
-is required and whether commercial use, modification, or redistribution is
-allowed. Use this resource to identify licensing requirements and ensure
+The Licenses resource provides information about the licenses that govern the
+use of data in OpenAQ. You can use it to get details about each license's
+permissions and restrictions, such as whether attribution is required and
+whether commercial use, modification, or redistribution is allowed. This
+resource is most helpful to identify licensing requirements and ensure
 compliance with [OpenAQ's Terms of Use](https://docs.openaq.org/about/terms).
 
 ## Methods
 
+The Licenses resource provides the following methods:
+
+- `get()` - For accessing a single license by license ID.
+- `list()` - For accessing multiple licenses.
+
 ### Get a single license
+
+The `get()` method accepts one single `licenses_id` as an argument and returns
+details about that license in a LicensesResponse object.
+
 ```py
 get(
   licenses_id: int
   ) -> LicensesResponse
 ```
 
+#### *Query arguments*
+
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| licenses_id |  `int` OpenAQ's unique identifier for each license | Required |
+| licenses_id |  `int` OpenAQ's unique ID for each license | Required |
 
-#### Example
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
 ```py
-    from openaq import OpenAQ
+from openaq import OpenAQ
 
-    with OpenAQ() as client:
-        client.licenses.get(licenses_id=1)
+# Retrieve the license with ID 1
+with OpenAQ() as client:
+    client.licenses.get(licenses_id=1)
 ```
   </TabItem>
   <TabItem label="async">
 ```py
-    from openaq import AsyncOpenAQ
+from openaq import AsyncOpenAQ
 
-    async with AsyncOpenAQ() as client:
-        await client.licenses.get(licenses_id=1)
+# Retrieve the license with ID 1
+async with AsyncOpenAQ() as client:
+    await client.licenses.get(licenses_id=1)
 ```
   </TabItem>
 </Tabs>
 
-### List licenses
+### List multiple licenses
+
+The `list()` method takes optional arguments and returns all licenses on the
+OpenAQ platform that meet all the conditions specified. If no argument is included,
+the method returns all licenses using the default arguments.
+
 ```py
 list(
   page: int = 1,
@@ -54,35 +73,44 @@ list(
   ) -> LicensesResponse
 ```
 
+#### *Query arguments*
+
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| page | `int` The page number to retrieve, defaults to 1 | Must exceed zero |
-| limit | `int` The number of results returned per page, defaults to 1,000 | Must range from 1 to 1,000 |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must be between 1 and 1,000 |
 | order_by | `str \| None` The license field by which to sort results, defaults to `id`. Currently only `id` is supported | |
 | sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
 
-#### Example
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
 ```py
-    from openaq import OpenAQ
+from openaq import OpenAQ
 
-    with OpenAQ() as client:
-        client.licenses.list()
+# List all licenses on OpenAQ
+with OpenAQ() as client:
+    client.licenses.list()
 ```
   </TabItem>
   <TabItem label="async">
 ```py
-    from openaq import AsyncOpenAQ
+from openaq import AsyncOpenAQ
 
-    async with AsyncOpenAQ() as client:
-        await client.licenses.list()
+# List all licenses on OpenAQ
+async with AsyncOpenAQ() as client:
+    await client.licenses.list()
 ```
   </TabItem>
 </Tabs>
 
 ## Response
+
+The Licenses object contains attributes that have all data about
+them. The hierarchy below presents the depth of the attributes and their
+datatypes.
+
 ```
 results[]
     ├── id: int
@@ -92,6 +120,5 @@ results[]
     ├── share_alike_required: bool
     ├── modification_allowed: bool
     ├── redistribution_allowed: bool
-    ├── source_url: str
-    └── date_from: str | None
+    └── source_url: str
 ```
