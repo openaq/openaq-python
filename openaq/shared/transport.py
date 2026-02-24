@@ -23,6 +23,16 @@ from openaq.shared.exceptions import (
 
 logger = logging.getLogger(__name__)
 
+# Set connect, write and pool to 5, and read to 8 since server times out at 6 anyways.
+DEFAULT_TIMEOUT = httpx.Timeout(5.0, read=8.0)
+
+# connection pool sized to the 60 req/min API rate limit
+DEFAULT_LIMITS = httpx.Limits(
+    max_connections=20,
+    max_keepalive_connections=10,
+    keepalive_expiry=30.0,
+)
+
 
 def check_response(res: httpx.Response) -> httpx.Response:
     """Checks the HTTP response of the request.

@@ -5,17 +5,11 @@ from pathlib import Path
 from unittest import mock
 from unittest.mock import mock_open, patch
 
-from openaq import __version__
-
-
 import httpx
 import pytest
 
-from openaq.shared.client import (
-    BaseClient,
-    _get_openaq_config,
-    _has_toml,
-)
+from openaq import __version__
+from openaq.shared.client import BaseClient, _get_openaq_config, _has_toml
 from openaq.shared.exceptions import ApiKeyMissingError
 from tests.unit.mocks import MockTransport
 

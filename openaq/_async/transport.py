@@ -3,14 +3,18 @@ from typing import Mapping
 
 import httpx
 
-from ..shared.transport import check_response
+from ..shared.transport import DEFAULT_LIMITS, DEFAULT_TIMEOUT, check_response
 
 logger = logging.getLogger(__name__)
 
 
 class AsyncTransport:
-    def __init__(self) -> None:
-        self.client = httpx.AsyncClient(timeout=15.0)
+    def __init__(
+        self,
+        timeout: float | httpx.Timeout | None = DEFAULT_TIMEOUT,
+        limits: httpx.Limits = DEFAULT_LIMITS,
+    ) -> None:
+        self.client = httpx.AsyncClient(timeout=timeout, limits=limits)
 
     async def send_request(
         self,

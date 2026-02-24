@@ -5,8 +5,7 @@ from pathlib import Path
 from unittest import mock
 
 import httpx
-
-
+from openaq.shared.transport import DEFAULT_LIMITS, DEFAULT_TIMEOUT
 import pytest
 
 from openaq import __version__
@@ -14,7 +13,6 @@ from openaq._async.client import AsyncOpenAQ
 from openaq.shared.exceptions import ApiKeyMissingError
 
 from ..mocks import AsyncMockTransport
-
 
 ASYNC_USER_AGENT = f"openaq-python-async-{__version__}-{platform.python_version()}"
 
@@ -30,6 +28,7 @@ def mock_config_file():
 
 
 class TestAsyncClient:
+
     @pytest.fixture()
     def setup(self):
         self.client = AsyncOpenAQ(
@@ -303,3 +302,31 @@ class TestAsyncClient:
 
         with pytest.raises(RateLimitError):
             await client._acquire_token()
+
+    def test_default_timeout_applied_to_transport(self):
+        """Test that default timeout is applied to the transport."""
+        client = AsyncOpenAQ(api_key="abc123-def456-ghi789")
+        assert client.transport.client.timeout == DEFAULT_TIMEOUT
+
+    def test_custom_timeout_passed_to_transport(self):
+        """Test that a custom timeout is passed through to the transport."""
+        custom_timeout = httpx.Timeout(10.0, read=15.0)
+        client = AsyncOpenAQ(api_key="abc123-def456-ghi789", timeout=custom_timeout)
+        assert client.transport.client.timeout == custom_timeout
+
+    def test_default_limits_applied_to_transport(self):
+        """Test that default connection limits are applied to the transport."""
+        with mock.patch('openaq._async.transport.httpx.AsyncClient') as mock_client:
+            AsyncOpenAQ(api_key="abc123-def456-ghi789")
+            mock_client.assert_called_once_with(
+                timeout=DEFAULT_TIMEOUT, limits=DEFAULT_LIMITS
+            )
+
+    def test_custom_limits_passed_to_transport(self):
+        """Test that custom connection limits are passed through to the transport."""
+        custom_limits = httpx.Limits(max_connections=5, max_keepalive_connections=2)
+        with mock.patch('openaq._async.transport.httpx.AsyncClient') as mock_client:
+            AsyncOpenAQ(api_key="abc123-def456-ghi789", limits=custom_limits)
+            mock_client.assert_called_once_with(
+                timeout=DEFAULT_TIMEOUT, limits=custom_limits
+            )

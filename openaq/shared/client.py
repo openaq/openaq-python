@@ -46,8 +46,6 @@ class BaseClient(ABC, Generic[TTransport]):
         _auto_wait: Whether the client should automatically wait when rate
             limited instead of raising an exception.
         _base_url: The base URL of the OpenAQ API.
-        _rate_limit_reset_datetime: When the current rate limit resets.
-        _rate_limit_remaining: Number of requests remaining in the current rate limit window.
 
     Args:
         transport: The transport mechanism used for making requests to the OpenAQ API.

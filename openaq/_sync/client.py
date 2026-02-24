@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 import logging
 import platform
 import time
+from datetime import datetime, timedelta
 from types import TracebackType
 from typing import Mapping
 
@@ -22,6 +22,7 @@ from openaq._sync.models.providers import Providers
 from openaq._sync.models.sensors import Sensors
 from openaq.shared.client import DEFAULT_BASE_URL, BaseClient
 from openaq.shared.exceptions import RateLimitError
+from openaq.shared.transport import DEFAULT_LIMITS, DEFAULT_TIMEOUT
 
 from .transport import Transport
 
@@ -34,9 +35,20 @@ class OpenAQ(BaseClient[Transport]):
     Args:
         api_key: The API key for accessing the service.
         headers: Additional headers to be sent with the request.
-        auto_wait: Whether to automatically wait when rate limited. Defaults to True.
+        auto_wait: Whether to automatically wait when rate limited. Defaults to
+            True.
         base_url: The base URL for the API endpoint.
-        _transport: The transport instance for making HTTP requests. For internal use.
+        transport: The transport instance for making HTTP requests. For internal
+            use.
+        rate_limit_override: Override the default rate limit capacity of 60
+            requests per minute.
+            Useful for accounts with a higher rate limit. Defaults to 60.
+        timeout: Timeout configuration for HTTP requests. Defaults to 5 seconds
+            for connection, write, and pool, and 8 seconds for read to account
+            for the API's 6 second processing limit. Pass None for no timeout.
+        limits: Connection pool limits for the HTTP transport. Defaults to 20
+            maximum connections with 10 keepalive connections. Keepalive
+            connections expire after 30 seconds.
 
     Note:
         An API key can either be passed directly to the OpenAQ client class at
@@ -68,8 +80,9 @@ class OpenAQ(BaseClient[Transport]):
     """
 
     _rate_limit_reset_datetime: datetime
-    _rate_limit_remaining: int
-    _request_count: int
+    _rate_limit_remaining: float
+    _rate_limit_capacity: float
+    _current_window_id: str
 
     def __init__(
         self,
@@ -78,10 +91,12 @@ class OpenAQ(BaseClient[Transport]):
         auto_wait: bool = True,
         base_url: str = DEFAULT_BASE_URL,
         transport: Transport | None = None,
+        timeout: float | httpx.Timeout | None = DEFAULT_TIMEOUT,
+        limits: httpx.Limits = DEFAULT_LIMITS,
         rate_limit_override: int | None = None,
     ) -> None:
         if transport is None:
-            transport = Transport()
+            transport = Transport(timeout=timeout, limits=limits)
         if headers is None:
             headers = {}
         super().__init__(transport, headers, api_key, auto_wait, base_url)
@@ -89,9 +104,8 @@ class OpenAQ(BaseClient[Transport]):
             f"openaq-python-sync-{__version__}-{platform.python_version()}"
         )
         self.resolve_headers()
-        self._request_count = 0
         rate_limit = rate_limit_override if rate_limit_override is not None else 60
-        self._rate_limit_capacity = int(rate_limit)
+        self._rate_limit_capacity = float(rate_limit)
         self._rate_limit_reset_datetime = datetime.min
         self._rate_limit_remaining = self._rate_limit_capacity
         self._current_window_id = datetime.now().strftime("%Y%m%d%H%M")

@@ -3,14 +3,22 @@ from typing import Mapping
 
 import httpx
 
-from openaq.shared.transport import check_response
+from openaq.shared.transport import (
+    DEFAULT_LIMITS,
+    DEFAULT_TIMEOUT,
+    check_response,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class Transport:
-    def __init__(self) -> None:
-        self.client = httpx.Client(timeout=15.0)
+    def __init__(
+        self,
+        timeout: float | httpx.Timeout | None = DEFAULT_TIMEOUT,
+        limits: httpx.Limits = DEFAULT_LIMITS,
+    ) -> None:
+        self.client = httpx.Client(timeout=timeout, limits=limits)
 
     def send_request(
         self,
