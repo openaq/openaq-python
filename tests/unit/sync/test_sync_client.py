@@ -368,3 +368,67 @@ class TestClient:
 
         with pytest.raises(RateLimitError):
             self.client._check_rate_limit()
+
+    def test_do_calls_transport_with_correct_args(self, setup):
+        """Test that _do constructs the correct URL and passes method to transport."""
+        mock_response = mock.MagicMock()
+        mock_response.headers = httpx.Headers({})
+        self.client.transport.send_request = mock.Mock(return_value=mock_response)
+
+        self.client._do("get", "locations/1")
+
+        call_kwargs = self.client.transport.send_request.call_args
+        assert call_kwargs.kwargs["url"] == "https://api.openaq.org/v3/locations/1"
+        assert call_kwargs.kwargs["method"] == "get"
+
+    def test_do_passes_params_to_transport(self, setup):
+        """Test that _do passes query params through to the transport."""
+        mock_response = mock.MagicMock()
+        mock_response.headers = httpx.Headers({})
+        self.client.transport.send_request = mock.Mock(return_value=mock_response)
+
+        self.client._do("get", "/test", params={"limit": 100, "page": 1})
+
+        call_kwargs = self.client.transport.send_request.call_args
+        assert call_kwargs.kwargs["params"] == {"limit": 100, "page": 1}
+
+    def test_do_passes_custom_headers_to_transport(self, setup):
+        """Test that _do merges custom headers into the request."""
+        mock_response = mock.MagicMock()
+        mock_response.headers = httpx.Headers({})
+        self.client.transport.send_request = mock.Mock(return_value=mock_response)
+
+        self.client._do("get", "/test", headers={"X-Custom-Header": "value"})
+
+        call_kwargs = self.client.transport.send_request.call_args
+        assert "X-Custom-Header" in call_kwargs.kwargs["headers"]
+
+    def test_do_syncs_rate_limit_from_response_headers(self, setup):
+        """Test that _do updates rate limit state from response headers."""
+        mock_response = mock.MagicMock()
+        mock_response.headers = httpx.Headers(
+            {
+                "x-ratelimit-remaining": "42",
+                "x-ratelimit-reset": "30",
+            }
+        )
+        self.client.transport.send_request = mock.Mock(return_value=mock_response)
+
+        self.client._do("get", "/test")
+
+        assert self.client._rate_limit_remaining == 42
+
+    def test_do_raises_before_sending_when_rate_limited(self, setup):
+        """Test that _do raises RateLimitError without calling transport when exhausted."""
+        from openaq.shared.exceptions import RateLimitError
+
+        self.client._auto_wait = False
+        self.client._rate_limit_remaining = 0
+        self.client._rate_limit_reset_datetime = datetime.now() + timedelta(seconds=30)
+        self.client._current_window_id = datetime.now().strftime("%Y%m%d%H%M")
+        self.client.transport.send_request = mock.Mock()
+
+        with pytest.raises(RateLimitError):
+            self.client._do("get", "/test")
+
+        self.client.transport.send_request.assert_not_called()
