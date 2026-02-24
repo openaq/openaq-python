@@ -91,7 +91,7 @@ class OpenAQ(BaseClient[Transport]):
         self.resolve_headers()
         self._request_count = 0
         rate_limit = rate_limit_override if rate_limit_override is not None else 60
-        self._rate_limit_capacity = float(rate_limit)
+        self._rate_limit_capacity = int(rate_limit)
         self._rate_limit_reset_datetime = datetime.min
         self._rate_limit_remaining = self._rate_limit_capacity
         self._current_window_id = datetime.now().strftime("%Y%m%d%H%M")
