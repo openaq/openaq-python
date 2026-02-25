@@ -5,13 +5,13 @@ from pathlib import Path
 from unittest import mock
 
 import httpx
-from openaq.shared.transport import DEFAULT_LIMITS, DEFAULT_TIMEOUT
 import pytest
 from freezegun import freeze_time
 
 from openaq import __version__
 from openaq._sync.client import OpenAQ
 from openaq.shared.exceptions import ApiKeyMissingError, RateLimitError
+from openaq.shared.transport import DEFAULT_LIMITS, DEFAULT_TIMEOUT
 
 from ..mocks import MockTransport
 

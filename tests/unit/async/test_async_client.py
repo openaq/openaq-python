@@ -5,12 +5,12 @@ from pathlib import Path
 from unittest import mock
 
 import httpx
-from openaq.shared.transport import DEFAULT_LIMITS, DEFAULT_TIMEOUT
 import pytest
 
 from openaq import __version__
 from openaq._async.client import AsyncOpenAQ
 from openaq.shared.exceptions import ApiKeyMissingError
+from openaq.shared.transport import DEFAULT_LIMITS, DEFAULT_TIMEOUT
 
 from ..mocks import AsyncMockTransport
 
