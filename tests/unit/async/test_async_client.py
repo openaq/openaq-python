@@ -1,16 +1,20 @@
 import os
 import platform
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
+import httpx
 import pytest
 
 from openaq import __version__
 from openaq._async.client import AsyncOpenAQ
 from openaq.shared.exceptions import ApiKeyMissingError
+from openaq.shared.transport import DEFAULT_LIMITS, DEFAULT_TIMEOUT
 
 from ..mocks import AsyncMockTransport
+
+ASYNC_USER_AGENT = f"openaq-python-async-{__version__}-{platform.python_version()}"
 
 
 @pytest.fixture
@@ -24,6 +28,7 @@ def mock_config_file():
 
 
 class TestAsyncClient:
+
     @pytest.fixture()
     def setup(self):
         self.client = AsyncOpenAQ(
@@ -46,10 +51,7 @@ class TestAsyncClient:
         assert self.client._base_url == "https://api.openaq.org/v3/"
 
     def test_default_headers(self, setup):
-        assert (
-            self.client.headers["User-Agent"]
-            == f"openaq-python-{__version__}-{platform.python_version()}"
-        )
+        assert self.client.headers["User-Agent"] == ASYNC_USER_AGENT
         assert self.client.headers["Accept"] == "application/json"
 
     def test_custom_headers(self, setup):
@@ -104,65 +106,6 @@ class TestAsyncClient:
         """
         assert self.client.api_key == "abc123-def456-ghi789"
 
-    @mock.patch('openaq.shared.client.datetime')
-    @mock.patch('asyncio.sleep')
-    @mock.patch('openaq._async.client.logger')
-    @pytest.mark.asyncio
-    async def test_wait_for_rate_limit_reset_waits_when_positive(
-        self, mock_logger, mock_sleep, mock_datetime, setup
-    ):
-        """Test that asyncio.sleep is called with correct duration when wait_seconds > 0."""
-        now = datetime(2026, 2, 12, 0, 0, 0)
-        mock_datetime.now.return_value = now
-
-        # Set reset time to 5 seconds in the future
-        self.client._rate_limit_reset_datetime = now + timedelta(seconds=5)
-
-        await self.client._wait_for_rate_limit_reset()
-
-        mock_sleep.assert_called_once_with(5)
-        mock_logger.info.assert_called_once_with(
-            "Rate limit hit. Waiting 5 seconds for reset..."
-        )
-
-    @mock.patch('openaq.shared.client.datetime')
-    @mock.patch('asyncio.sleep')
-    @mock.patch('openaq._async.client.logger')
-    @pytest.mark.asyncio
-    async def test_wait_for_rate_limit_reset_does_not_wait_when_zero(
-        self, mock_logger, mock_sleep, mock_datetime, setup
-    ):
-        """Test that asyncio.sleep is not called when wait_seconds is 0."""
-        now = datetime(2026, 2, 12, 0, 0, 0)
-        mock_datetime.now.return_value = now
-
-        # Set reset time to now (0 seconds wait)
-        self.client._rate_limit_reset_datetime = now
-
-        await self.client._wait_for_rate_limit_reset()
-
-        mock_sleep.assert_not_called()
-        mock_logger.info.assert_not_called()
-
-    @mock.patch('openaq.shared.client.datetime')
-    @mock.patch('asyncio.sleep')
-    @mock.patch('openaq._async.client.logger')
-    @pytest.mark.asyncio
-    async def test_wait_for_rate_limit_reset_does_not_wait_when_negative(
-        self, mock_logger, mock_sleep, mock_datetime, setup
-    ):
-        """Test that asyncio.sleep is not called when wait_seconds is negative."""
-        now = datetime(2026, 2, 12, 0, 0, 0)
-        mock_datetime.now.return_value = now
-
-        # Set reset time to 5 seconds in the past
-        self.client._rate_limit_reset_datetime = now - timedelta(seconds=5)
-
-        await self.client._wait_for_rate_limit_reset()
-
-        mock_sleep.assert_not_called()
-        mock_logger.info.assert_not_called()
-
     @pytest.mark.asyncio
     async def test_close_closes_transport(self, setup):
         """Test that close() calls transport.close()."""
@@ -198,3 +141,192 @@ class TestAsyncClient:
                 raise ValueError("Test exception")
 
         self.client.transport.close.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_acquire_token_grants_when_capacity_available(self, setup):
+        """Test that token is granted immediately when capacity is available."""
+        self.client._rate_limit_remaining = 60.0
+        self.client._in_flight_requests = 0
+        initial_in_flight = self.client._in_flight_requests
+
+        await self.client._acquire_token()
+
+        assert self.client._in_flight_requests == initial_in_flight + 1
+
+    @pytest.mark.asyncio
+    async def test_acquire_token_raises_when_exhausted_and_auto_wait_false(self, setup):
+        """Test that RateLimitError is raised when exhausted and auto_wait is False."""
+        from openaq.shared.exceptions import RateLimitError
+
+        self.client._auto_wait = False
+        self.client._rate_limit_remaining = 0.0
+        self.client._in_flight_requests = 0
+
+        with pytest.raises(RateLimitError):
+            await self.client._acquire_token()
+
+    @pytest.mark.asyncio
+    async def test_acquire_token_resets_capacity_on_new_window(self, setup):
+        """Test that capacity resets when minute window rolls over."""
+        self.client._rate_limit_remaining = 0.0
+        self.client._in_flight_requests = 0
+        self.client._current_window_id = "202602240000"
+
+        with mock.patch('openaq._async.client.datetime') as mock_datetime:
+            now = datetime(2026, 2, 24, 0, 1, 0)
+            mock_datetime.now.return_value = now
+
+            await self.client._acquire_token()
+
+        assert self.client._in_flight_requests == 1
+
+    @pytest.mark.asyncio
+    async def test_acquire_token_accounts_for_in_flight_on_window_reset(self, setup):
+        """Test that in-flight requests are subtracted from capacity on window reset."""
+        self.client._rate_limit_remaining = 0.0
+        self.client._in_flight_requests = 5
+        self.client._current_window_id = "202602240000"
+
+        with mock.patch('openaq._async.client.datetime') as mock_datetime:
+            now = datetime(2026, 2, 24, 0, 1, 0)
+            mock_datetime.now.return_value = now
+
+            await self.client._acquire_token()
+
+        assert self.client._rate_limit_remaining == self.client._rate_limit_capacity - 5
+
+    @pytest.mark.asyncio
+    async def test_acquire_token_decrements_in_flight_on_completion(self, setup):
+        """Test that in-flight counter is decremented after request completes."""
+        mock_response = mock.MagicMock()
+        mock_response.headers = {}
+        self.client.transport.send_request = mock.AsyncMock(return_value=mock_response)
+
+        await self.client._do("get", "/test")
+
+        assert self.client._in_flight_requests == 0
+
+    @pytest.mark.asyncio
+    async def test_acquire_token_decrements_in_flight_on_exception(self, setup):
+        """Test that in-flight counter is decremented even when request raises."""
+        self.client.transport.send_request = mock.AsyncMock(
+            side_effect=Exception("network error")
+        )
+
+        with pytest.raises(Exception, match="network error"):
+            await self.client._do("get", "/test")
+
+        assert self.client._in_flight_requests == 0
+
+    @pytest.mark.asyncio
+    async def test_set_rate_limit_updates_remaining_from_headers(self, setup):
+        """Test that remaining is updated from x-ratelimit-remaining header."""
+        headers = httpx.Headers(
+            {"x-ratelimit-remaining": "45", "x-ratelimit-limit": "60"}
+        )
+        self.client._set_rate_limit(headers)
+        assert self.client._rate_limit_remaining == 45.0
+
+    @pytest.mark.asyncio
+    async def test_set_rate_limit_updates_capacity_from_headers(self, setup):
+        """Test that capacity is updated from x-ratelimit-limit header."""
+        headers = httpx.Headers(
+            {"x-ratelimit-remaining": "45", "x-ratelimit-limit": "120"}
+        )
+        self.client._set_rate_limit(headers)
+        assert self.client._rate_limit_capacity == 120.0
+
+    @pytest.mark.asyncio
+    async def test_set_rate_limit_server_remaining_overrides_local_count(self, setup):
+        """Test that server-provided remaining overrides optimistic local tracking."""
+
+        self.client._rate_limit_remaining = 50.0
+        headers = httpx.Headers(
+            {"x-ratelimit-remaining": "30", "x-ratelimit-limit": "60"}
+        )
+        self.client._set_rate_limit(headers)
+        assert self.client._rate_limit_remaining == 30.0
+
+    @pytest.mark.asyncio
+    async def test_rate_limit_synced_event_set_after_first_request(self, setup):
+        """Test that rate limit sync event is set after the first request completes."""
+        mock_response = mock.MagicMock()
+        mock_response.headers = {}
+        self.client.transport.send_request = mock.AsyncMock(return_value=mock_response)
+
+        assert not self.client._rate_limit_synced_event.is_set()
+        await self.client._do("get", "/test")
+        assert self.client._rate_limit_synced_event.is_set()
+
+    @pytest.mark.asyncio
+    async def test_rate_limit_synced_event_set_even_on_request_failure(self, setup):
+        """Test that sync event is set even when the first request fails."""
+        self.client.transport.send_request = mock.AsyncMock(
+            side_effect=Exception("network error")
+        )
+
+        with pytest.raises(Exception):
+            await self.client._do("get", "/test")
+
+        assert self.client._rate_limit_synced_event.is_set()
+
+    @pytest.mark.asyncio
+    async def test_default_rate_limit_override(self, setup):
+        """Test that default rate limit capacity is set to 60."""
+        assert self.client._rate_limit_capacity == 60.0
+
+    @pytest.mark.asyncio
+    async def test_custom_rate_limit_override(self):
+        """Test that rate_limit_override sets custom capacity."""
+        client = AsyncOpenAQ(
+            api_key="abc123-def456-ghi789",
+            transport=AsyncMockTransport(),
+            rate_limit_override=30,
+        )
+        assert client._rate_limit_capacity == 30.0
+        assert client._rate_limit_remaining == 30.0
+
+    @pytest.mark.asyncio
+    async def test_blocks_after_custom_limit(self):
+        """Test that client raises after exhausting custom rate limit."""
+        from openaq.shared.exceptions import RateLimitError
+
+        client = AsyncOpenAQ(
+            api_key="abc123-def456-ghi789",
+            transport=AsyncMockTransport(),
+            auto_wait=False,
+            rate_limit_override=5,
+        )
+        for _ in range(5):
+            await client._acquire_token()
+
+        with pytest.raises(RateLimitError):
+            await client._acquire_token()
+
+    def test_default_timeout_applied_to_transport(self):
+        """Test that default timeout is applied to the transport."""
+        client = AsyncOpenAQ(api_key="abc123-def456-ghi789")
+        assert client.transport.client.timeout == DEFAULT_TIMEOUT
+
+    def test_custom_timeout_passed_to_transport(self):
+        """Test that a custom timeout is passed through to the transport."""
+        custom_timeout = httpx.Timeout(10.0, read=15.0)
+        client = AsyncOpenAQ(api_key="abc123-def456-ghi789", timeout=custom_timeout)
+        assert client.transport.client.timeout == custom_timeout
+
+    def test_default_limits_applied_to_transport(self):
+        """Test that default connection limits are applied to the transport."""
+        with mock.patch('openaq._async.transport.httpx.AsyncClient') as mock_client:
+            AsyncOpenAQ(api_key="abc123-def456-ghi789")
+            mock_client.assert_called_once_with(
+                timeout=DEFAULT_TIMEOUT, limits=DEFAULT_LIMITS
+            )
+
+    def test_custom_limits_passed_to_transport(self):
+        """Test that custom connection limits are passed through to the transport."""
+        custom_limits = httpx.Limits(max_connections=5, max_keepalive_connections=2)
+        with mock.patch('openaq._async.transport.httpx.AsyncClient') as mock_client:
+            AsyncOpenAQ(api_key="abc123-def456-ghi789", limits=custom_limits)
+            mock_client.assert_called_once_with(
+                timeout=DEFAULT_TIMEOUT, limits=custom_limits
+            )

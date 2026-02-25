@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import logging
+import platform
 import time
+from datetime import datetime, timedelta
 from types import TracebackType
 from typing import Mapping
 
 import httpx
 
+from openaq import __version__
 from openaq._sync.models.countries import Countries
 from openaq._sync.models.instruments import Instruments
 from openaq._sync.models.licenses import Licenses
@@ -18,6 +21,8 @@ from openaq._sync.models.parameters import Parameters
 from openaq._sync.models.providers import Providers
 from openaq._sync.models.sensors import Sensors
 from openaq.shared.client import DEFAULT_BASE_URL, BaseClient
+from openaq.shared.exceptions import RateLimitError
+from openaq.shared.transport import DEFAULT_LIMITS, DEFAULT_TIMEOUT
 
 from .transport import Transport
 
@@ -30,9 +35,20 @@ class OpenAQ(BaseClient[Transport]):
     Args:
         api_key: The API key for accessing the service.
         headers: Additional headers to be sent with the request.
-        auto_wait: Whether to automatically wait when rate limited. Defaults to True.
+        auto_wait: Whether to automatically wait when rate limited. Defaults to
+            True.
         base_url: The base URL for the API endpoint.
-        _transport: The transport instance for making HTTP requests. For internal use.
+        transport: The transport instance for making HTTP requests. For internal
+            use.
+        rate_limit_override: Override the default rate limit capacity of 60
+            requests per minute.
+            Useful for accounts with a higher rate limit. Defaults to 60.
+        timeout: Timeout configuration for HTTP requests. Defaults to 5 seconds
+            for connection, write, and pool, and 8 seconds for read to account
+            for the API's 6 second processing limit. Pass None for no timeout.
+        limits: Connection pool limits for the HTTP transport. Defaults to 20
+            maximum connections with 10 keepalive connections. Keepalive
+            connections expire after 30 seconds.
 
     Note:
         An API key can either be passed directly to the OpenAQ client class at
@@ -63,15 +79,36 @@ class OpenAQ(BaseClient[Transport]):
 
     """
 
+    _rate_limit_reset_datetime: datetime
+    _rate_limit_remaining: float
+    _rate_limit_capacity: float
+    _current_window_id: str
+
     def __init__(
         self,
         api_key: str | None = None,
-        headers: Mapping[str, str] = {},
+        headers: Mapping[str, str] | None = None,
         auto_wait: bool = True,
         base_url: str = DEFAULT_BASE_URL,
-        _transport: Transport = Transport(),
+        transport: Transport | None = None,
+        timeout: float | httpx.Timeout | None = DEFAULT_TIMEOUT,
+        limits: httpx.Limits = DEFAULT_LIMITS,
+        rate_limit_override: int | None = None,
     ) -> None:
-        super().__init__(_transport, headers, api_key, auto_wait, base_url)
+        if transport is None:
+            transport = Transport(timeout=timeout, limits=limits)
+        if headers is None:
+            headers = {}
+        super().__init__(transport, headers, api_key, auto_wait, base_url)
+        self._user_agent = (
+            f"openaq-python-sync-{__version__}-{platform.python_version()}"
+        )
+        self.resolve_headers()
+        rate_limit = rate_limit_override if rate_limit_override is not None else 60
+        self._rate_limit_capacity = float(rate_limit)
+        self._rate_limit_reset_datetime = datetime.min
+        self._rate_limit_remaining = self._rate_limit_capacity
+        self._current_window_id = datetime.now().strftime("%Y%m%d%H%M")
 
         self.countries = Countries(self)
         self.instruments = Instruments(self)
@@ -83,6 +120,45 @@ class OpenAQ(BaseClient[Transport]):
         self.providers = Providers(self)
         self.parameters = Parameters(self)
         self.sensors = Sensors(self)
+
+    @property
+    def _rate_limit_reset_seconds(self) -> int:
+        return int((self._rate_limit_reset_datetime - datetime.now()).total_seconds())
+
+    def _is_rate_limited(self) -> bool:
+        return (
+            self._rate_limit_remaining == 0
+            and self._rate_limit_reset_datetime > datetime.now()
+        )
+
+    def _check_rate_limit(self) -> None:
+        now = datetime.now()
+        window_id = now.strftime("%Y%m%d%H%M")
+
+        if self._current_window_id != window_id:
+            self._rate_limit_remaining = self._rate_limit_capacity
+            self._current_window_id = window_id
+            return
+
+        if self._rate_limit_remaining <= 0:
+            if self._auto_wait:
+                self._wait_for_rate_limit_reset()
+                self._rate_limit_remaining = self._rate_limit_capacity
+                self._current_window_id = datetime.now().strftime("%Y%m%d%H%M")
+            else:
+                message = f"Rate limit exceeded. Limit resets in {self._rate_limit_reset_seconds} seconds"
+                logger.error(message)
+                raise RateLimitError(message)
+
+    def _set_rate_limit(self, headers: httpx.Headers) -> None:
+        rate_limit_remaining = self._get_int_header(headers, 'x-ratelimit-remaining', 0)
+        rate_limit_reset_seconds = self._get_int_header(
+            headers, 'x-ratelimit-reset', 60
+        )
+        now = (datetime.now() + timedelta(seconds=0.5)).replace(microsecond=0)
+        rate_limit_reset_datetime = now + timedelta(seconds=rate_limit_reset_seconds)
+        self._rate_limit_remaining = rate_limit_remaining
+        self._rate_limit_reset_datetime = rate_limit_reset_datetime
 
     def _wait_for_rate_limit_reset(self) -> None:
         """Wait until the rate limit resets."""
@@ -120,8 +196,7 @@ class OpenAQ(BaseClient[Transport]):
             RateLimitError: If rate limited and auto_wait is False.
         """
         self._check_rate_limit()
-        if self._auto_wait and self._is_rate_limited():
-            self._wait_for_rate_limit_reset()
+        self._rate_limit_remaining -= 1
         request_headers = self.build_request_headers(headers)
         url = self._base_url + path
         data = self.transport.send_request(

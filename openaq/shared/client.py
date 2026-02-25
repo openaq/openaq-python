@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 import logging
-import math
 import os
-import platform
-from abc import ABC
-from datetime import datetime, timedelta
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Generic, Mapping, TypeVar
 
@@ -15,7 +12,7 @@ import httpx
 
 from openaq._async.transport import AsyncTransport
 from openaq._sync.transport import Transport
-from openaq.shared.exceptions import ApiKeyMissingError, RateLimitError
+from openaq.shared.exceptions import ApiKeyMissingError
 from openaq.shared.types import OpenAQConfig
 
 logger = logging.getLogger(__name__)
@@ -27,11 +24,8 @@ try:
 except ImportError:
     _has_toml = False
 
-from openaq import __version__
 
 ACCEPT_HEADER = "application/json"
-
-DEFAULT_USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
 
 DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 
@@ -52,8 +46,6 @@ class BaseClient(ABC, Generic[TTransport]):
         _auto_wait: Whether the client should automatically wait when rate
             limited instead of raising an exception.
         _base_url: The base URL of the OpenAQ API.
-        _rate_limit_reset_datetime: When the current rate limit resets.
-        _rate_limit_remaining: Number of requests remaining in the current rate limit window.
 
     Args:
         transport: The transport mechanism used for making requests to the OpenAQ API.
@@ -69,8 +61,6 @@ class BaseClient(ABC, Generic[TTransport]):
     _user_agent: str
     _auto_wait: bool
     _transport: TTransport
-    _rate_limit_reset_datetime: datetime
-    _rate_limit_remaining: float
 
     def __init__(
         self,
@@ -96,10 +86,6 @@ class BaseClient(ABC, Generic[TTransport]):
         self._headers = httpx.Headers(headers)
         self._transport: TTransport = transport
         self._base_url = base_url
-        self._user_agent = DEFAULT_USER_AGENT
-        self.resolve_headers()
-        self._rate_limit_reset_datetime = datetime.min
-        self._rate_limit_remaining = math.inf
         self._auto_wait = auto_wait
         self._check_api_key_url()
 
@@ -204,23 +190,6 @@ class BaseClient(ABC, Generic[TTransport]):
         self._headers["User-Agent"] = self._user_agent
         self._headers["Accept"] = ACCEPT_HEADER
 
-    def _is_rate_limited(self) -> bool:
-        return (
-            self._rate_limit_remaining == 0
-            and self._rate_limit_reset_datetime > datetime.now()
-        )
-
-    def _check_rate_limit(self) -> None:
-        if self._is_rate_limited():
-            if not self._auto_wait:
-                message = f"Rate limit exceeded. Limit resets in {self._rate_limit_reset_seconds} seconds"
-                logger.error(message)
-                raise RateLimitError(message)
-
-    @property
-    def _rate_limit_reset_seconds(self) -> int:
-        return int((self._rate_limit_reset_datetime - datetime.now()).total_seconds())
-
     def _get_int_header(self, headers: httpx.Headers, key: str, default: int) -> int:
         """Extract integer from header, avoiding Any types.
 
@@ -238,15 +207,8 @@ class BaseClient(ABC, Generic[TTransport]):
         except (KeyError, ValueError):
             return default
 
-    def _set_rate_limit(self, headers: httpx.Headers) -> None:
-        rate_limit_remaining = self._get_int_header(headers, 'x-ratelimit-remaining', 0)
-        rate_limit_reset_seconds = self._get_int_header(
-            headers, 'x-ratelimit-reset', 60
-        )
-        now = (datetime.now() + timedelta(seconds=0.5)).replace(microsecond=0)
-        rate_limit_reset_datetime = now + timedelta(seconds=rate_limit_reset_seconds)
-        self._rate_limit_remaining = rate_limit_remaining
-        self._rate_limit_reset_datetime = rate_limit_reset_datetime
+    @abstractmethod
+    def _set_rate_limit(self, headers: httpx.Headers) -> None: ...
 
 
 def _get_openaq_config() -> OpenAQConfig | None:

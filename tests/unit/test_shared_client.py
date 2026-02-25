@@ -1,6 +1,5 @@
 import os
 import platform
-from datetime import datetime
 from http import HTTPStatus
 from pathlib import Path
 from unittest import mock
@@ -8,15 +7,10 @@ from unittest.mock import mock_open, patch
 
 import httpx
 import pytest
-from freezegun import freeze_time
 
-from openaq.shared.client import (
-    DEFAULT_USER_AGENT,
-    BaseClient,
-    _get_openaq_config,
-    _has_toml,
-)
-from openaq.shared.exceptions import ApiKeyMissingError, RateLimitError
+from openaq import __version__
+from openaq.shared.client import BaseClient, _get_openaq_config, _has_toml
+from openaq.shared.exceptions import ApiKeyMissingError
 from tests.unit.mocks import MockTransport
 
 
@@ -46,7 +40,16 @@ def test__get_openaq_config_file_exists():
                 assert result == None
 
 
+DEFAULT_USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
+
+
 class SharedClient(BaseClient):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._user_agent = DEFAULT_USER_AGENT
+        self.resolve_headers()
+
     def close():
         pass
 
@@ -54,6 +57,9 @@ class SharedClient(BaseClient):
         pass
 
     def _get():
+        pass
+
+    def _set_rate_limit(self, headers):
         pass
 
 
@@ -140,8 +146,8 @@ class TestSharedClient:
         assert self.instance.headers == {
             'this': 'that',
             'Accept': 'application/json',
-            'User-Agent': DEFAULT_USER_AGENT,
             'X-API-Key': 'abc123-def456-ghi789',
+            'User-Agent': DEFAULT_USER_AGENT,
         }
         with pytest.raises(AttributeError):
             self.instance.headers = {'openaq': 'api'}
@@ -154,8 +160,8 @@ class TestSharedClient:
             'this': 'that',
             'Accept': 'application/json',
             'Accept-Language': 'en-US,en;q=0.5',
-            'User-Agent': DEFAULT_USER_AGENT,
             'X-API-Key': 'abc123-def456-ghi789',
+            'User-Agent': DEFAULT_USER_AGENT,
         }
 
     def test_build_request_headers_none(self):
@@ -163,85 +169,9 @@ class TestSharedClient:
         assert request_headers == {
             'this': 'that',
             'Accept': 'application/json',
-            'User-Agent': DEFAULT_USER_AGENT,
             'X-API-Key': 'abc123-def456-ghi789',
+            'User-Agent': DEFAULT_USER_AGENT,
         }
-
-    def test___check_rate_limit(self):
-        mock_response = httpx.Response(
-            HTTPStatus.OK,
-            content="Test content",
-            headers={
-                'X-RateLimit-Used': '0',
-                'X-RateLimit-Reset': '60',
-                'X-RateLimit-Remaining': '0',
-                'X-RateLimit-Limit': '60',
-            },
-        )
-        self.instance._set_rate_limit(mock_response.headers)
-        with pytest.raises(RateLimitError):
-            self.instance._check_rate_limit()
-
-    @freeze_time("2025-02-27T01:00:00")
-    def test__is_rate_limited(self):
-        mock_response = httpx.Response(
-            HTTPStatus.OK,
-            content="Test content",
-            headers={
-                'X-RateLimit-Used': '0',
-                'X-RateLimit-Reset': '60',
-                'X-RateLimit-Remaining': '59',
-                'X-RateLimit-Limit': '60',
-            },
-        )
-        self.instance._set_rate_limit(mock_response.headers)
-        assert self.instance._rate_limit_reset_seconds == 60
-        assert self.instance._is_rate_limited() == False
-        with freeze_time("2025-02-27T01:00:59"):
-            assert self.instance._is_rate_limited() == False
-            assert self.instance._rate_limit_reset_seconds == 1
-
-    @freeze_time("2025-02-27T01:00:00")
-    def test__is_rate_limited_true(self):
-        mock_response = httpx.Response(
-            HTTPStatus.OK,
-            content="Test content",
-            headers={
-                'X-RateLimit-Used': '0',
-                'X-RateLimit-Reset': '30',
-                'X-RateLimit-Remaining': '0',
-                'X-RateLimit-Limit': '60',
-            },
-        )
-        self.instance._set_rate_limit(mock_response.headers)
-        with freeze_time("2025-02-27T01:00:29"):
-            assert self.instance._rate_limit_remaining == 0
-            assert self.instance._rate_limit_reset_seconds == 1
-            assert self.instance._rate_limit_reset_datetime == datetime(
-                year=2025, month=2, day=27, hour=1, minute=0, second=30
-            )
-            assert self.instance._is_rate_limited()
-
-    @freeze_time("2025-02-27T01:00:00")
-    def test__is_rate_limited_false(self):
-        mock_response = httpx.Response(
-            HTTPStatus.OK,
-            content="Test content",
-            headers={
-                'X-RateLimit-Used': '0',
-                'X-RateLimit-Reset': '30',
-                'X-RateLimit-Remaining': '60',
-                'X-RateLimit-Limit': '60',
-            },
-        )
-        self.instance._set_rate_limit(mock_response.headers)
-        with freeze_time("2025-02-27T01:00:31"):
-            assert self.instance._rate_limit_remaining == 60
-            assert self.instance._rate_limit_reset_seconds == -1
-            assert self.instance._rate_limit_reset_datetime == datetime(
-                year=2025, month=2, day=27, hour=1, minute=0, second=30
-            )
-            assert self.instance._is_rate_limited() == False
 
     def test_auto_wait_default_is_true(self):
         """Test that auto_wait defaults to True."""
@@ -249,20 +179,3 @@ class TestSharedClient:
             MockTransport, api_key='openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p'
         )
         assert instance._auto_wait == True
-
-    def test_auto_wait_false_raises_rate_limit_error(self):
-        """Test that auto_wait=True doesn't raise RateLimitError when rate limited."""
-        instance = SharedClient(
-            MockTransport,
-            api_key='openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p',
-        )
-        mock_response = httpx.Response(
-            HTTPStatus.OK,
-            content="Test content",
-            headers={
-                'X-RateLimit-Remaining': '0',
-                'X-RateLimit-Reset': '60',
-            },
-        )
-        instance._set_rate_limit(mock_response.headers)
-        self.instance._check_rate_limit()  # Should not raise RateLimitError
