@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.0rc2] - 2026-02-24
+
+### Updated
+
+- HTTPX client configuration settings for timeout
+- HTTPX client configuration settings for limits
+
+### Fixed
+
+- Fixed creation of headers on client classes to remove mutable default argument.
+- Fixed creation of transport on client classes to remove mutable default argument.
+- automatic rate limiting for AsyncOpenAQ, no longer relies solely on HTTP
+headers, a more reliable method for async usage.
+
 ## [1.0.0rc1] - 2026-02-13
 
 **Breaking changes**
