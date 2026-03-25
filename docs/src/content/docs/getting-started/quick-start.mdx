@@ -6,28 +6,31 @@ description: A tutorial to get started using the OpenAQ Python SDK
 import { Steps } from '@astrojs/starlight/components';
 
 
-This tutorial provide a quick start for making your first OpenAQ query using the 
-OpenAQ Python SDK. The simplest example we can query a single air quality
-monitoring location and get information, such as the location's name, from the
-response.
+This tutorial provides a quick start for making your first OpenAQ query using the 
+OpenAQ Python SDK. As a simple example, we will query a single air quality
+monitoring location and get the location's name from the response.
 
 ## Tutorial
 
 <Steps>
 
-1. Install the openaq package from [PyPI](https://pypi.org/project/openaq/): 
+1. From your terminal, install the openaq package from [PyPI](https://pypi.org/project/openaq/): 
 
     ```sh
     pip install openaq
     ```
 
-2. Get an API key
+2. Get your OpenAQ API key
 
-    Visit [explore.openaq.org/register](https://explore.openaq.org/register) and
-    copy your API key.
+    If you do not have an account with us, visit
+    [explore.openaq.org/register](https://explore.openaq.org/register) to
+    register for one. Once you have verified your email and logged in to your
+    account, you can find your OpenAQ API key at the bottom of your settings
+    page.
 
 
-3. Run the following code in a Python REPL or from a .py file:
+3. Replace the `replace-me-with-a-valid-key` part in the code below with your
+   OpenAQ API key then run the code block in a Python REPL or from a .py file:
 
     ```py
     from openaq import OpenAQ
@@ -41,20 +44,21 @@ response.
     print(location.results[0].name)
     ```
 
-    This will print out `Del Norte` in your console, the name of the location
-    with ID 2178.
+    If you follow the steps correctly, you will see `Del Norte` printed out in
+    your console. This is the name of the location with ID 2178 that we query
+    for.
 
  </Steps>
 
 ## Walkthrough
 
 
-Now we can walk through the code step by step:
+Now let's walk through the code step by step:
 
 
 <Steps>
 
-1. Import the client class from the `openaq` package. The `OpenAQ` client
+1. **Import the client class from the `openaq` package.** The `OpenAQ` client
 provides all the options for querying resources.
 
     ```py {1}
@@ -69,9 +73,9 @@ provides all the options for querying resources.
     print(location.results[0].name)
     ```
 
-2. Set up the client. Provide an API key to the client to authenticate with the 
-OpenAQ API. Replace the value `replace-me-with-a-valid-key` with you actual 
-API key, this placeholder **will not work**.
+2. **Set up the client by providing an OpenAQ API key to the client for
+authentication.** Remember to replace the value `replace-me-with-a-valid-key`
+with you actual API key, as this placeholder **will not work**.
 
     ```py {3}
     from openaq import OpenAQ
@@ -85,8 +89,9 @@ API key, this placeholder **will not work**.
     print(location.results[0].name)
     ```
 
-3. Query the location by ID. We've chose locations ID 2178, you can replace this 
-with another other OpenAQ locations ID.
+3. **Access the locations resource to get a location's information by its ID.**
+Though we choose locations ID 2178 here, you can replace this with another other
+OpenAQ locations ID.
 
     ```py {5}
     from openaq import OpenAQ
@@ -100,7 +105,7 @@ with another other OpenAQ locations ID.
     print(location.results[0].name)
     ```
 
-4. Close the connection. 
+4. **Explicitly close the connection.**
 
     ```py {7}
     from openaq import OpenAQ
@@ -114,7 +119,7 @@ with another other OpenAQ locations ID.
     print(location.results[0].name)
     ```
 
-5. Print the results. 
+5. **Print the results.**
 
     ```py {9}
     from openaq import OpenAQ
@@ -132,6 +137,9 @@ with another other OpenAQ locations ID.
 
 ## Next Steps
 
-- Read the other getting started articles to familiarize yourself with 
-- Check out the common workflows for more real-world workflows
-- 
+- Read the other getting started articles to familiarize yourself with the
+  basics of working with the SDK
+- Check out the common workflows for more real-world practices
+- Though we have inline documentation, you may find it helpful to use individual
+  resources pages as guides for terms, access methods, and examples as you
+  interact with each resource.

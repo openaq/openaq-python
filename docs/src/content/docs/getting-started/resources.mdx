@@ -3,12 +3,11 @@ title: Resources
 ---
 
 
-The OpenAQ API follows a resource-based design, where each endpoint returns a 
+The OpenAQ API follows a resource-based design where each endpoint returns a 
 response corresponding to the endpoint. The OpenAQ Python SDK further simplifies
 this by providing convenient resources from the client with methods to call the 
 endpoints. All API responses through the SDK provide common features for reading
-data as convenient Python objects, a dictionary or a JSON string. 
-
+data as convenient Python objects, a dictionary, or a JSON string. 
 
 
 ```d2
@@ -48,4 +47,43 @@ grid-gap: 20
 5 -> 1
 5 -> 2
 10 -> 7
+```
+
+```d2 layout="elk"
+# Nodes
+providers: providers {shape: oval}
+countries: countries {shape: oval}
+parameters: parameters {shape: oval}
+locations: locations {shape: oval}
+licenses: licenses {shape: oval}
+manufacturers: manufacturers {shape: oval}
+instruments: instruments {shape: oval}
+owners: owners {shape: oval}
+sensors: sensors {shape: oval}
+measurements: measurements {shape: oval}
+
+# Green arrows: "A has attributes B"
+providers -> parameters: has attribute {style.stroke: "#4caf50"}
+locations -> providers: has attribute {style.stroke: "#4caf50"}
+locations -> countries: has attribute {style.stroke: "#4caf50"}
+locations -> parameters: has attribute {style.stroke: "#4caf50"}
+locations -> licenses: has attribute {style.stroke: "#4caf50"}
+locations -> owners: has attribute {style.stroke: "#4caf50"}
+locations -> sensors: has attribute {style.stroke: "#4caf50"}
+locations -> instruments: has attribute {style.stroke: "#4caf50"}
+instruments <-> manufacturers: has attribute {style.stroke: "#4caf50"}
+
+# Orange arrows: "A can filter B"
+countries <-> providers: can filter {style.stroke: "#ff9800"}
+countries <-> parameters: can filter {style.stroke: "#ff9800"}
+parameters -> providers: can filter {style.stroke: "#ff9800"}
+countries -> locations: can filter {style.stroke: "#ff9800"}
+parameters -> locations: can filter {style.stroke: "#ff9800"}
+providers -> locations: can filter {style.stroke: "#ff9800"}
+licenses -> locations: can filter {style.stroke: "#ff9800"}
+manufacturers -> locations: can filter {style.stroke: "#ff9800"}
+instruments -> locations: can filter {style.stroke: "#ff9800"}
+owners -> locations: can filter {style.stroke: "#ff9800"}
+manufacturers -> instruments: can filter {style.stroke: "#ff9800"}
+sensors -> measurements: can filter {style.stroke: "#ff9800"}
 ```

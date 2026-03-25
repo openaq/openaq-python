@@ -18,7 +18,7 @@ All response objects follow a common top-level form, with specific data objects
 for each resource within the results. The `results` object in each response
 remains a `list`, or array in JSON. This applies even when requesting a single
 object by keys, like in a `get()` function call, or when filtering removes all
-possible results. In those cases, you receive an empty list.
+possible results. In the latter case, you receive an empty list.
 
 ```
 ├── headers
@@ -36,13 +36,13 @@ possible results. In those cases, you receive an empty list.
 ```
 
 Find the structure of individual resource response results in their respective
-pages in next section of the docs.
+pages in Resources section of the docs.
 
 ## Accessing response data
 
 The SDK provides three ways to access response data, depending on your needs.
 
-### Response objects
+### *Response objects*
 
 By default, resource methods deserialize OpenAQ API JSON responses into data
 objects for easier access. These data objects support convenient dot notation
@@ -50,33 +50,40 @@ access to attributes. You can retrieve values directly from the response
 structure shown above.
 
 ```py
+# Access the page number
 response.meta.page
+
+# Access the remaining rate limits available for use
 response.headers.x_ratelimit_remaining
-response.results[0]  # Access first item in results list
+
+# Access the first item in the results list
+response.results[0]
 ```
 
-### Dictionary
+### *Dictionary*
 
 You can also return responses as a Python dictionary. All resource responses
-include a `dict()` method that allows property access using Python dictionary
-key syntax:
+include a `dict()` method that allows property access using either Python
+dictionary key syntax:
 
 ```py
 response.dict()['results']
 ```
 
-or using the built-in `get()`:
+or the built-in `get()`:
 ```py
 response.dict().get('results')
 ```
 
-Just like in the deserialized object, the `results` key stays a Python `list`.
+Just like in the deserialized object, the `results` key has a Python `list` for
+its value.
 
 
-### JSON
+### *JSON*
 
-Response objects also provide the option to return the raw JSON string of the 
-esponse payload. Access this on all response objects with the `json()` method:
+Response objects also provide the option to return the raw JSON string of the
+response payload. You can access this on all response objects by using the
+`json()` method:
 
 ```py
 response.json()

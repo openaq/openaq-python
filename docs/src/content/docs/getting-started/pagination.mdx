@@ -27,6 +27,7 @@ locations = client.locations.list(page=2, limit=50)
 
 To paginate through an entire result set, use a `for` loop:
 ```py
+# If the result set returns <=1,000 records
 import math
 
 limit = 100
@@ -41,11 +42,28 @@ for page in range(2, total_pages + 1):
     locations.extend(response.results)
 ```
 
+```py
+# If the result set returns >1,000 records
+results = True
+limit = 1000
+page_num = 1
+locations = []
+
+while results:
+    response = client.locations.list(page=page_num, limit=limit)
+    locations.extend(response.results)
+    page_num += 1
+    
+    if response.meta.found == 0:
+        results = False
+```
+
 ## The meta object
 
-All `list()` responses include a `meta` object with metadata about the result
+All responses include a `meta` object with metadata about the result
 set. The `meta.found` field holds the total number of records matching your
-query, which you can use to calculate the total page count as shown preceding.
+query, which you can use to calculate the total page count as shown preceding if
+the result set contain 1,000 or fewer records.
 
 When `meta.found` returns `'>1000'`, you can't calculate the exact page count
 ahead of time. Consider narrowing your query with filters like `countries_id`
