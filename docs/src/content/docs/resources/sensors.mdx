@@ -4,10 +4,22 @@ title: Sensors
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+The Sensors resource provides details about individual air quality sensing units
+that collect environmental data and is not to be confused with the term air
+sensors which is a Location designation (alongside reference-grade). As such, a
+Location can have one or more sensors, each tracking a single parameter such as
+PM2.5, PM10, or humidity.
 
 ## Methods
 
+The Instruments resource provides the following methods:
+
+- `get()` - For accessing data about a single sensor by its sensors ID.
+
 ### Get a single sensor
+
+The `get()` method accepts one single `sensors_id` as an argument and returns
+details about that sensor in a SensorsResponse object.
 
 ```py
 get(
@@ -15,17 +27,20 @@ get(
   ) -> SensorsResponse
 ```
 
-| argument | type |
-| -------- | ---- |
-| sensors_id | `int` |
+#### *Query arguments*
 
-#### Example
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| sensors_id | `int` OpenAQ's unique ID for each sensor | Required |
+
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
+    # Retrieve information about the sensor with ID=1 on OpenAQ
     with OpenAQ() as client:
         client.sensors.get(sensors_id=1)
     ```
@@ -34,40 +49,63 @@ get(
     ```py
     from openaq import AsyncOpenAQ
 
+    # Retrieve information about the sensor with ID=1 on OpenAQ
     async with AsyncOpenAQ() as client:
         await client.sensors.get(sensors_id=1)
     ```
   </TabItem>
 </Tabs>
 
-## Response
+## Response object
+
+The Sensor object contains attributes that have all data about
+it. The hierarchy below presents the depth of the attributes and their
+datatypes.
 
 ```
-Sensor[]
+results[]
     ├── id: int
     ├── name: str
-    ├── parameter: 
+    ├── parameter
     │   ├── id: int
     │   ├── name: str
     │   ├── units: str
-    │   └── display_name: str | None
-    ├── datetime_first: 
+    │   └── displayName: str
+    ├── datetime_first
     │   ├── utc: str
     │   └── local: str
-    ├── datetime_last: 
+    ├── datetime_last
     │   ├── utc: str
     │   └── local: str
-    └── coverage: 
-        ├── expected_count: int
-        ├── expected_interval: str
-        ├── observed_count: int
-        ├── observed_interval: str
-        ├── percent_complete: float
-        ├── percent_coverage: float
-        ├── datetime_from:
-        │   ├── utc: str
-        │   └── local: str
-        └── datetime_to:
-            ├── utc: str
-            └── local: str
+    ├── coverage
+    │   ├── expectedCount: int
+    │   ├── expectedInterval: str
+    │   ├── observedCount: int
+    │   ├── observedInterval: str
+    │   ├── percentComplete: float
+    │   ├── percentCoverage: float
+    │   ├── datetimeFrom
+    │   │   ├── utc: str
+    │   │   └── local: str
+    │   └── datetimeTo
+    │       ├── utc: str
+    │       └── local: str
+    ├── latest
+    │   ├── datetime
+    │   │   ├── utc: str
+    │   │   └── local: str
+    │   ├── value: float
+    │   └── coordinates
+    │       ├── latitude: float
+    │       └── longitude: float
+    └── summary
+        ├── min: float
+        ├── q02: float | None
+        ├── q25: float | None
+        ├── median: float | None
+        ├── q75: float | None
+        ├── q98: float | None
+        ├── max: float
+        ├── avg: float
+        └── sd: float
 ```
