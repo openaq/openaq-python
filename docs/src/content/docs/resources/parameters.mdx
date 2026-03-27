@@ -4,10 +4,25 @@ title: Parameters
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+The Parameters resource provides information about the air
+quality parameters in the dataset, such as PM2.5, CO, NO2, among many others.
+With this resource, you will find details about different types of pollutant and
+meteorological data that OpenAQ ingests, such as name, unit of measurement, and
+description.
 
 ## Methods
 
+The Parameters resource provides the following methods:
+
+- `get()` - For accessing a single parameter by parameter ID.
+- `list()` - For accessing multiple parameters.
+- `latest()` - For accessing the latest measurements of the specified parameter
+  at all locations reporting it on the OpenAQ platform.
+
 ### Get a single parameter
+
+The `get()` method accepts one single `parameters_id` as an argument and returns
+details about that parameter in a `ParametersResponse` object.
 
 ```py
 get(
@@ -15,65 +30,41 @@ get(
   ) -> ParametersResponse
 ```
 
-| argument | type |
-| -------- | ---- |
-| parameters_id | `int` |
+#### *Query arguments*
 
-#### Example
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| parameters_id | `int` OpenAQ's unique ID for each parameter | Required |
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
-
-    with OpenAQ() as client:
-        client.parameters.get(parameters_id=1)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    async with AsyncOpenAQ() as client:
-        await client.parameters.get(parameters_id=1)
-    ```
-  </TabItem>
-</Tabs>
-
-### List latest measurements from a parameter
-
-```py
-latest(
-  parameters_id: int
-  ) -> LatestResponse
-```
-
-| argument | type |
-| -------- | ---- |
-| parameters_id | `int` |
-
-#### Example
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
+    # Retrieve the parameter with ID 2
     with OpenAQ() as client:
-        client.parameters.latest(parameters_id=1)
+        client.parameters.get(parameters_id=2)
     ```
   </TabItem>
   <TabItem label="async">
     ```py
     from openaq import AsyncOpenAQ
 
+    # Retrieve the parameter with ID 2
     async with AsyncOpenAQ() as client:
-        await client.parameters.latest(parameters_id=1)
+        await client.parameters.get(parameters_id=2)
     ```
   </TabItem>
 </Tabs>
 
 ### List multiple parameters
+
+The `list()` method takes optional arguments and returns parameters on the OpenAQ
+platform that meet all the conditions specified in a `ParametersResponse` object.
+If no argument is included, the method returns all parameters using the default
+arguments.
 
 ```py
 list(
@@ -90,47 +81,113 @@ list(
   ) -> ParametersResponse
 ```
 
-| argument | type | description | rules |
-| -------- | ---- | ----------- | ----- |
-| page | `int` | The page number, must be greater than zero. Page count is parameters found / limit. | |
-| limit | `int` | The number of results returned per page. Must be between 1 and 1,000. | |
-| order_by | `str \| None` | Order by operators for results. | |
-| sort_order | `SortOrder \| None` | Order for sorting results (asc/desc). | |
-| parameter_type | `ParameterType \| None` | pollutant or meteorological. | |
-| coordinates | `tuple[float, float] \| None` | WGS 84 coordinate pair in form latitude, longitude (y,x). | Must be accompanied by radius, cannot be accompanied by bbox. |
-| radius | `int \| None` | A distance value in meters to search around the given coordinates value. | Must be accompanied by coordinates, cannot be accompanied by bbox. |
-| bbox | `tuple[float, float, float, float] \| None` | Geospatial bounding box of min X, min Y, max X, max Y in WGS 84 coordinates. Limited to four decimals precision. | Cannot be accompanied by either coordinate or radius. |
-| iso | `str \| None` | 2 letter ISO 3166-alpha-2 country code. | |
-| countries_id | `int \| list[int] \| None` | Single countries ID or an array of IDs. | |
+#### *Query arguments*
 
-#### Example
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must be between 1 and 1,000 |
+| order_by | `str \| None` The license field by which to sort results, defaults to `id`. Currently only `id` is supported | |
+| sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
+| parameter_type | `str \| None` | The type of parameter to return | If not None then must be one of: `pollutant` or `meteorological`.|
+| coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for available parameters | Must be in WGS84 (EPSG:4326) in (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be used at the same time as `bbox` |
+| radius | `int \| None` How far (in meters) to search for parameters around the coordinate pair | Must be between 1 and 25,000. Must be accompanied by `coordinates` argument. Cannot be used at the same time as `bbox` |
+| bbox | `tuple[float, float, float, float] \| None` The rectangular area within which parameters are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be used at the same time as `coordinates` or `radius` |
+| iso | `str \| None` The ISO 3166-1 alpha-2 code for the country or territory where the parameters are measured | Must be a valid ISO 3166-1 alpha-2 code representation of the country. Cannot be used at the same time as `countries_id` |
+| countries_id | `int \| list[int] \| None` Filter by the country or territory where the parameters are measured | Must be OpenAQ unique ID for the country or territory. Cannot be used at the same time as `iso` |
+
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
+    # List all meteorological parameters that OpenAQ ingests
     with OpenAQ() as client:
-        client.parameters.list()
+        client.parameters.list(parameter_type="meteorological")
     ```
   </TabItem>
   <TabItem label="async">
     ```py
     from openaq import AsyncOpenAQ
 
+    # List all meteorological parameters that OpenAQ ingests
     async with AsyncOpenAQ() as client:
-        await client.parameters.list()
+        await client.parameters.list(parameter_type="meteorological")
     ```
   </TabItem>
 </Tabs>
 
-## Response
+### List latest measurements from a parameter
 
+The `latest()` method takes one single `parameters_id` as an argument and
+returns the last measurement readings for that parameter across all locations
+in OpenAQ database in a `LatestResponse` object.
+
+```py
+latest(
+  parameters_id: int
+  ) -> LatestResponse
 ```
-Parameter[]
+
+#### *Query arguments*
+
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| parameters_id | `int` OpenAQ's unique ID for each parameter | Required |
+
+#### *Example*
+
+<Tabs syncKey="client">
+  <TabItem label="sync">
+    ```py
+    from openaq import OpenAQ
+
+    # Retrieve the latest measurement readings for PM2.5 (parameter ID 2) at all
+    # locations on OpenAQ
+    with OpenAQ() as client:
+        client.parameters.latest(parameters_id=2)
+    ```
+  </TabItem>
+  <TabItem label="async">
+    ```py
+    from openaq import AsyncOpenAQ
+
+    # Retrieve the latest measurement readings for PM2.5 (ID=2) at all
+    # locations on OpenAQ
+    async with AsyncOpenAQ() as client:
+        await client.parameters.latest(parameters_id=2)
+    ```
+  </TabItem>
+</Tabs>
+
+## Response objects
+
+The Parameter and Latest objects in the results of their respective response
+contain attributes that have all data about them. The hierarchy below presents
+the depth of the attributes and their datatypes.
+
+### ParametersResponse
+```
+results[]
     ├── id: int
     ├── name: str
     ├── units: str
     ├── display_name: str | None
     └── description: str | None
+```
+
+### LatestResponse
+```
+results[]
+    ├── datetime:
+    │   ├── utc: str
+    │   └── local: str
+    ├── value: float
+    ├── coordinates: 
+    │   ├── latitude: float
+    │   └── longitude: float
+    ├── sensors_id: int
+    └── locations_id: int
 ```

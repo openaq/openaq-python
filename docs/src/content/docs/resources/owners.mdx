@@ -4,10 +4,29 @@ title: Owners
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+The Owners resource provides information about the people or organizations that
+own and report air quality data upstream, in turn enabling data providers to
+share their data with us. Owners may include governmental agencies, research
+institutions, other organizations that oversee air quality monitoring, and even
+individuals who have installed an air quality monitoring device on their
+property.
+
+The data owner may be the same as the data provider. This is true when the data
+providers own the device or station that reports the data, or when the
+information of the contributing owner is not shared with us by the data
+provider, in which case the owner field defaults to the data provider.
 
 ## Methods
 
+The Owners resource provides the following methods:
+
+- `get()` - For accessing a single owner by owner ID.
+- `list()` - For accessing multiple owners.
+
 ### Get a single owner
+
+The `get()` method accepts one single `owners_id` as an argument and returns
+details about that owner in a `OwnersResponse` object.
 
 ```py
 get(
@@ -15,32 +34,41 @@ get(
   ) -> OwnersResponse
 ```
 
-| argument | type |
-| -------- | ---- |
-| owners_id | `int` |
+#### *Query arguments*
 
-#### Example
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| Owner | `int` OpenAQ's unique ID for each owner | Required |
+
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
+    # Retrieve the owner with ID 14
     with OpenAQ() as client:
-        client.owners.get(owners_id=1)
+        client.owners.get(owners_id=14)
     ```
   </TabItem>
   <TabItem label="async">
     ```py
     from openaq import AsyncOpenAQ
 
+    # Retrieve the owner with ID 14
     async with AsyncOpenAQ() as client:
-        await client.owners.get(owners_id=1)
+        await client.owners.get(owners_id=14)
     ```
   </TabItem>
 </Tabs>
 
 ### List multiple owners
+
+The `list()` method takes optional arguments and returns owners on the OpenAQ
+platform that meet all the conditions specified in a `OwnersResponse` object.
+If no argument is included, the method returns all owners using the default
+arguments.
 
 ```py
 list(
@@ -51,20 +79,23 @@ list(
   ) -> OwnersResponse
 ```
 
-| argument | type | description |
-| -------- | ---- | ----------- |
-| page | `int` | The page number, must be greater than zero. Page count is owners found / limit. |
-| limit | `int` | The number of results returned per page. Must be between 1 and 1,000. |
-| order_by | `str \| None` | Order by operators for results. |
-| sort_order | `SortOrder \| None` | Order for sorting results (asc/desc). |
+#### *Query arguments*
 
-#### Example
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must be between 1 and 1,000 |
+| order_by | `str \| None` The owner field by which to sort results, defaults to `id`. Currently only `id` is supported | |
+| sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
+
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
+    # List all owners on OpenAQ
     with OpenAQ() as client:
         client.owners.list()
     ```
@@ -73,13 +104,18 @@ list(
     ```py
     from openaq import AsyncOpenAQ
 
+    # List all owners on OpenAQ
     async with AsyncOpenAQ() as client:
         await client.owners.list()
     ```
   </TabItem>
 </Tabs>
 
-## Response
+## Response objects
+
+The Owner objects in the results of the `OwnersResponse` contain attributes
+that have all data about them. The hierarchy below presents the depth of the
+attributes and their datatypes.
 
 ```
 Owner[]

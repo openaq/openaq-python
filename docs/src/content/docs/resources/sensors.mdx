@@ -5,21 +5,22 @@ title: Sensors
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 The Sensors resource provides details about individual air quality sensing units
-that collect environmental data and is not to be confused with the term air
-sensors which is a Location designation (alongside reference-grade). As such, a
-Location can have one or more sensors, each tracking a single parameter such as
-PM2.5, PM10, or humidity.
+that collect environmental data. As such, a Location can have one or more
+sensors, each tracking a single parameter such as PM2.5, PM10, or humidity.
+
+The Sensors resource should not be confused with the term "air sensors" which is a
+Location designation (alongside reference-grade).
 
 ## Methods
 
-The Instruments resource provides the following methods:
+The Instruments resource provides the following method:
 
 - `get()` - For accessing data about a single sensor by its sensors ID.
 
 ### Get a single sensor
 
 The `get()` method accepts one single `sensors_id` as an argument and returns
-details about that sensor in a SensorsResponse object.
+details about that sensor in a `SensorsResponse` object.
 
 ```py
 get(
@@ -58,9 +59,9 @@ get(
 
 ## Response object
 
-The Sensor object contains attributes that have all data about
-it. The hierarchy below presents the depth of the attributes and their
-datatypes.
+The Sensor objects in the results of the `SensorsResponse` contain attributes
+that have all data about them. The hierarchy below presents the depth of the
+attributes and their datatypes.
 
 ```
 results[]

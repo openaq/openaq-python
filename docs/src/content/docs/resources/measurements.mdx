@@ -4,10 +4,28 @@ title: Measurements
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+The Measurements resources provide measurements data from sensors. OpenAQ
+ingests raw measurements at the hourly interval at the very least, but also
+hosts data at a much higher frequency (e.g. 5 minutes interval). In addition to
+providing raw measurement values as reported by providers, we also provides
+options for accessing the data at different levels of aggregation.
 
 ## Methods
 
+The Measurements resource provides the following methods:
+
+- `list()` - For accessing measurements data.
+
 ### List measurements from a sensor
+
+The `list()` method takes 2 required arguments and multiple optional arguments,
+ultimately returning measurements data on the OpenAQ platform that meet all the
+conditions specified in a `MeasurementsResponse` object. While it is possible to
+leave arguments unspecified, because the Measurements resource contains a large
+amount of data, we recommend that you limit queries using arguments as
+constaints, such as using a smaller time period with the `date_from` and
+`date_to`, or choosing `hours` or greater frequencies for `data` to avoid
+Request Timeout error.
 
 ```py
 list(
@@ -17,110 +35,167 @@ list(
   datetime_from: datetime.datetime | datetime.date | str | None = None,
   datetime_to: datetime.datetime | datetime.date | str | None = None,
   date_from: datetime.date | str | None = None,
-  datet_to: datetime.date | str | None = None,
+  date_to: datetime.date | str | None = None,
   page: int = 1,
   limit: int = 1000
   ) -> MeasurementsResponse
 ```
 
+#### *Query arguments*
+
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| sensors_id | `int` The ID of the sensor for which measurements should be retrieved. | |
-| data | `str` The base measurement unit to query. | Required, must be one of `measurements`, `hours`, `days`, `years` | 
-| rollup | `str \| None` The period by which to rollup the base measurement data. | |
-| datetime_from | `datetime.datetime \| datetime.date \| str \| None` Starting date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string. |  Can only be used when `data` is either `measurements` or `hours`, cannot be used with `date_form` or `date_to` |
-| datetime_to | `datetime.datetime \| datetime.date \| str \| None` Ending date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string. | Can only be used when `data` is either `measurements` or `hours`, cannot be used with `date_form` or `date_to` |
-| date_from | `datetime.date \| str \| None` Starting date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string. |  Can only be used when `data` is either `days` or `years`, cannot be used with `datetime_from` or `datetime_to`|
-| date_to | `datetime.date \| str \| None` Ending date for the measurement retrieval. Can be a datetime object or ISO-8601 formatted date or datetime string. | Can only be used when `data` is either `days` or `years`, cannot be used with `datetime_from` or `datetime_to` |
-| page | `int` The page number, must be greater than zero. Page count is measurements found / limit. | |
-| limit | `int` The number of results returned per page. Must be between 1 and 1,000. | |
+| sensors_id | `int` OpenAQ's unique ID for the sensor from which measurements should be retrieved. | Required |
+| data | `str` The base measurement unit to query. | Required, must be one of: `measurements`, `hours`, `days`, `years` | 
+| rollup | `str \| None` The period by which to roll up the base measurement data. | Must be one of: `hourly`, `daily`, `monthly`, `yearly`, `hourofday`, `dayofweek`, `monthofyear` |
+| datetime_from | `datetime.datetime \| datetime.date \| str \| None` Starting datetime to retrieve measurements. | If not a datetime object then must be a ISO-8601 formatted datetime string i.e. `YYYY-MM-DDTHH:mm:ss`. Can only be used when `data` is either `measurements` or `hours`. Cannot be used with `date_form` or `date_to` |
+| datetime_to | `datetime.datetime \| datetime.date \| str \| None` Ending datetime to retrieve measurements. | If not a datetime object then must be a ISO-8601 formatted datetime string i.e. `YYYY-MM-DDTHH:mm:ss`. Can only be used when `data` is either `measurements` or `hours`. Cannot be used with `date_form` or `date_to` |
+| date_from | `datetime.date \| str \| None` Starting date to retrieve measurements. | If not a datetime object then must be a ISO-8601 formatted date string i.e. `YYYY-MM-DD`. Can only be used when `data` is either `days` or `years`. Cannot be used with `datetime_from` or `datetime_to` |
+| date_to | `datetime.date \| str \| None` Ending date to retrieve measurements. | If not a datetime object then must be a ISO-8601 formatted date string i.e. `YYYY-MM-DD`. Can only be used when `data` is either `days` or `years`. Cannot be used with `datetime_from` or `datetime_to` |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must be between 1 and 1,000 |
 
+#### *Example*
 
-### Data and Rollups
+<Tabs syncKey="client">
+  <TabItem label="sync">
+```py
+from openaq import OpenAQ
 
-#### Data 
+# Retrieve days measurements data for the first three months of 2026 for sensor 
+# with ID 10330999
+with OpenAQ() as client:
+    client.measurements.list(sensors_id=10330999,
+                             data="days",
+                             date_from="2026-01-01",
+                             date_to="2026-03-31")
+```
+  </TabItem>
+  <TabItem label="async">
+```py
+from openaq import AsyncOpenAQ
 
+# Retrieve days measurements data for the first three months of 2026 for sensor 
+# with ID 10330999
+async with AsyncOpenAQ() as client:
+    await client.measurements.list(sensors_id=10330999,
+                                   data="days",
+                                   date_from="2026-01-01",
+                                   date_to="2026-03-31")
+```
+  </TabItem>
+</Tabs>
 
-##### measurements
+### Data and Rollup
 
+Understanding data and rollups concepts is the key to using the Measurements
+resource effectively. While `data` gives you the benefits of speed as it fetches
+pre-computed measurements data, it is limited in the level of aggregation
+(covering only `measurements`, `hours`, `days`, and `years` data) and the base
+measurement from which data is aggregated (i.e. the hourly average values).
 
-##### hours
+On the other hand, adding the argument `rollup` allows you the flexibility of
+choosing among a variety of aggregation periods from any base measurements input
+in `data`. However, because rollups are computed on the fly, it will be slower
+and more resources-consuming than simply using `data`, especially when rolling
+up from data="measurements". As such, prioritize `data` where you can and if you
+need to use `rollup` for a customized aggregation:
+- double check to see if it's a query that could be done with just using `data`
+- limit your queries to smaller time periods
 
+#### *Possible combinations*
 
-##### days
+The table below presents acceptable combinations of `data` and `rollup` values.
+The columns are `data` values whereas the rows are `rollup` values.
 
+|                 | measurements | hours | days | years |
+|-----------------|--------------|-------|------|-------|
+| **hourly**      | ✓            | ✗     | ✗    | ✗     |
+| **daily**       | ✓            | ✓     | ✗    | ✗     |
+| **monthly**     | ✗            | ✓     | ✓    | ✗     |
+| **yearly**      | ✗            | ✓     | ✓    | ✗     |
+| **hourofday**   | ✗            | ✓     | ✗    | ✗     |
+| **dayofweek**   | ✗            | ✓     | ✓    | ✗     |
+| **monthofyear** | ✗            | ✓     | ✓    | ✗     |
 
-##### years
+#### *`data` argument options* 
 
+| data | description | note |
+| ---- | ----------- | ---- |
+| measurements | Retrieve the raw measurement values as reported by the upstream providers. | |
+| hours | Retrieve the hourly average value of raw measurements. | If the upstream reporting period is hourly, the query with `data`="hours" and that with `data`="measurements" would return the same results. |
+| days | Retrieve the daily average measurements, computed from the hourly average values from 01:00 to 0:00 in local time. | |
+| years | Retrieve the yearly average measurements, computed from the hourly average values from January 01 at 01:00 to December 31 0:00 in local time. | |
 
-#### Rollups
+#### *`rollup` argument options* 
 
-##### hourly
+| rollup | description | note |
+| ------ | ----------- | ---- |
+| hourly | Aggregates across the selected base measurement and returns the average value for each hour. | If "measurements" is your base measurement, opt for simply using data="hours" without using the `rollup` argument.
+| daily | Aggregates across the selected base measurement and returns the average value for each day. | If "hours" is your base measurement, opt for simply using data="days" without using the `rollup` argument.
+| monthly | Aggregates across the selected base measurement and returns the average value for each month. | |
+| yearly | Aggregates across the selected base measurement and returns the average value for each year. | If "hours" is your base measurement, opt for simply using data="years" without using the `rollup` argument.
+| hourofday | Aggregates across the selected base measurement and returns the average value for each hour in a 24-hour day. | |
+| dayofweek | Aggregates across the selected base measurement and returns the average value for each day in a week (Monday-Sunday). | |
+| monthofyear | Aggregates across the selected base measurement and returns the average value for each month in a year (January-December). | |
 
-##### daily
-
-##### monthly
-
-
-##### hourofday
-
-##### dayofweek
-
-##### monthofyear
-
-
-|             | measurements | hours | days | years |
-|-------------|--------------|-------|------|-------|
-| hourly      | ✓            | ✗     | ✗    | ✗     |
-| daily       | ✓            | ✓     | ✗    | ✗     |
-| monthly     | ✗            | ✓     | ✓    | ✗     |
-| yearly      | ✗            | ✓     | ✓    | ✗     |
-| hourofday   | ✗            | ✓     | ✗    | ✗     |
-| dayofweek   | ✗            | ✓     | ✓    | ✗     |
-| monthofyear | ✗            | ✓     | ✓    | ✗     |
-
-
-#### Example
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
+    # Retrieve monthly measurements data aggregated from the hours base
+    # measurements for the first three months of 2026 for sensor with ID 10330999
     with OpenAQ() as client:
-        client.measurements.list(sensors_id=1)
+        client.measurements.list(sensors_id=10330999,
+                                data="hours",
+                                rollup="monthly",
+                                date_from="2026-01-01",
+                                date_to="2026-03-31")
     ```
   </TabItem>
   <TabItem label="async">
     ```py
     from openaq import AsyncOpenAQ
 
+    # Retrieve monthly measurements data aggregated from the hours base
+    # measurements for the first three months of 2026 for sensor with ID 10330999
     async with AsyncOpenAQ() as client:
-        await client.measurements.list(sensors_id=1)
+        await client.measurements.list(sensors_id=10330999,
+                                data="hours",
+                                rollup="monthly",
+                                date_from="2026-01-01",
+                                date_to="2026-03-31")
     ```
   </TabItem>
 </Tabs>
 
-## Response
+## Response object
+
+The Measurements objects in the results of the `MeasurementsResponse` contain
+attributes that have all data about them. The hierarchy below presents the depth
+of the attributes and their datatypes.
 
 ```
-Measurement[]
+results[]
     ├── value: float
-    ├── parameter: 
+    ├── parameter
     │   ├── id: int
     │   ├── name: str
     │   ├── units: str
     │   └── display_name: str | None
-    ├── period:
+    ├── period
     │   ├── label: str
     │   ├── interval: str
     │   └── datetime_from:
     │       ├── utc: str
     │       └── local: str
-    ├── coordinates: 
+    ├── coordinates
     │   ├── latitude: float
     │   └── longitude: float
-    ├── summary: 
+    ├── summary
     │   ├── min: float
     │   ├── q02: float
     │   ├── q25: float
@@ -136,10 +211,10 @@ Measurement[]
         ├── observed_interval: str
         ├── percent_complete: float
         ├── percent_coverage: float
-        ├── datetime_from:
+        ├── datetime_from
         │   ├── utc: str
         │   └── local: str
-        └── datetime_to:
+        └── datetime_to
             ├── utc: str
             └── local: str
 ```

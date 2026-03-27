@@ -4,10 +4,25 @@ title: Providers
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+The Providers resource provides details about the entities that supply air
+quality data to OpenAQ platform. Providers may be governmental agencies,
+research organizations, or private companies. The data “provider” may be the
+same as the data “owner” (see Owners) and/or the monitoring instrument
+“manufacturer” (see Manufacturers), but their IDs across the three resources are
+independent of each other. For example, AirGradient has a providers_id=66, a
+owners_id=12, and a manufacturers_id=12.
 
 ## Methods
 
+The Providers resource provides the following methods:
+
+- `get()` - For accessing a single provider by provider ID.
+- `list()` - For accessing multiple providers.
+
 ### Get a single provider
+
+The `get()` method accepts one single `providers_id` as an argument and returns
+details about that provider in a `ProvidersResponse` object.
 
 ```py
 get(
@@ -15,32 +30,41 @@ get(
   ) -> ProvidersResponse
 ```
 
-| argument | type |
-| -------- | ---- |
-| providers_id | `int` |
+#### *Query arguments*
 
-#### Example
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| providers_id | `int` OpenAQ's unique ID for each provider | Required |
+
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
+    # Retrieve the provider with ID 66
     with OpenAQ() as client:
-        client.providers.get(providers_id=1)
+        client.providers.get(providers_id=66)
     ```
   </TabItem>
   <TabItem label="async">
     ```py
     from openaq import AsyncOpenAQ
 
+    # Retrieve the provider with ID 66
     async with AsyncOpenAQ() as client:
-        await client.providers.get(providers_id=1)
+        await client.providers.get(providers_id=66)
     ```
   </TabItem>
 </Tabs>
 
 ### List multiple providers
+
+The `list()` method takes optional arguments and returns providers on the OpenAQ
+platform that meet all the conditions specified in a `ProvidersResponse` object.
+If no argument is included, the method returns all providers using the default
+arguments.
 
 ```py
 list(
@@ -58,27 +82,30 @@ list(
   ) -> ProvidersResponse
 ```
 
-| argument | type | description | rules |
-| -------- | ---- | ----------- | ----- |
-| page | `int` | The page number, must be greater than zero. Page count is providers found / limit. | |
-| limit | `int` | The number of results returned per page. Must be between 1 and 1,000. | |
-| order_by | `str \| None` | Order by operators for results. | |
-| sort_order | `SortOrder \| None` | Order for sorting results (asc/desc). | |
-| parameters_id | `int \| list[int] \| None` | Single parameters ID or an array of IDs. | |
-| monitor | `bool \| None` | Boolean for reference grade monitors (true) or air sensors (false). | |
-| coordinates | `tuple[float, float] \| None` | WGS 84 coordinate pair in form latitude, longitude (y,x). | Must be accompanied by radius, cannot be accompanied by bbox. |
-| radius | `int \| None` | A distance value in meters to search around the given coordinates value, must be between 1 and 25,000 (25km). | Must be accompanied by coordinates, cannot be accompanied by bbox. |
-| bbox | `tuple[float, float, float, float] \| None` | Geospatial bounding box of min X, min Y, max X, max Y in WGS 84 coordinates. Limited to four decimals precision. | Cannot be accompanied by either coordinate or radius. |
-| iso | `str \| None` | 2 letter ISO 3166-alpha-2 country code. | |
-| countries_id | `int \| list[int] \| None` | Single countries ID or an array of IDs. | |
+#### *Query arguments*
 
-#### Example
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must be between 1 and 1,000 |
+| order_by | `str \| None` The providers field by which to sort results, defaults to `id`. Currently only `id` is supported | |
+| sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
+| parameters_id | `int \| list[int] \| None` Filter by a pollutant or meteorological parameter | Must be OpenAQ unique ID for the pollutant or meteorlogical parameter |
+| monitor | `bool \| None` Filter for reference-grade monitors (`True`) or air sensor (`False`) locations | |
+| coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for providers | Must be in WGS84 (EPSG:4326) in (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be used at the same time as `bbox` |
+| radius | `int \| None` How far (in meters) to search for providers around the coordinate pair | Must be between 1 and 25,000. Must be accompanied by `coordinates` argument. Cannot be used at the same time as `bbox` |
+| bbox | `tuple[float, float, float, float] \| None` The rectangular area within which providers are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be used at the same time as `coordinates` or `radius` |
+| iso | `str \| None` The ISO 3166-1 alpha-2 code for the country or territory where the provider operates | Must be a valid ISO 3166-1 alpha-2 code representation of the country. Cannot be used at the same time as `countries_id` |
+| countries_id | `int \| list[int] \| None` Filter by the country or territory where the provider operates | Must be OpenAQ unique ID for the country or territory. Cannot be used at the same time as `iso` |
+
+#### *Example*
 
 <Tabs syncKey="client">
   <TabItem label="sync">
     ```py
     from openaq import OpenAQ
 
+    # List all providers on OpenAQ
     with OpenAQ() as client:
         client.providers.list()
     ```
@@ -87,16 +114,21 @@ list(
     ```py
     from openaq import AsyncOpenAQ
 
+    # List all providers on OpenAQ
     async with AsyncOpenAQ() as client:
         await client.providers.list()
     ```
   </TabItem>
 </Tabs>
 
-## Response
+## Response object
+
+The Providers objects in the results of the `ProvidersResponse` contain
+attributes that have all data about them. The hierarchy below presents the depth
+of the attributes and their datatypes.
 
 ```
-Provider[]
+results[]
     ├── id: int
     ├── name: str
     ├── source_name: str

@@ -7,9 +7,11 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 The Countries resource provides details about countries and territories
 (henceforth referred to as countries for short) in the OpenAQ dataset and
 includes only those with monitoring locations from which OpenAQ ingests data.
-You can use it to get a country's air quality data information: the time of
-its first and most recent measurement on OpenAQ, the parameters
-that are being measured in the country. All country values come from the
+You can use it to get a country's air quality data information, such as the time of
+its first and most recent measurement on OpenAQ, or the parameters
+that are being measured in the country.
+
+Country value for each location comes from the location's
 coordinates provided by the upstream provider. OpenAQ uses the [Natural Earth
 10m dataset](https://www.naturalearthdata.com/) for country boundaries. Country
 codes follow the [ISO 3166-1
@@ -26,7 +28,7 @@ The Countries resource provides the following methods:
 ### Get a single country
 
 The `get()` method accepts one single `countries_id` as an argument and returns
-details about that country in a CountriesResponse object.
+details about that country in a `CountriesResponse` object.
 
 ```py
 get(
@@ -66,7 +68,8 @@ async with AsyncOpenAQ() as client:
 ### List multiple countries
 
 The `list()` method takes optional arguments and returns countries on the
-OpenAQ platform that meet all the conditions specified. If no argument is included,
+OpenAQ platform that meet all the conditions specified in a
+`CountriesResponse` object. If no argument is included,
 the method returns all countries using the default arguments.
 
 ```py
@@ -120,9 +123,9 @@ async with AsyncOpenAQ() as client:
 
 ## Response objects
 
-The Country object contains attributes that have all data about
-them. The hierarchy below presents the depth of the attributes and their
-datatypes.
+The Country objects in the results of the `CountriesResponse` contain attributes
+that have all data about them. The hierarchy below presents the depth of the
+attributes and their datatypes.
 
 ```
 results[]

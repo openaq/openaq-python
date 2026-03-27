@@ -19,7 +19,7 @@ The Instruments resource provides the following methods:
 ### Get a single instrument
 
 The `get()` method accepts one single `instruments_id` as an argument and returns
-details about that instrument in a InstrumentsResponse object.
+details about that instrument in a `InstrumentsResponse` object.
 
 ```py
 get(
@@ -59,8 +59,9 @@ get(
 ### List multiple instruments
 
 The `list()` method takes optional arguments and returns instruments on the
-OpenAQ platform that meet all the conditions specified. If no argument is included,
-the method returns all instruments using the default arguments.
+OpenAQ platform that meet all the conditions specified in a
+`InstrumentsResponse` object. If no argument is included, the method returns all
+instruments using the default arguments.
 
 ```py
 list(
@@ -105,8 +106,9 @@ list(
 
 ## Response objects
 
-The Instrument object contains attributes that have all data about
-it. The hierarchy below presents the depth of the attributes and their
+The Instrument objects in the results of the
+`InstrumentsResponse` contain attributes that have all data about
+them. The hierarchy below presents the depth of the attributes and their
 datatypes.
 
 ```

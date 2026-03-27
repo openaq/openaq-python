@@ -4,11 +4,12 @@ title: Locations
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-The Locations resource provides air monitoring stations data from the OpenAQ database. You can use it to get details about stations:
-where they are located, what instruments they use, what pollutants they measure,
-and who owns or manages them. The resource has methods to query single stations,
-search many stations, and access live sensor data. This resource helps you work
-with station information and current conditions.
+The Locations resource provides air monitoring stations data from the OpenAQ
+database. You can use it to get details about stations: where they are located,
+what instruments they use, what pollutants they measure, and who owns or manages
+them. The resource has methods to query single stations, search many stations,
+and access live sensor data. This resource helps you work with station
+information and current conditions.
 
 ## Methods
 
@@ -24,7 +25,7 @@ The Locations resource provides the following methods:
 ### Get a single location
 
 The `get()` method accepts one single `locations_id` as an argument and returns
-details about that location in a LocationsResponse object.
+details about that location in a `LocationsResponse` object.
 
 #### *Query arguments*
 ```py
@@ -35,7 +36,7 @@ get(
 
 | argument | description | input requirements |
 | -------- | ----------- | ---- |
-| locations_id | `int` OpenAQ's unique ID for each location | Required |
+| locations_id | `int` OpenAQ's unique ID for a location | Required |
 
 #### *Example*
 
@@ -60,11 +61,12 @@ get(
   </TabItem>
 </Tabs>
 
-###  List multiple locations
+### List multiple locations
 
-The `list()` method takes optional arguments and returns locations on the
-OpenAQ platform that meet all the conditions specified. If no argument is included,
-the method returns all locations using the default arguments.
+The `list()` method takes optional arguments and returns locations on the OpenAQ
+platform that meet all the conditions specified in a `LocationsResponse` object.
+If no argument is included, the method returns all locations using the default
+arguments.
 
 ```py
 list(
@@ -132,8 +134,8 @@ list(
 ### List latest measurements from a location
 
 The `latest()` method takes one single `locations_id` as an argument and returns
-the latest measurement readings of all sensors at that location in a
-LatestResponse object.
+the last measurement readings of all sensors at that location in a
+`LatestResponse` object.
 
 ```py
 .latest(
@@ -141,12 +143,11 @@ LatestResponse object.
   ) -> LatestResponse
 ```
 
-
 #### *Query arguments*
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
-| locations_id | `int`  unique identifier for a location in OpenAQ | Required |
+| locations_id | `int` OpenAQ's unique ID for each location | Required |
 
 #### *Example*
 
@@ -174,7 +175,7 @@ LatestResponse object.
 ### Retrieve all sensors at a location
 
 The `sensors()` method accepts one single `locations_id` as an argument and
-returns all sensors at that location in a SensorsResponse object.
+returns all sensors at that location in a `SensorsResponse` object.
 
 ```py
 .sensors(
@@ -186,7 +187,7 @@ returns all sensors at that location in a SensorsResponse object.
 
 | argument | description | input requirements |
 | -------- | ----------- | ---- |
-| locations_id | `int`  unique identifier for a location in OpenAQ | Required |
+| locations_id | `int` OpenAQ's unique ID for a location | Required |
 
 #### *Example*
 
@@ -213,9 +214,9 @@ returns all sensors at that location in a SensorsResponse object.
 
 ## Response objects
 
-These Location and Latest objects contain attributes that have all data about
-them. The hierarchy below presents the depth of the attributes and their
-datatypes.
+The Location, Latest, and Sensor objects in the results of their respective
+response contain attributes that have all data about them. The hierarchy below
+presents the depth of the attributes and their datatypes.
 
 ### LocationsResponse
 ```
@@ -247,15 +248,15 @@ results[]
     │       ├── name: str
     │       ├── units: str
     │       └── display_name: str | None
-    ├── coordinates: 
+    ├── coordinates
     │   ├── latitude: float
     │   └── longitude: float
     ├── bounds: tuple[float, float, float, float]
     ├── distance: float | None
-    ├── datetime_first: 
+    ├── datetime_first
     │   ├── utc: str
     │   └── local: str
-    └── datetime_last: 
+    └── datetime_last
         ├── utc: str
         └── local: str
 ```
