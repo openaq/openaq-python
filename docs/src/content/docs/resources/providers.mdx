@@ -133,15 +133,17 @@ results[]
     ├── name: str
     ├── source_name: str
     ├── export_prefix: str
-    ├── license: str
     ├── datetime_added: str
     ├── datetime_first: str
     ├── datetime_last: str
-    ├── entity_type: str
+    ├── entities_id: int
+    ├── bbox: Bbox()
+    │   ├── type: str
+    │   └── coordinates: array[]
     └── parameters: []
         ├── id: int
         ├── name: str
         ├── units: str
-        ├── display_name: str | None
-        └── description: str | None
+        └── display_name: str | None
+
 ```
