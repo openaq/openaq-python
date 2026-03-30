@@ -44,10 +44,11 @@ class Parameters(SyncResourceBase):
         return ParametersResponse.read_response(parameter_response)
 
     def latest(self, parameters_id: int) -> LatestResponse:
-        """Retrieve latest measurements from a location.
+        """Retrieve the latest measurements for a parameter across all locations
+        in OpenAQ database.
 
         Args:
-            parameters_id: The locations ID of the location to retrieve.
+            parameters_id: The parameter ID of which to retrieve measurements.
 
         Returns:
             LatestResponse: An instance representing the retrieved latest results.
