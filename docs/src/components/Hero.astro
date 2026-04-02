@@ -1,5 +1,6 @@
 ---
-import { Image } from 'astro:assets';
+
+import { Picture } from 'astro:assets';
 import LinkButton from './vendor/starlight/LinkButton.astro'
 
 const { data } = Astro.locals.starlightRoute.entry;
@@ -11,8 +12,9 @@ const PAGE_TITLE_ID = "_top"
 const imageAttrs = {
 	loading: 'eager' as const,
 	decoding: 'async' as const,
-	width: 400,
-	height: 400,
+	formats: ['avif', 'webp', 'png'] as const,
+	width: 800,
+	height: 800,
 	alt: image?.alt || '',
 };
 
@@ -34,14 +36,28 @@ if (image) {
 <div class="hero">
 	{
 		darkImage && (
-			<Image
+			<Picture
 				src={darkImage}
-				{...imageAttrs}
-				class:list={{ 'light:sl-hidden': Boolean(lightImage) }}
+				formats={imageAttrs.formats}
+				width={imageAttrs.width}
+				height={imageAttrs.height}
+				alt={imageAttrs.alt}
+				loading={imageAttrs.loading}
+				decoding={imageAttrs.decoding}
+				pictureAttributes={{ class: lightImage ? 'light:sl-hidden' : undefined }}
 			/>
 		)
 	}
-	{lightImage && <Image src={lightImage} {...imageAttrs} class="dark:sl-hidden" />}
+	{lightImage && <Picture 
+		src={lightImage}
+		formats={imageAttrs.formats}
+		width={imageAttrs.width}
+		height={imageAttrs.height}
+		alt={imageAttrs.alt}
+		loading={imageAttrs.loading}
+		decoding={imageAttrs.decoding}
+        pictureAttributes={{ class: 'dark:sl-hidden' }}
+	/>}
 	{rawHtml && <div class="hero-html sl-flex" set:html={rawHtml} />}
 	<div class="sl-flex stack">
 		<div class="sl-flex copy">
@@ -73,6 +89,7 @@ if (image) {
 		padding-bottom: 1rem;
 	}
 
+	.hero > picture img,
 	.hero > img,
 	.hero > .hero-html {
 		object-fit: contain;
@@ -83,7 +100,14 @@ if (image) {
         transition: transform 1s ease-in-out 0s;
 	}
 
-    .hero > img:hover {
+	.hero > picture img {
+		width: 100%;
+		height: auto;
+		object-fit: contain;
+	}
+
+    .hero > img:hover,
+	.hero > picture:hover img {
         transform: perspective(300px) rotateY(10deg);
     }
 
@@ -128,6 +152,7 @@ if (image) {
 			padding-block: clamp(2.5rem, calc(1rem + 10vmin), 10rem);
 		}
 
+		.hero > picture,
 		.hero > img,
 		.hero > .hero-html {
 			order: 2;
