@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import astroD2 from 'astro-d2';
 
 import icon from 'astro-icon';
 
@@ -99,7 +98,6 @@ export default defineConfig({
         },
       ],
     }),
-    astroD2(),
     icon(),
   ],
 });
