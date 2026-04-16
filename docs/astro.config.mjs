@@ -72,10 +72,14 @@ export default defineConfig({
         {
           label: 'Common workflows',
           items: [
-            { label: 'Integrating with Pandas', slug: 'guides/pandas' },
             {
               label: 'Querying around a city',
               slug: 'guides/querying-around-a-city',
+            },
+            { label: 'Integrating with Pandas', slug: 'guides/pandas' },
+            {
+              label: 'Writing data to csv',
+              slug: 'guides/write-to-csv',
             },
           ],
         },

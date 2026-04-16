@@ -1,0 +1,72 @@
+---
+title: Writing data to csv
+description: Write measurements data in OpenAQ API responses to .csv fies
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+
+Sometimes, you might want to have the data readily available for later without
+having to use the API again. It could be that you want to perform analyses at a
+later time, use a different tool to work with the data outside of Python, or
+your goal might simply be to store the data locally. This guide demonstrates
+how you can write the data you query using OpenAQ SDK to a .csv file for later
+access.
+
+As an example, let's say you want to get all hourly PM2.5 data for location ID
+2178 reported for the last month of 2025. Using the .get() method of the Locations
+resource, you'll get the sensors_id that report PM2.5 at this location. You can
+then use that to access the measurements data.
+
+If you want to run the code, make sure you already have OpenAQ Python SDK
+installed. Remember to replace the `replace-me-with-a-valid-key` below with your
+OpenAQ API key.
+
+```py
+from openaq import OpenAQ
+from datetime import datetime
+
+client = OpenAQ(api_key='replace-me-with-a-valid-key')
+sensors_list = client.locations.get(2178).results[0].sensors
+pm25_sensors_id = 0
+
+for sensor in sensors_list:
+    if "pm25" in sensor.name:
+        pm25_sensors_id = sensor.id
+        break
+
+response = client.measurements.list(pm25_sensors_id,
+                                    data="hours",
+                                    datetime_from=datetime(2025, 12, 1),
+                                    datetime_to=datetime(2025, 12, 31)
+                                    )
+
+measurements = response.results
+```
+
+## Using built-in Python module
+To write data to file, you can use Python's built-in `csv` module that is
+available in its standard library. Outside of OpenAQ Python SDK, no installation
+of other external packages is necessary.
+
+```py
+import csv
+
+headers = ["timestamp", "parameter", "unit", "value"]
+
+with open("pm25_2178_2025_12.csv", 'w', newline='') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=headers)
+    writer.writeheader()
+
+    for item in measurements:
+        row = {
+            "timestamp": item.period.datetime_to.local,
+            "parameter": item.parameter.name,
+            "unit": item.parameter.units,
+            "value": item.value
+        }
+
+        writer.writerow(row)
+```
+
+## Using Pandas
