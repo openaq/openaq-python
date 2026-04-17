@@ -6,20 +6,26 @@ description: Write measurements data in OpenAQ API responses to .csv fies
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 
-Sometimes, you might want to have the data readily available for later without
-having to use the API again. It could be that you want to perform analyses at a
-later time, use a different tool to work with the data outside of Python, or
-your goal might simply be to store the data locally. This guide demonstrates
-how you can write the data you query using OpenAQ SDK to a .csv file for later
-access.
+Sometimes, you might want to have the data readily available without having to
+use the API again. It could be that you want to perform analyses at a later
+time, use a different tool to work with the data outside of Python, or your goal
+might simply be to store the data locally. 
+
+This guide demonstrates how you can write the measurements data you query using
+OpenAQ SDK to a .csv file for later access.
+
+## Getting measurements data
 
 As an example, let's say you want to get all hourly PM2.5 data for location ID
-2178 reported for the last month of 2025. Using the .get() method of the Locations
-resource, you'll get the sensors_id that report PM2.5 at this location. You can
-then use that to access the measurements data.
+2178 reported for the last month of 2025. To get this data:
+1. First, use the `.get()` method of the Locations resource to get the sensors_id that report PM2.5
+at this location. 
+2. Then, you can use that sensors_id to get measurements data from the
+Measurements resource.
 
-If you want to run the code, make sure you already have OpenAQ Python SDK
-installed. Remember to replace the `replace-me-with-a-valid-key` below with your
+The code below demonstrates the workflow above to get measurements data and
+store them. To run it, make sure you already have OpenAQ Python SDK installed.
+Remember to also replace the `replace-me-with-a-valid-key` below with your
 OpenAQ API key.
 
 ```py
@@ -45,16 +51,18 @@ measurements = response.results
 ```
 
 ## Using built-in Python module
-To write data to file, you can use Python's built-in `csv` module that is
-available in its standard library. Outside of OpenAQ Python SDK, no installation
-of other external packages is necessary.
+To write the fetched data to file, you can use Python's built-in `csv` module
+that is available in its standard library. Outside of OpenAQ Python SDK, no
+installation of other external packages is necessary with this approach.
 
 ```py
 import csv
 
+# Choose column names in .csv output
 headers = ["timestamp", "parameter", "unit", "value"]
 
-with open("pm25_2178_2025_12.csv", 'w', newline='') as csvfile:
+# Write each measurement data into .csv
+with open("csv_pm25_2178_2025_12.csv", 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=headers)
     writer.writeheader()
 
@@ -70,3 +78,33 @@ with open("pm25_2178_2025_12.csv", 'w', newline='') as csvfile:
 ```
 
 ## Using Pandas
+Alternatively, data can be written to file using third-party packages such as
+Pandas. In addition to installing Pandas, this approach also requires
+[converting the MeasurementsResponse object into a Pandas DataFrame](link) in
+the process. While less clean than the built-in `csv` method, because Pandas can
+automatically flatten the nested results, you can pick all columns or filter out
+unwanted columns in the output to be exported instead of manually extracting
+them.
+
+```py
+import pandas as pd
+
+# Flatten MeasuremensResponse into Pandas 2-dimensional DataFrame
+data = response.dict()
+df = pd.json_normalize(data["results"])
+
+# Rename columns as desired
+df = df.rename(columns={
+    "period.datetime_to.local": "timestamp",
+    "parameter.name": "parameter",
+    "parameter.units": "unit"
+    })
+
+# Filter columns to write to .csv
+df[["timestamp", "parameter", "unit", "value"]].to_csv(
+    "pd_pm25_2178_2025_12.csv", index=False
+    )
+
+# Close the connection when done
+client.close()
+```
