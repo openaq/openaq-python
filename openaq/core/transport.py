@@ -5,6 +5,7 @@ from __future__ import annotations
 import http.client
 import json
 import logging
+import ssl
 import threading
 import time
 import urllib.parse
@@ -12,6 +13,8 @@ from collections import deque
 from dataclasses import dataclass, field
 from http import HTTPStatus
 from typing import Any, Mapping
+
+import certifi
 
 from openaq.core.exceptions import (
     BadGatewayError,
@@ -212,7 +215,10 @@ class PooledConnection:
 
     def __post_init__(self) -> None:
         """Initializes the underlying HTTPS connection after the dataclass is created."""
-        self.conn = http.client.HTTPSConnection(self.host, timeout=self.connect_timeout)
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
+        self.conn = http.client.HTTPSConnection(
+            self.host, timeout=self.connect_timeout, context=ssl_context
+        )
 
 
 class ConnectionPool:

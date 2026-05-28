@@ -16,7 +16,6 @@ from types import TracebackType
 from typing import Mapping
 from urllib.parse import urljoin
 
-
 from openaq import __version__
 from openaq.core.exceptions import ApiKeyMissingError, RateLimitError
 from openaq.core.transport import (
