@@ -1,0 +1,947 @@
+"""Validator functions for type checking and runtime validation."""
+
+import datetime
+from typing import TypeGuard, cast
+
+from openaq.core.constants import ISO_CODES, MAX_LIMIT
+from openaq.core.exceptions import (
+    IdentifierOutOfBoundsError,
+    InvalidParameterError,
+)
+from openaq.core.types import (
+    _DATA_VALUES,
+    _PARAMETER_TYPE_VALUES,
+    _ROLLUP_VALUES,
+    _SORT_ORDER_VALUES,
+    BboxOnly,
+    CoordinatesRadius,
+    Data,
+    ParameterType,
+    Rollup,
+    SortOrder,
+)
+
+
+def integer_id_check(id: object) -> TypeGuard[int]:
+    """Check if value is a valid positive integer within 32-bit range.
+
+    Args:
+        id: Value to validate as an API identifier.
+
+    Returns:
+        True if value is a valid integer ID (1 to 2,147,483,647), False otherwise.
+    """
+    if isinstance(id, bool):
+        return False
+    if not isinstance(id, int):
+        return False
+    return id > 0 and id < 1 << 31
+
+
+def validate_integer_id(id: object) -> int:
+    """Validate integer ID parameter and raise error if invalid.
+
+    Args:
+        id: Value representing an ID query or path parameter.
+
+    Returns:
+        The unaltered validated integer ID.
+
+    Raises:
+        IdentifierOutOfBoundsError: If ID is not a positive integer within valid range.
+    """
+    if not integer_id_check(id):
+        message = f"ID values must be between 1 and {1 << 31 - 1}, got {id}"
+        raise IdentifierOutOfBoundsError(message)
+    return id
+
+
+def radius_check(radius: object) -> TypeGuard[int]:
+    """Check if value is a valid radius integer.
+
+    Args:
+        radius: Value to validate as a radius query parameter.
+
+    Returns:
+        True if value is an integer between 1 and 25,000 (meters), False otherwise.
+    """
+    if isinstance(radius, bool):
+        return False
+    if not (isinstance(radius, int)):
+        return False
+    return 1 <= radius <= 25_000
+
+
+def validate_radius(radius: object) -> int:
+    """Validate radius query parameter and raise error if invalid.
+
+    Args:
+        radius: Value representing the radius query parameter (in meters).
+
+    Returns:
+        The unaltered validated radius integer.
+
+    Raises:
+        InvalidParameterError: If radius is not an integer between 1 and 25,000.
+    """
+    if not radius_check(radius):
+        raise InvalidParameterError(
+            f"Radius must be an integer greater than zero and less that 25,000 (25km)"
+        )
+    return radius
+
+
+def validate_coordinates(coordinates: object) -> tuple[float, float]:
+    """Validate coordinates query parameter and raise error if invalid.
+
+    Args:
+        coordinates: Value representing the coordinates query parameter as (latitude, longitude).
+
+    Returns:
+        The unaltered validated coordinates tuple.
+
+    Raises:
+        InvalidParameterError: If coordinates are not a valid (lat, lon) tuple with valid ranges.
+    """
+    if not isinstance(coordinates, tuple):
+        raise InvalidParameterError(
+            f"Coordinates must be a tuple, got {type(coordinates).__name__}"
+        )
+
+    if len(coordinates) != 2:
+        raise InvalidParameterError(
+            f"Coordinates must have exactly 2 values, got {len(coordinates)}"
+        )
+
+    if not all(isinstance(x, (int, float)) for x in coordinates):
+        raise InvalidParameterError("Coordinates must contain only numbers")
+
+    lat, lon = coordinates
+
+    if not -90 <= lat <= 90:
+        raise InvalidParameterError(f"Latitude must be between -90 and 90, got {lat}")
+
+    if not -180 <= lon <= 180:
+        raise InvalidParameterError(
+            f"Longitude must be between -180 and 180, got {lon}"
+        )
+
+    return coordinates
+
+
+def validate_bbox(bbox: object) -> tuple[float, float, float, float]:
+    """Validate bounding box query parameter and raise error if invalid.
+
+    Args:
+        bbox: Value representing the bbox query parameter as (min_lon, min_lat, max_lon, max_lat).
+
+    Returns:
+        The unaltered validated bounding box tuple.
+
+    Raises:
+        InvalidParameterError: If bounding box is not a valid 4-value tuple with valid coordinate ranges.
+    """
+    if not isinstance(bbox, tuple):
+        raise InvalidParameterError(
+            f"Bounding box must be a tuple, got {type(bbox).__name__}"
+        )
+
+    if len(bbox) != 4:
+        raise InvalidParameterError(
+            f"Bounding box must have exactly 4 values, got {len(bbox)}"
+        )
+
+    if not all(isinstance(x, (int, float)) for x in bbox):
+        raise InvalidParameterError("Bounding box must contain only numbers")
+
+    min_lon, min_lat, max_lon, max_lat = bbox
+
+    if not (-90 <= min_lat <= 90 and -90 <= max_lat <= 90):
+        raise InvalidParameterError(
+            f"Latitudes must be between -90 and 90, got {min_lat}, {max_lat}"
+        )
+
+    if not (-180 <= min_lon <= 180 and -180 <= max_lon <= 180):
+        raise InvalidParameterError(
+            f"Longitudes must be between -180 and 180, got {min_lon}, {max_lon}"
+        )
+
+    if min_lon >= max_lon:
+        raise InvalidParameterError(
+            f"minimum longitude value must be less than maximum longtitude, got {min_lon} >= {max_lon}"
+        )
+
+    if min_lat >= max_lat:
+        raise InvalidParameterError(
+            f"minimum latitude must be less than maximum latitude, got {min_lat} >= {max_lat}"
+        )
+
+    return bbox
+
+
+def countries_id_iso_exclusivity_check(
+    countries_id: int | list[int] | None, iso: str | None
+) -> bool:
+    """Check if countries_id and iso are mutually exclusive.
+
+    Returns:
+        True if parameters are mutually exclusive (at most one provided), False otherwise.
+    """
+    return not (countries_id is not None and iso is not None)
+
+
+def validate_countries_query_parameters(
+    countries_id: int | list[int] | None, iso: str | None
+) -> tuple[int | list[int] | None, str | None]:
+    """Validate countries_id and iso query parameters and raise error if invalid.
+
+    Args:
+        countries_id: countries_id query parameter value.
+        iso: iso query parameter value.
+
+    Returns:
+        tuple of the input values
+
+    Raises:
+        InvalidParameterError: If parameter combination is invalid.
+    """
+    if not countries_id_iso_exclusivity_check(countries_id, iso):
+        raise InvalidParameterError("iso cannot be used with countries_id")
+
+    if iso is not None:
+        iso = validate_iso_param(iso)
+
+    if countries_id is not None:
+        countries_id = validate_integer_or_list_integer_params(
+            'countries_id', countries_id
+        )
+    return (countries_id, iso)
+
+
+def geospatial_params_exclusivity_check(
+    coordinates: object | None, radius: object | None, bbox: object | None
+) -> bool:
+    """Check if geospatial query parameter combination is valid.
+
+    Validates that:
+    - coordinates and radius are either both provided or both absent
+    - bbox is mutually exclusive with coordinates/radius
+
+    Args:
+        coordinates: Coordinates query parameter value.
+        radius: Radius query parameter value.
+        bbox: Bounding box query parameter value.
+
+    Returns:
+        True if parameters form a valid combination, False otherwise.
+    """
+    has_coordinates = coordinates is not None
+    has_radius = radius is not None
+    has_bbox = bbox is not None
+
+    if has_coordinates != has_radius:
+        return False
+
+    if has_bbox and (has_coordinates or has_radius):
+        return False
+
+    return True
+
+
+def validate_geospatial_params(
+    coordinates: object | None, radius: object | None, bbox: object | None
+) -> CoordinatesRadius | BboxOnly | tuple[None, None, None]:
+    """Validate geospatial query parameters and raise error if invalid.
+
+    Args:
+        coordinates: Coordinates query parameter value.
+        radius: Radius query parameter value.
+        bbox: Bounding box query parameter value.
+
+    Returns:
+        Validated geospatial parameters as one of:
+        - (coordinates, radius, None) if coordinates/radius provided
+        - (None, None, bbox) if bbox provided
+        - (None, None, None) if no geospatial parameters provided
+
+    Raises:
+        InvalidParameterError: If parameter combination is invalid or values fail validation.
+    """
+    if not geospatial_params_exclusivity_check(coordinates, radius, bbox):
+        has_coordinates = coordinates is not None
+        has_radius = radius is not None
+        has_bbox = bbox is not None
+        if has_coordinates and not has_radius:
+            raise InvalidParameterError("coordinates requires radius parameter")
+
+        if has_radius and not has_coordinates:
+            raise InvalidParameterError("radius requires coordinates parameter")
+
+        if has_bbox and (has_coordinates or has_radius):
+            raise InvalidParameterError(
+                "bbox cannot be used with coordinates/radius parameters"
+            )
+    if bbox is not None:
+        validated_bbox = validate_bbox(bbox)
+        return (None, None, validated_bbox)
+    elif coordinates is not None and radius is not None:
+        validated_coords = validate_coordinates(coordinates)
+        validated_radius = validate_radius(radius)
+        return (validated_coords, validated_radius, None)
+    else:
+        return (None, None, None)
+
+
+def page_check(page: object) -> TypeGuard[int]:
+    """Check if value is a valid page number.
+
+    Args:
+        page: Value to validate as a page query parameter.
+
+    Returns:
+        True if value is a positive integer, False otherwise.
+    """
+    if isinstance(page, bool):
+        return False
+    if not isinstance(page, int):
+        return False
+    return page > 0
+
+
+def validate_page_param(page: object) -> int:
+    """Validate page query parameter and raise error if invalid.
+
+    Args:
+        page: Value representing the page query parameter.
+
+    Returns:
+        The unaltered validated page integer.
+
+    Raises:
+        InvalidParameterError: If page is not a positive integer.
+    """
+    if not page_check(page):
+        message = f"page query parameter must be an integer greater than zero, got {type(page)} - {page}"
+        raise InvalidParameterError(message)
+    return page
+
+
+def limit_check(limit: int) -> TypeGuard[int]:
+    """Check if value is a valid limit number.
+
+    Args:
+        limit: Value to validate as a limit query parameter.
+
+    Returns:
+        True if value is an integer between 1 and MAX_LIMIT (1,000), False otherwise.
+    """
+    if isinstance(limit, bool):
+        return False
+    if not isinstance(limit, int):
+        return False
+    return 0 < limit <= MAX_LIMIT
+
+
+def validate_limit_param(limit: int) -> int:
+    """Validate limit query parameter and raise error if invalid.
+
+    Args:
+        limit: Value representing the limit query parameter (results per page).
+
+    Returns:
+        The unaltered validated limit integer.
+
+    Raises:
+        InvalidParameterError: If limit is not an integer between 1 and 1,000.
+    """
+    if not limit_check(limit):
+        message = f"limit query parameter must be an integer greater than zero and less than or equal to {MAX_LIMIT:,}, got {limit}"
+        raise InvalidParameterError(message)
+    return limit
+
+
+def is_int_list(id: list[object]) -> TypeGuard[list[int]]:
+    """Check if all items in list are valid integer IDs.
+
+    Args:
+        id: List of values to validate.
+
+    Returns:
+        True if all items are valid integer IDs, False otherwise.
+    """
+    return all(isinstance(x, int) and integer_id_check(x) for x in id)
+
+
+def validate_integer_or_list_integer_params(
+    param_name: str, id: list[object] | object
+) -> list[int] | int:
+    """Validate query parameter that accepts either a single integer or list of integers.
+
+    Args:
+        param_name: Name of the query parameter (for error messages).
+        id: Value representing a query parameter that can be an integer or list of integers.
+
+    Returns:
+        The unaltered validated integer or list of integers.
+
+    Raises:
+        InvalidParameterError: If value is not a valid integer or list of valid integers.
+    """
+    if isinstance(id, int) and integer_id_check(id):
+        return id
+    if isinstance(id, list):
+        if not is_int_list(id):
+            message = f"query parameter {param_name} must be a valid list of integers, got list containing: {set(type(x).__name__ for x in id)}"
+            raise InvalidParameterError(message)
+        return id
+    message = f"query parameter {param_name} must be an integer or list of integers, got: {type(id)}"
+    raise InvalidParameterError(message)
+
+
+_ISO_CODES_FROZEN = frozenset(ISO_CODES)
+
+
+def iso_check(code: object) -> TypeGuard[str]:
+    """Check if value is a valid ISO-3166-1 alpha-2 country code.
+
+    Args:
+        code: Value to validate as an ISO country code query parameter.
+
+    Returns:
+        True if value is a valid 2-letter ISO country code (case-insensitive), False otherwise.
+    """
+    if not isinstance(code, str):
+        return False
+    return len(code) == 2 and code.upper() in _ISO_CODES_FROZEN
+
+
+def validate_iso_param(code: str) -> str:
+    """Validate ISO country code query parameter and raise error if invalid.
+
+    Args:
+        code: Value representing the iso query parameter (ISO-3166-1 alpha-2 country code).
+
+    Returns:
+        The unaltered validated ISO country code string.
+
+    Raises:
+        InvalidParameterError: If code is not a valid ISO-3166-1 alpha-2 country code.
+    """
+    if not iso_check(code):
+        message = (
+            f"iso value must be a valid ISO-3166-1 alpha-2 country code, got {code}"
+        )
+        raise InvalidParameterError(message)
+    return code
+
+
+def validate_monitor(monitor: object) -> bool:
+    """Validate monitor query parameter and raise error if invalid.
+
+    Args:
+        monitor: Value representing the monitor query parameter.
+
+    Returns:
+        The unaltered validated monitor boolean.
+
+    Raises:
+        InvalidParameterError: If monitor is not a boolean.
+    """
+    if not isinstance(monitor, bool):
+        message = f"monitor parameter must be a boolean, got: {type(monitor)}"
+        raise InvalidParameterError(message)
+    return monitor
+
+
+def validate_mobile(mobile: object) -> bool:
+    """Validate mobile query parameter and raise error if invalid.
+
+    Args:
+        mobile: Value representing the mobile query parameter.
+
+    Returns:
+        The unaltered validated mobile boolean.
+
+    Raises:
+        InvalidParameterError: If mobile is not a boolean.
+    """
+    if not isinstance(mobile, bool):
+        message = f"mobile parameter must be a boolean, got: {type(mobile)}"
+        raise InvalidParameterError(message)
+    return mobile
+
+
+def validate_order_by(order_by: object) -> str:
+    """Validate order_by query parameter and raise error if invalid.
+
+    Args:
+        order_by: Value representing the order_by query parameter (field name to sort by).
+
+    Returns:
+        The unaltered validated order_by string.
+
+    Raises:
+        InvalidParameterError: If order_by is not a string.
+    """
+    if not isinstance(order_by, str):
+        message = f"order by parameter must be a string, got: {type(order_by)}"
+        raise InvalidParameterError(message)
+    return order_by
+
+
+def validate_sort_order(sort_order: object) -> SortOrder:
+    """Validate sort_order query parameter and raise error if invalid.
+
+    Args:
+        sort_order: Value representing the sort_order query parameter.
+
+    Returns:
+        The unaltered validated sort_order value (one of: 'ASC', 'DESC', 'asc', 'desc').
+
+    Raises:
+        InvalidParameterError: If sort_order is not a valid sort order string.
+    """
+    if not isinstance(sort_order, str):
+        message = f"sort_order parameter must be a string, got: {type(sort_order)}"
+        raise InvalidParameterError(message)
+
+    if sort_order not in _SORT_ORDER_VALUES:
+        raise InvalidParameterError(f"Invalid sort_order: {sort_order}")
+
+    return cast(SortOrder, sort_order)
+
+
+def data_check(data: object) -> TypeGuard[Data]:
+    """Check if value is a valid data type.
+
+    Args:
+        data: Value to validate as a data path parameter.
+
+    Returns:
+        True if value is one of: 'measurements', 'hours', 'days', 'years', False otherwise.
+    """
+    if not isinstance(data, str):
+        return False
+    return data in _DATA_VALUES
+
+
+def validate_data(data: object) -> Data:
+    """Validate data path parameter and raise error if invalid.
+
+    Args:
+        data: Value representing the data path parameter.
+
+    Returns:
+        The unaltered validated data value.
+
+    Raises:
+        InvalidParameterError: If data is not one of the valid data types.
+    """
+    if not data_check(data):
+        raise InvalidParameterError(
+            f"Invalid data type: {data}. Must be one of: {', '.join(_DATA_VALUES)}"
+        )
+    return data
+
+
+def rollup_check(rollup: object) -> TypeGuard[Rollup]:
+    """Check if value is a valid rollup type.
+
+    Args:
+        rollup: Value to validate as a rollup path parameter.
+
+    Returns:
+        True if value is a valid rollup type (e.g., 'hourly', 'daily', 'monthly'), False otherwise.
+    """
+    if not isinstance(rollup, str):
+        return False
+    return rollup in _ROLLUP_VALUES
+
+
+def validate_rollup(rollup: object) -> Rollup:
+    """Validate rollup path parameter and raise error if invalid.
+
+    Args:
+        rollup: Value representing the rollup path parameter.
+
+    Returns:
+        The unaltered validated rollup value.
+
+    Raises:
+        InvalidParameterError: If rollup is not one of the valid rollup types.
+    """
+    if not rollup_check(rollup):
+        raise InvalidParameterError(
+            f"Invalid rollup type: {rollup}. Must be one of: {', '.join(_ROLLUP_VALUES)}"
+        )
+    return rollup
+
+
+def check_data_rollup_compatibility(data: Data, rollup: Rollup) -> bool:
+    """Check that data and rollup path parameters are compatible.
+
+    Args:
+        data: Value representing the data path parameter.
+        rollup: Value representing the rollup path parameter.
+
+    Returns:
+        True if the data and rollup values can be paired, False if not.
+    """
+    valid_combinations = {
+        "measurements": ["hourly", "daily"],
+        "hours": [
+            "daily",
+            "monthly",
+            "yearly",
+            "hourofday",
+            "dayofweek",
+            "monthofyear",
+        ],
+        "days": ["monthly", "yearly", "dayofweek", "monthofyear"],
+        "years": [],
+    }
+    return rollup in valid_combinations.get(data, [])
+
+
+def validate_data_rollup_compatibility(
+    data: object, rollup: object | None
+) -> tuple[Data, Rollup | None]:
+    """Validate data and rollup parameters and their compatibility.
+
+    Args:
+        data: Value representing the data path parameter.
+        rollup: Value representing the rollup path parameter (optional).
+
+    Returns:
+        Tuple of validated (data, rollup) values.
+
+    Raises:
+        InvalidParameterError: If data or rollup are invalid, or if the combination is incompatible.
+    """
+    validated_data = validate_data(data)
+    validated_rollup = validate_rollup(rollup) if rollup is not None else None
+
+    if validated_rollup is not None and not check_data_rollup_compatibility(
+        validated_data, validated_rollup
+    ):
+        raise InvalidParameterError(
+            f"Invalid combination: data='{validated_data}' cannot be paired with rollup='{validated_rollup}'"
+        )
+
+    return validated_data, validated_rollup
+
+
+def check_valid_date_parameter(
+    data: Data,
+    date_from: datetime.date | str | None,
+    date_to: datetime.date | str | None,
+    datetime_from: datetime.datetime | str | None,
+    datetime_to: datetime.datetime | str | None,
+) -> bool:
+    """Validate data and date/datetime query parameters and their compatibility.
+
+    Args:
+        data: Value representing the data path parameter.
+        date_from: Value representing the date_from query parameter
+        date_to: Value representing the date_to query parameter
+        datetime_from: Value representing the datetime_from query parameter
+        datetime_to: Value representing the datetime_to query parameter
+
+    Returns:
+        True if the data is paired with valie date query parameters, False if not.
+    """
+    if data in ['days', 'years']:
+        return datetime_from is not None or datetime_to is not None
+    else:
+        return date_from is not None or date_to is not None
+
+
+def date_check(value: object) -> TypeGuard[datetime.date | str]:
+    """Check if value is a valid date object or ISO-8601 date string.
+
+    Args:
+        value: Value to validate as a date query parameter.
+
+    Returns:
+        True if value is a date object or valid ISO-8601 date string, False otherwise.
+    """
+    if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
+        return True
+    if isinstance(value, str):
+        return iso8601_date_check(value)
+    return False
+
+
+def iso8601_date_check(value: str) -> bool:
+    """Check if value is a valid ISO-8601 date string (YYYY-MM-DD).
+
+    Args:
+        value: String to validate as an ISO-8601 date.
+
+    Returns:
+        True if value is a valid ISO-8601 formatted date string, False otherwise.
+    """
+    if not isinstance(value, str):
+        return False
+
+    try:
+        datetime.date.fromisoformat(value)
+        return True
+    except ValueError:
+        return False
+
+
+def to_date(value: datetime.date | str) -> datetime.date:
+    """Convert value to date object if not already a date.
+
+    Args:
+        value: Date object or ISO-8601 date string.
+
+    Returns:
+        Date object (converted from string if necessary).
+    """
+    if isinstance(value, datetime.date):
+        return value
+    return datetime.date.fromisoformat(value)
+
+
+def date_from_lesser_check(
+    date_from: datetime.date, date_to: datetime.date | None = None
+) -> bool:
+    """Checks that date_from is either less than today or less than date_to.
+
+    Args:
+        date_from: Value representing the date_from query parameter (start date).
+        date_to: Value representing the date_to query parameter (end date), or None.
+
+    Returns:
+        True if date_from is in the past or less than date_to.
+    """
+    if not date_to:
+        return date_from < datetime.date.today()
+    return date_from < date_to
+
+
+def iso8601_datetime_check(value: object) -> TypeGuard[str]:
+    """Check if value is a valid ISO-8601 datetime string.
+
+    Args:
+        value: Value to validate as an ISO-8601 datetime string.
+
+    Returns:
+        True if value is a valid ISO-8601 formatted datetime string, False otherwise.
+    """
+    if not isinstance(value, str):
+        return False
+
+    try:
+        # Replace 'Z' with '+00:00' for Python 3.10
+        # https://docs.python.org/3/whatsnew/3.11.html#datetime
+        datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+        return True
+    except ValueError:
+        return False
+
+
+def datetime_check(value: object) -> TypeGuard[datetime.datetime | str]:
+    """Check if value is a valid datetime object or ISO-8601 string.
+
+    Args:
+        value: Value to validate as a datetime query parameter.
+
+    Returns:
+        True if value is a datetime object or valid ISO-8601 string, False otherwise.
+    """
+    is_datetime = isinstance(value, datetime.datetime)
+    is_str = isinstance(value, str)
+    if not any([is_datetime, is_str]):
+        return False
+    if is_str:
+        return iso8601_datetime_check(value)
+    return True
+
+
+def to_datetime(value: datetime.datetime | str) -> datetime.datetime:
+    """Convert value to datetime object if not already a datetime.
+
+    Args:
+        value: Datetime object or ISO-8601 datetime string.
+
+    Returns:
+        Datetime object (converted from string if necessary).
+    """
+    if isinstance(value, datetime.datetime):
+        return value
+    return datetime.datetime.fromisoformat(value)
+
+
+def datetime_from_lesser_check(
+    datetime_from: datetime.datetime, datetime_to: datetime.datetime | None = None
+) -> bool:
+    """Checks that datetime_from is either less than now or less than datetime_to.
+
+    Args:
+        datetime_from: Value representing the datetime_from query parameter (start date/time).
+        datetime_to: Value representing the datetime_to query parameter (end date/time), or None.
+
+    Returns:
+        True if datetime_from is in the past or less than datetime_to.
+    """
+    if not datetime_to:
+        return datetime_from < datetime.datetime.now()
+    return datetime_from < datetime_to
+
+
+def datetime_date_params_exclusivity_check(
+    datetime_from: datetime.datetime | datetime.date | str | None,
+    datetime_to: datetime.datetime | datetime.date | str | None,
+    date_from: datetime.date | str | None,
+    date_to: datetime.date | str | None,
+) -> bool:
+    """Checks that datetime_from and/or datetime_to is not used with date_from and/or date_to.
+
+    Args:
+        datetime_from: Value representing the datetime_from query parameter (start date/time) or None.
+        datetime_to: Value representing the datetime_to query parameter (end date/time), or None.
+        date_from: Value representing the date_from query parameter or None.
+        date_to: Value representing the date_to query parameter or None.
+
+    Returns:
+        True if datetime_from and/or datetime_to is not used with date_from and/or date_to, otherwise False
+    """
+    date_params_used = (date_from is not None) or (date_to is not None)
+    datetime_params_used = (datetime_from is not None) or (datetime_to is not None)
+
+    return not (date_params_used and datetime_params_used)
+
+
+def validate_datetime_params(
+    data: Data,
+    datetime_from: datetime.datetime | datetime.date | str | None,
+    datetime_to: datetime.datetime | datetime.date | str | None,
+    date_from: datetime.date | str | None,
+    date_to: datetime.date | str | None,
+) -> tuple[
+    datetime.datetime | None,
+    datetime.datetime | None,
+    datetime.date | None,
+    datetime.date | None,
+]:
+    """Validate datetime and date query parameters based on data type.
+
+    Args:
+        data: Value representing the data path parameter.
+        datetime_from: Value representing the datetime_from query parameter.
+        datetime_to: Value representing the datetime_to query parameter.
+        date_from: Value representing the date_from query parameter.
+        date_to: Value representing the date_to query parameter.
+
+    Returns:
+        Tuple of (datetime_from, datetime_to, date_from, date_to).
+
+    Raises:
+        InvalidParameterError: If parameters are invalid or incompatible with data value.
+    """
+    if check_valid_date_parameter(data, date_from, date_to, datetime_from, datetime_to):
+        raise InvalidParameterError(
+            f"Invalid parameter combination for data='{data}'. "
+            f"Use datetime_from/datetime_to for 'measurements'/'hours', "
+            f"or date_from/date_to for 'days'/'years'."
+        )
+
+    if not datetime_date_params_exclusivity_check(
+        datetime_from, datetime_to, date_from, date_to
+    ):
+        raise InvalidParameterError(
+            "Cannot mix date and datetime parameters. "
+            "Use either date_from/date_to OR datetime_from/datetime_to, not both."
+        )
+
+    if data in ['days', 'years']:
+        if date_to:
+            if not date_check(date_from) or not date_check(date_to):
+                raise InvalidParameterError(
+                    f"Invalid date_from or date_to, must be either date type or ISO-8601 formatted date string, got {type(date_from)} and {type(date_to)}"
+                )
+            date_from_date = to_date(date_from)
+            date_to_date = to_date(date_to)
+            if not date_from_lesser_check(date_from_date, date_to_date):
+                raise InvalidParameterError(
+                    "Invalid date_from or date_to, date_from must be less than date_to"
+                )
+            return (None, None, date_from_date, date_to_date)
+        elif date_from is not None:
+            if not date_check(date_from):
+                raise InvalidParameterError(
+                    f"Invalid date_from, must be either date type or ISO-8601 formatted date string, got {type(date_from)}"
+                )
+            date_from_date = to_date(date_from)
+            if not date_from_lesser_check(date_from_date):
+                raise InvalidParameterError(
+                    "Invalid date_from, date_from must be in the past."
+                )
+            return (None, None, date_from_date, None)
+        else:
+            return (None, None, None, None)
+
+    else:  # data in ['measurements', 'hours']
+        if datetime_to is not None:
+            if not datetime_check(datetime_from) or not datetime_check(datetime_to):
+                raise InvalidParameterError(
+                    f"Invalid datetime_from or datetime_to, must be either datetime type or ISO-8601 formatted string, got {type(datetime_from)} and {type(datetime_to)}"
+                )
+            datetime_from_datetime = to_datetime(datetime_from)
+            datetime_to_datetime = to_datetime(datetime_to)
+            if not datetime_from_lesser_check(
+                datetime_from_datetime, datetime_to_datetime
+            ):
+                raise InvalidParameterError(
+                    "Invalid datetime_from or datetime_to, datetime_from must be less than datetime_to"
+                )
+            return (datetime_from_datetime, datetime_to_datetime, None, None)
+        elif datetime_from is not None:
+            if not datetime_check(datetime_from):
+                raise InvalidParameterError(
+                    f"Invalid datetime_from, must be either datetime type or ISO-8601 formatted string, got {type(datetime_from)}"
+                )
+            datetime_from_datetime = to_datetime(datetime_from)
+            if not datetime_from_lesser_check(datetime_from_datetime):
+                raise InvalidParameterError(
+                    "Invalid datetime_from, datetime_from must be in the past."
+                )
+            return (datetime_from_datetime, None, None, None)
+        else:
+            return (None, None, None, None)
+
+
+def parameter_type_check(parameter_type: object) -> TypeGuard[ParameterType]:
+    """Check if value is a valid parameter type.
+
+    Args:
+        parameter_type: Value to validate as a parameter_type query parameter.
+
+    Returns:
+        True if value is one of: 'pollutant', 'meteorological', False otherwise.
+    """
+    if not isinstance(parameter_type, str):
+        return False
+    return parameter_type in _PARAMETER_TYPE_VALUES
+
+
+def validate_parameter_type(parameter_type: object) -> ParameterType:
+    """Validate parameter_type query parameter and raise error if invalid.
+
+    Args:
+        parameter_type: Value representing the parameter_type query parameter.
+
+    Returns:
+        The unaltered validated parameter_type value.
+
+    Raises:
+        InvalidParameterError: If parameter_type is not one of the valid parameter_type types.
+    """
+    if not parameter_type_check(parameter_type):
+        raise InvalidParameterError(
+            f"Invalid parameter_type type: {parameter_type}. Must be one of: {', '.join(_PARAMETER_TYPE_VALUES)}"
+        )
+    return parameter_type

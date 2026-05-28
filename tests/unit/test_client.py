@@ -1,0 +1,377 @@
+import os
+import platform
+from datetime import datetime, timedelta
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, mock_open, patch
+
+import pytest
+from freezegun import freeze_time
+
+from openaq import __version__
+from openaq.client import OpenAQ, _get_openaq_config, _has_toml
+from openaq.core.exceptions import ApiKeyMissingError, RateLimitError
+from openaq.core.transport import (
+    DEFAULT_LIMITS,
+    DEFAULT_TIMEOUT,
+    Headers,
+    Limits,
+    Timeout,
+)
+
+from .mocks import MockTransport
+
+USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
+
+
+@pytest.fixture
+def mock_config_file():
+    mock_toml_content = b"""api-key='test_api_key'"""
+    with patch.object(Path, 'is_file', return_value=True):
+        with patch(
+            'builtins.open', mock_open(read_data=mock_toml_content)
+        ) as mock_file:
+            yield mock_file
+
+
+class TestClient:
+    @pytest.fixture()
+    def setup(self):
+        self.client = OpenAQ(api_key="abc123-def456-ghi789", transport=MockTransport())
+
+    @pytest.fixture()
+    def mock_openaq_api_key_env_vars(self):
+        with patch.dict(
+            os.environ, {"OPENAQ_API_KEY": "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"}
+        ):
+            yield
+
+    def test_transport_property(self, setup):
+        assert isinstance(self.client.transport, MockTransport)
+        with pytest.raises(AttributeError):
+            self.client.transport = MockTransport()
+
+    def test_default_client_params(self, setup):
+        assert self.client._base_url == "https://api.openaq.org/v3/"
+
+    def test_default_headers(self, setup):
+        assert self.client.headers["User-Agent"] == USER_AGENT
+        assert self.client.headers["Accept"] == "application/json"
+
+    def test_custom_headers(self, setup):
+        self.client = OpenAQ(
+            api_key="abc123-def456-ghi789",
+            base_url="https://mycustom.openaq.org",
+            transport=MockTransport(),
+        )
+        assert self.client.headers["X-API-Key"] == "abc123-def456-ghi789"
+
+    def test_client_params(self, setup):
+        self.client = OpenAQ(
+            api_key="abc123-def456-ghi789",
+            base_url="https://mycustom.openaq.org",
+            transport=MockTransport(),
+        )
+        assert self.client._base_url == "https://mycustom.openaq.org"
+
+    def test_api_env_var(self, mock_openaq_api_key_env_vars):
+        client = OpenAQ(transport=MockTransport())
+        assert client.api_key == "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"
+
+    @pytest.mark.usefixtures("mock_config_file")
+    def test_api_key_from_config(self):
+        if int(platform.python_version_tuple()[1]) >= 11:
+            client = OpenAQ(transport=MockTransport())
+            assert client.api_key == "test_api_key"
+        else:
+            with pytest.raises(ApiKeyMissingError):
+                client = OpenAQ(transport=MockTransport())
+
+    def test_api_key_arg_override_env_var(self, setup, mock_openaq_api_key_env_vars):
+        assert self.client.api_key == "abc123-def456-ghi789"
+
+    def test_api_key_arg_override_config(self, setup, mock_config_file):
+        assert self.client.api_key == "abc123-def456-ghi789"
+
+    def test_api_key_arg_override_env_vars_config(
+        self, setup, mock_openaq_api_key_env_vars, mock_config_file
+    ):
+        assert self.client.api_key == "abc123-def456-ghi789"
+
+    @patch('openaq.client.datetime')
+    @patch('time.sleep')
+    @patch('openaq.client.logger')
+    def test_wait_for_rate_limit_reset_waits_when_positive(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        now = datetime(2026, 2, 12, 0, 0, 0)
+        mock_datetime.now.return_value = now
+        self.client._rate_limit_reset_datetime = now + timedelta(seconds=5)
+
+        self.client._wait_for_rate_limit_reset()
+
+        mock_sleep.assert_called_once_with(5)
+        mock_logger.info.assert_called_once_with(
+            "Rate limit hit. Waiting 5 seconds for reset."
+        )
+
+    @patch('openaq.client.datetime')
+    @patch('time.sleep')
+    @patch('openaq.client.logger')
+    def test_wait_for_rate_limit_reset_does_not_wait_when_zero(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        now = datetime(2026, 2, 12, 0, 0, 0)
+        mock_datetime.now.return_value = now
+        self.client._rate_limit_reset_datetime = now
+
+        self.client._wait_for_rate_limit_reset()
+
+        mock_sleep.assert_not_called()
+        mock_logger.info.assert_not_called()
+
+    @patch('openaq.client.datetime')
+    @patch('time.sleep')
+    @patch('openaq.client.logger')
+    def test_wait_for_rate_limit_reset_does_not_wait_when_negative(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        now = datetime(2026, 2, 12, 0, 0, 0)
+        mock_datetime.now.return_value = now
+        self.client._rate_limit_reset_datetime = now - timedelta(seconds=5)
+
+        self.client._wait_for_rate_limit_reset()
+
+        mock_sleep.assert_not_called()
+        mock_logger.info.assert_not_called()
+
+    def test_close_closes_transport(self, setup):
+        self.client._transport.close = Mock()
+        self.client.close()
+        self.client._transport.close.assert_called_once()
+
+    def test_context_manager_enter_returns_client(self, setup):
+        with self.client as ctx_client:
+            assert ctx_client is self.client
+
+    def test_context_manager_exit_closes_transport(self, setup):
+        self.client._transport.close = Mock()
+        with self.client:
+            pass
+        self.client._transport.close.assert_called_once()
+
+    def test_context_manager_exit_closes_even_with_exception(self, setup):
+        self.client._transport.close = Mock()
+        with pytest.raises(ValueError):
+            with self.client:
+                raise ValueError("Test exception")
+        self.client._transport.close.assert_called_once()
+
+    def test_blocks_after_custom_limit(self):
+        client = OpenAQ(
+            api_key="abc123-def456-ghi789",
+            transport=MockTransport(),
+            auto_wait=False,
+            rate_limit_override=5,
+        )
+        client._rate_limit_reset_datetime = datetime.now() + timedelta(seconds=60)
+        for _ in range(5):
+            client._check_rate_limit()
+
+        with pytest.raises(RateLimitError):
+            client._check_rate_limit()
+
+    def test_allows_exactly_override_requests(self):
+        limit = 10
+        client = OpenAQ(
+            api_key="abc123-def456-ghi789",
+            transport=MockTransport(),
+            auto_wait=False,
+            rate_limit_override=limit,
+        )
+        client._rate_limit_reset_datetime = datetime.now() + timedelta(seconds=60)
+        success_count = 0
+        for _ in range(limit + 5):
+            try:
+                client._check_rate_limit()
+                success_count += 1
+            except RateLimitError:
+                break
+
+        assert success_count == limit
+
+    def test_raises_when_exhausted_and_auto_wait_false(self, setup):
+        self.client._auto_wait = False
+        self.client._rate_limit_remaining = 0.0
+        self.client._rate_limit_reset_datetime = datetime.now() + timedelta(seconds=30)
+
+        with pytest.raises(RateLimitError):
+            self.client._check_rate_limit()
+
+    @freeze_time("2026-02-12T00:00:00")
+    def test_error_message_includes_reset_seconds(self, setup):
+        self.client._auto_wait = False
+        self.client._rate_limit_remaining = 0.0
+        self.client._rate_limit_reset_datetime = datetime(2026, 2, 12, 0, 0, 30)
+
+        with pytest.raises(RateLimitError, match="30"):
+            self.client._check_rate_limit()
+
+    @patch('time.sleep')
+    def test_waits_when_exhausted_and_auto_wait_true(self, mock_sleep, setup):
+        self.client._auto_wait = True
+        self.client._rate_limit_remaining = 0.0
+        self.client._rate_limit_reset_datetime = datetime.now() + timedelta(seconds=10)
+
+        self.client._check_rate_limit()
+
+        mock_sleep.assert_called_once()
+
+    @patch('time.sleep')
+    def test_resets_capacity_after_wait(self, mock_sleep, setup):
+        self.client._auto_wait = True
+        self.client._rate_limit_remaining = 0.0
+        self.client._rate_limit_reset_datetime = datetime.now() + timedelta(seconds=10)
+
+        self.client._check_rate_limit()
+
+        assert self.client._rate_limit_remaining == self.client._rate_limit_capacity - 1
+
+    def test_set_rate_limit_updates_remaining_from_headers(self, setup):
+        headers = Headers({"x-ratelimit-remaining": "45", "x-ratelimit-reset": "60"})
+        self.client._set_rate_limit(headers)
+        assert self.client._rate_limit_remaining == 45
+
+    def test_set_rate_limit_server_remaining_overrides_local_count(self, setup):
+        self.client._rate_limit_remaining = 50.0
+        headers = Headers({"x-ratelimit-remaining": "30", "x-ratelimit-reset": "60"})
+        self.client._set_rate_limit(headers)
+        assert self.client._rate_limit_remaining == 30
+
+    def test_set_rate_limit_updates_reset_datetime_from_headers(self, setup):
+        headers = Headers({"x-ratelimit-remaining": "45", "x-ratelimit-reset": "30"})
+        before = datetime.now() + timedelta(seconds=29)
+        self.client._set_rate_limit(headers)
+        after = datetime.now() + timedelta(seconds=32)
+
+        assert before < self.client._rate_limit_reset_datetime < after
+
+    def test_set_rate_limit_missing_headers_does_not_raise(self, setup):
+        headers = Headers({})
+        try:
+            self.client._set_rate_limit(headers)
+        except Exception as e:
+            pytest.fail(f"Unexpected exception raised: {e}")
+
+    def test_set_rate_limit_remaining_allows_further_requests(self, setup):
+        headers = Headers({"x-ratelimit-remaining": "2", "x-ratelimit-reset": "30"})
+        self.client._set_rate_limit(headers)
+        self.client._auto_wait = False
+
+        self.client._check_rate_limit()
+        self.client._check_rate_limit()
+
+        with pytest.raises(RateLimitError):
+            self.client._check_rate_limit()
+
+    def test_do_calls_transport_with_correct_args(self, setup):
+        mock_response = MagicMock()
+        mock_response.headers = Headers({})
+        self.client._transport.send_request = Mock(return_value=mock_response)
+
+        self.client._do("get", "locations/1")
+
+        call_kwargs = self.client._transport.send_request.call_args
+        assert call_kwargs.kwargs["url"] == "https://api.openaq.org/v3/locations/1"
+        assert call_kwargs.kwargs["method"] == "get"
+
+    def test_do_passes_params_to_transport(self, setup):
+        mock_response = MagicMock()
+        mock_response.headers = Headers({})
+        self.client._transport.send_request = Mock(return_value=mock_response)
+
+        self.client._do("get", "/test", params={"limit": 100, "page": 1})
+
+        call_kwargs = self.client._transport.send_request.call_args
+        assert call_kwargs.kwargs["params"] == {"limit": 100, "page": 1}
+
+    def test_do_passes_custom_headers_to_transport(self, setup):
+        mock_response = MagicMock()
+        mock_response.headers = Headers({})
+        self.client._transport.send_request = Mock(return_value=mock_response)
+
+        self.client._do("get", "/test", headers={"X-Custom-Header": "value"})
+
+        call_kwargs = self.client._transport.send_request.call_args
+        assert "x-custom-header" in call_kwargs.kwargs["headers"]
+
+    def test_do_syncs_rate_limit_from_response_headers(self, setup):
+        mock_response = MagicMock()
+        mock_response.headers = Headers(
+            {"x-ratelimit-remaining": "42", "x-ratelimit-reset": "30"}
+        )
+        self.client._transport.send_request = Mock(return_value=mock_response)
+
+        self.client._do("get", "/test")
+
+        assert self.client._rate_limit_remaining == 42
+
+    def test_do_raises_before_sending_when_rate_limited(self, setup):
+        self.client._auto_wait = False
+        self.client._rate_limit_remaining = 0
+        self.client._rate_limit_reset_datetime = datetime.now() + timedelta(seconds=30)
+        self.client._transport.send_request = Mock()
+
+        with pytest.raises(RateLimitError):
+            self.client._do("get", "/test")
+
+        self.client._transport.send_request.assert_not_called()
+
+    def test_default_timeout_applied_to_transport(self):
+        client = OpenAQ(api_key="abc123-def456-ghi789")
+        assert client.transport._connect_timeout == DEFAULT_TIMEOUT.connect
+        assert client.transport._read_timeout == DEFAULT_TIMEOUT.read
+
+    def test_custom_timeout_passed_to_transport(self):
+        custom_timeout = Timeout(10.0, read=15.0)
+        client = OpenAQ(api_key="abc123-def456-ghi789", timeout=custom_timeout)
+        assert client.transport._connect_timeout == custom_timeout.connect
+        assert client.transport._read_timeout == custom_timeout.read
+
+    def test_default_limits_applied_to_transport(self):
+        client = OpenAQ(api_key="abc123-def456-ghi789")
+        assert client.transport._pool._max_total == DEFAULT_LIMITS.max_connections
+        assert (
+            client.transport._pool._max_idle == DEFAULT_LIMITS.max_keepalive_connections
+        )
+
+    def test_custom_limits_passed_to_transport(self):
+        custom_limits = Limits(max_connections=5, max_keepalive_connections=2)
+        client = OpenAQ(api_key="abc123-def456-ghi789", limits=custom_limits)
+        assert client.transport._pool._max_total == 5
+        assert client.transport._pool._max_idle == 2
+
+
+def test_tomllib_conditional_import():
+    if int(platform.python_version_tuple()[1]) >= 11:
+        assert _has_toml == True
+    else:
+        assert _has_toml == False
+
+
+def test__get_openaq_config_file_exists():
+    mock_toml_content = b"""
+        api-key = 'openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p'
+    """
+    expected_config = {"api_key": "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"}
+
+    with patch.object(Path, 'is_file', return_value=True):
+        with patch(
+            'builtins.open', mock_open(read_data=mock_toml_content)
+        ) as mock_file:
+            result = None
+            if int(platform.python_version_tuple()[1]) >= 11:
+                result = _get_openaq_config()
+                assert result == expected_config
+                mock_file.assert_any_call(Path(Path.home() / ".openaq.toml"), 'rb')
+            else:
+                assert result == None

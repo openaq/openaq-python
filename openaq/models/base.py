@@ -1,0 +1,29 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from openaq.client import OpenAQ
+
+
+class ResourceBase:
+    """Base model for sync resources.
+
+    Handles the instantiation of the parent client object.
+
+
+    Attributes:
+        client: an instance of OpenAQ client object.
+
+    """
+
+    def __init__(
+        self,
+        client: OpenAQ,
+    ):
+        """Initialize the ResourceBase.
+
+        Args:
+            client (OpenAQ): The client instance to interact with the OpenAQ API.
+        """
+        self._client = client

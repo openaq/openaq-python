@@ -27,7 +27,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Typing :: Typed",
 ]
-dependencies = ["httpx>=0.28.1,<1.0"]
+dependencies = []
 dynamic = ["version"]
 
 [project.urls]
@@ -62,10 +62,8 @@ path = "openaq/__init__.py"
 dependencies = [
   "coverage[toml]",
   "pytest",
-  "pytest-asyncio",
   "pytest-cov",
   "pytest-mock",
-  "respx",
   "freezegun",
 ]
 
@@ -83,11 +81,7 @@ python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.hatch.envs.types]
 detached = true
-dependencies = ["mypy", "lxml","httpx"]
-
-[[tool.mypy.overrides]]
-module = ["httpx.*", "openaq"]
-ignore_missing_imports = true
+dependencies = ["mypy", "lxml"]
 
 [[tool.mypy.overrides]]
 module = ["orjson"]

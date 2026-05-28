@@ -1,7 +1,8 @@
-import httpx
+import http.client
+
 import pytest
 
-from openaq.shared.exceptions import (
+from openaq.core.exceptions import (
     BadGatewayError,
     BadRequestError,
     ForbiddenError,
@@ -14,7 +15,12 @@ from openaq.shared.exceptions import (
     TimeoutError,
     ValidationError,
 )
-from openaq.shared.transport import check_response
+from openaq.core.transport import Response, check_response
+
+
+def make_response(status_code: int) -> Response:
+    msg = http.client.HTTPMessage()
+    return Response(status_code, b"", msg)
 
 
 @pytest.mark.parametrize(
@@ -35,12 +41,11 @@ from openaq.shared.transport import check_response
     ],
 )
 def test_check_response(http_code, exception):
-    response = httpx.Response(http_code)
     with pytest.raises(exception):
-        check_response(response)
+        check_response(make_response(http_code))
 
 
 @pytest.mark.parametrize("http_code", [200, 201, 202, 204])
 def test_check_response_successful(http_code):
-    response = httpx.Response(http_code)
+    response = make_response(http_code)
     assert check_response(response) == response

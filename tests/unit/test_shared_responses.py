@@ -1,3 +1,4 @@
+import http
 import json
 import numbers
 import types
@@ -5,10 +6,9 @@ from dataclasses import fields
 from pathlib import Path
 from typing import Union, get_args, get_origin, get_type_hints
 
-import httpx
 import pytest
 
-from openaq.shared.responses import (
+from openaq.core.responses import (
     CountriesResponse,
     Country,
     Instrument,
@@ -28,9 +28,10 @@ from openaq.shared.responses import (
     ProvidersResponse,
     Sensor,
     SensorsResponse,
-    _ResourceBase,
+    _ModelBase,
     _ResponseBase,
 )
+from openaq.core.transport import Response
 
 RATE_LIMIT_HEADERS = {
     "X-Ratelimit-Limit": "23",
@@ -68,10 +69,11 @@ def read_response_file(name: str) -> str:
         return f.read()
 
 
-def mock_response(data: str) -> httpx.Response:
-    return httpx.Response(
-        status_code=200, headers=RATE_LIMIT_HEADERS, json=json.loads(data)
-    )
+def mock_response(data: str) -> Response:
+    msg = http.client.HTTPMessage()
+    for key, value in RATE_LIMIT_HEADERS.items():
+        msg[key] = value
+    return Response(200, data.encode(), msg)
 
 
 def remove_nulls(value):
@@ -120,7 +122,6 @@ def value_matches_type(value, expected_type) -> bool:
     return isinstance(value, expected_type)
 
 
-@pytest.mark.respx(base_url="https://api.openaq.org/v3/")
 def test_rate_limit_headers_response():
     """Tests that example JSON responses validate against response models."""
     response = read_response_file('locations')
@@ -143,8 +144,7 @@ def test_rate_limit_headers_response():
         ('sensor', Sensor),
     ],
 )
-@pytest.mark.respx(base_url="https://api.openaq.org/v3/")
-def test_resources_validation(name: str, resource_class: _ResourceBase):
+def test_resources_validation(name: str, resource_class: _ModelBase):
     """Tests that example JSON responses validate against response models."""
     resource = read_resource_file(name)
     resource_dict = json.loads(resource)
@@ -172,7 +172,6 @@ def test_resources_validation(name: str, resource_class: _ResourceBase):
         ('sensors', SensorsResponse),
     ],
 )
-@pytest.mark.respx(base_url="https://api.openaq.org/v3/")
 def test_responses_validation(name: str, response_class: _ResponseBase):
     """Tests that example JSON responses validate against response models."""
     response = read_response_file(name)
@@ -200,7 +199,6 @@ def test_responses_validation(name: str, response_class: _ResponseBase):
         ('sensors', SensorsResponse),
     ],
 )
-@pytest.mark.respx(base_url="https://api.openaq.org/v3/")
 def test_responses_json(name: str, response_class: _ResponseBase):
     """Tests that example JSON responses validate against response models."""
     response = read_response_file(name)
@@ -243,7 +241,6 @@ def test_response_ignores_unexpected_fields():
         ('sensors', SensorsResponse),
     ],
 )
-@pytest.mark.respx(base_url="https://api.openaq.org/v3/")
 def test_field_types(name: str, response_class: _ResponseBase):
     """Tests whether all fields have the correct types"""
     response = read_response_file(name)

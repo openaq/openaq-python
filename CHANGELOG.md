@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.0rc3] - 2026-05-23
+
+**Breaking changes**
+
+### Removed
+
+- Refactors Transport to no longer have HTTPX as dependency
+- Removed AsyncClient, now only a synchronous OpenAQ client is exported
+
 ## [1.0.0rc2] - 2026-02-24
 
 ### Updated
