@@ -1,10 +1,8 @@
 import http.client
-import ssl
 import threading
 import time
 from unittest import mock
 
-import certifi
 import pytest
 
 from openaq.core.transport import (
@@ -293,13 +291,15 @@ class TestTransport:
             with pytest.raises(OSError):
                 transport._raw_request("GET", "api.openaq.org", "/v3/locations", {})
 
-    def test_ssl_context_uses_certifi_ca_bundle(self):
-        pc = PooledConnection(host="api.openaq.org", connect_timeout=5.0)
-        assert pc.conn._context.verify_mode == ssl.CERT_REQUIRED
-
-    def test_ssl_context_ca_certs_matches_certifi(self):
-        pc = PooledConnection(host="api.openaq.org", connect_timeout=5.0)
-        assert (
-            pc.conn._context.cert_store_stats()
-            == ssl.create_default_context(cafile=certifi.where()).cert_store_stats()
+    def test_send_request_uppercases_method(self):
+        transport = Transport()
+        transport._raw_request = mock.Mock(
+            return_value=Response(200, b'{}', http.client.HTTPMessage())
         )
+
+        transport.send_request(
+            "get", "https://api.openaq.org/v3/locations/1", None, Headers()
+        )
+
+        method = transport._raw_request.call_args.args[0]
+        assert method == "GET"

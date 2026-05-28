@@ -14,8 +14,6 @@ from dataclasses import dataclass, field
 from http import HTTPStatus
 from typing import Any, Mapping
 
-import certifi
-
 from openaq.core.exceptions import (
     BadGatewayError,
     BadRequestError,
@@ -215,10 +213,7 @@ class PooledConnection:
 
     def __post_init__(self) -> None:
         """Initializes the underlying HTTPS connection after the dataclass is created."""
-        ssl_context = ssl.create_default_context(cafile=certifi.where())
-        self.conn = http.client.HTTPSConnection(
-            self.host, timeout=self.connect_timeout, context=ssl_context
-        )
+        self.conn = http.client.HTTPSConnection(self.host, timeout=self.connect_timeout)
 
 
 class ConnectionPool:
@@ -440,21 +435,31 @@ class Transport:
         for attempt in range(2):
             pc = self._pool.acquire(host, self._pool_timeout)
             try:
-                if self._read_timeout is not None:
-                    if pc.conn.sock is not None:
-                        pc.conn.sock.settimeout(self._read_timeout)
-
                 pc.conn.request(method, path, headers=dict(headers))
-                raw = pc.conn.getresponse()
-
-                # After connect, set socket timeout for the read.
                 if self._read_timeout is not None and pc.conn.sock is not None:
                     pc.conn.sock.settimeout(self._read_timeout)
-
+                raw = pc.conn.getresponse()
                 body = raw.read()
                 resp = Response(raw.status, body, raw.msg)
                 self._pool.release(pc)
                 return resp
+
+            except ssl.SSLCertVerificationError as exc:
+                self._pool.release(pc, discard=True)
+                logger.error(
+                    "SSL certificate verification failed for %s: %s. "
+                    "On macOS, run 'Install Certificates.command' in your Python "
+                    "installation directory to fix this.",
+                    host,
+                    exc,
+                )
+                raise
+
+            except ssl.SSLError as exc:
+                self._pool.release(pc, discard=True)
+                logger.error("SSL error for %s: %s", host, exc)
+                raise
+
             except (OSError, http.client.HTTPException) as exc:
                 self._pool.release(pc, discard=True)
                 if attempt == 1:
@@ -501,7 +506,7 @@ class Transport:
         if parsed.query:
             path = f"{path}?{parsed.query}"
 
-        res = self._raw_request(method, host, path, headers)
+        res = self._raw_request(method.upper(), host, path, headers)
         logger.debug("Received response: %s from %s", res.status_code, url)
         return check_response(res)
 

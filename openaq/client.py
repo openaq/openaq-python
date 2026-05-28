@@ -350,7 +350,7 @@ class OpenAQ:
         """
         self._check_rate_limit()
         request_headers = self._build_request_headers(headers)
-        url = urljoin(self._base_url, path)
+        url = urljoin(self._base_url, path.lstrip("/"))
         data = self._transport.send_request(
             method=method, url=url, params=params, headers=request_headers
         )
