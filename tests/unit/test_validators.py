@@ -3,12 +3,12 @@ import datetime
 import pytest
 from freezegun import freeze_time
 
-from openaq.shared.exceptions import (
+from openaq.core.exceptions import (
     IdentifierOutOfBoundsError,
     InvalidParameterError,
 )
-from openaq.shared.types import Data
-from openaq.shared.validators import (
+from openaq.core.types import Data
+from openaq.core.validators import (
     countries_id_iso_exclusivity_check,
     data_check,
     date_from_lesser_check,

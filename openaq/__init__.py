@@ -2,16 +2,15 @@
 
 import logging
 
-__version__ = "1.0.0rc2"
+__version__ = "1.0.0rc3"
 
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-from ._async.client import AsyncOpenAQ as AsyncOpenAQ
-from ._sync.client import OpenAQ as OpenAQ
-from .shared.exceptions import (
+from .client import OpenAQ as OpenAQ
+from .core.exceptions import (
     ApiKeyMissingError,
     BadGatewayError,
     BadRequestError,
@@ -30,7 +29,6 @@ from .shared.exceptions import (
 
 __all__ = [
     "OpenAQ",
-    "AsyncOpenAQ",
     "IdentifierOutOfBoundsError",
     "ApiKeyMissingError",
     "NotAuthorizedError",

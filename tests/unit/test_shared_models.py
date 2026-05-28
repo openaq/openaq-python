@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from openaq.shared.models import build_measurements_path, build_query_params
+from openaq.core.models import build_measurements_path, build_query_params
 
 
 @pytest.mark.parametrize(
