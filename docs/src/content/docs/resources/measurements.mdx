@@ -98,7 +98,7 @@ On the other hand, adding the argument `rollup` allows you the flexibility of
 choosing among a variety of aggregation periods from any base measurements input
 in `data`. However, because rollups are computed on the fly, it will be slower
 and more resources-consuming than simply using `data`, especially when rolling
-up from data="measurements". As such, prioritize `data` where you can and if you
+up from `data`="measurements". As such, prioritize `data` where you can and if you
 need to use `rollup` for a customized aggregation:
 - double check to see if it's a query that could be done with just using `data`
 - limit your queries to smaller time periods
@@ -131,10 +131,10 @@ The columns are `data` values whereas the rows are `rollup` values.
 
 | rollup | description | note |
 | ------ | ----------- | ---- |
-| hourly | Aggregates across the selected base measurement and returns the average value for each hour. | If "measurements" is your base measurement, opt for simply using data="hours" without using the `rollup` argument.
-| daily | Aggregates across the selected base measurement and returns the average value for each day. | If "hours" is your base measurement, opt for simply using data="days" without using the `rollup` argument.
+| hourly | Aggregates across the selected base measurement and returns the average value for each hour. | If "measurements" is your base measurement, opt for simply using `data`="hours" without using the `rollup` argument.
+| daily | Aggregates across the selected base measurement and returns the average value for each day. | If "hours" is your base measurement, opt for simply using `data`="days" without using the `rollup` argument.
 | monthly | Aggregates across the selected base measurement and returns the average value for each month. | |
-| yearly | Aggregates across the selected base measurement and returns the average value for each year. | If "hours" is your base measurement, opt for simply using data="years" without using the `rollup` argument.
+| yearly | Aggregates across the selected base measurement and returns the average value for each year. | If "hours" is your base measurement, opt for simply using `data`="years" without using the `rollup` argument.
 | hourofday | Aggregates across the selected base measurement and returns the average value for each hour in a 24-hour day. | |
 | dayofweek | Aggregates across the selected base measurement and returns the average value for each day in a week (Monday-Sunday). | |
 | monthofyear | Aggregates across the selected base measurement and returns the average value for each month in a year (January-December). | |
