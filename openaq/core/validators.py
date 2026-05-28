@@ -817,8 +817,8 @@ def datetime_date_params_exclusivity_check(
 
 def validate_datetime_params(
     data: Data,
-    datetime_from: datetime.datetime | datetime.date | str | None,
-    datetime_to: datetime.datetime | datetime.date | str | None,
+    datetime_from: datetime.datetime | str | None,
+    datetime_to: datetime.datetime | str | None,
     date_from: datetime.date | str | None,
     date_to: datetime.date | str | None,
 ) -> tuple[
