@@ -350,6 +350,20 @@ class TestClient:
         assert client.transport._pool._max_total == 5
         assert client.transport._pool._max_idle == 2
 
+    def test_do_does_not_produce_double_slash_in_url(self, setup):
+        """Leading slash on path should not create double slash when base_url has trailing slash."""
+        mock_response = MagicMock()
+        mock_response.headers = Headers({})
+        self.client._transport.send_request = Mock(return_value=mock_response)
+
+        self.client._do("get", "/locations/1")
+
+        call_kwargs = self.client._transport.send_request.call_args
+        url = call_kwargs.kwargs["url"]
+        assert "//" not in url.replace(
+            "https://", ""
+        ), f"URL contains double slash: {url}"
+
 
 def test_tomllib_conditional_import():
     if int(platform.python_version_tuple()[1]) >= 11:

@@ -14,6 +14,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
 from typing import Mapping
+from urllib.parse import urljoin
+
 
 from openaq import __version__
 from openaq.core.exceptions import ApiKeyMissingError, RateLimitError
@@ -349,7 +351,7 @@ class OpenAQ:
         """
         self._check_rate_limit()
         request_headers = self._build_request_headers(headers)
-        url = self._base_url + path
+        url = urljoin(self._base_url, path)
         data = self._transport.send_request(
             method=method, url=url, params=params, headers=request_headers
         )
