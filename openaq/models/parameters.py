@@ -1,3 +1,5 @@
+"""Resource model for interacting with the parameters endpoints of the OpenAQ API."""
+
 from openaq.core.models import build_query_params
 from openaq.core.responses import LatestResponse, ParametersResponse
 from openaq.core.types import ParameterType, SortOrder

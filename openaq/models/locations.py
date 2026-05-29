@@ -1,3 +1,5 @@
+"""Resource model for interacting with the locations endpoints of the OpenAQ API."""
+
 from openaq.core.models import build_query_params
 from openaq.core.responses import (
     LatestResponse,
