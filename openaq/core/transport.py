@@ -516,6 +516,20 @@ class Transport:
         self._pool.close_all()
 
 
+_HTTP_SATUS_MAP = {
+    HTTPStatus.BAD_REQUEST: BadRequestError,
+    HTTPStatus.NOT_FOUND: NotFoundError,
+    HTTPStatus.REQUEST_TIMEOUT: TimeoutError,
+    HTTPStatus.FORBIDDEN: ForbiddenError,
+    HTTPStatus.UNPROCESSABLE_ENTITY: ValidationError,
+    HTTPStatus.TOO_MANY_REQUESTS: HTTPRateLimitError,
+    HTTPStatus.UNAUTHORIZED: NotAuthorizedError,
+    HTTPStatus.INTERNAL_SERVER_ERROR: ServerError,
+    HTTPStatus.BAD_GATEWAY: BadGatewayError,
+    HTTPStatus.SERVICE_UNAVAILABLE: ServiceUnavailableError,
+}
+
+
 def check_response(res: Response) -> Response:
     """Checks the HTTP response of the request.
 
@@ -540,42 +554,12 @@ def check_response(res: Response) -> Response:
     """
     if res.status_code >= HTTPStatus.OK and res.status_code < HTTPStatus.BAD_REQUEST:
         return res
-    elif res.status_code == HTTPStatus.BAD_REQUEST:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise BadRequestError(res.text)
-    elif res.status_code == HTTPStatus.NOT_FOUND:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise NotFoundError(res.text)
-    elif res.status_code == HTTPStatus.REQUEST_TIMEOUT:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise TimeoutError(res.text)
-    elif res.status_code == HTTPStatus.FORBIDDEN:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise ForbiddenError(res.text)
-    elif res.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise ValidationError(res.text)
-    elif res.status_code == HTTPStatus.TOO_MANY_REQUESTS:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise HTTPRateLimitError(res.text)
-    elif res.status_code == HTTPStatus.UNAUTHORIZED:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise NotAuthorizedError(res.text)
-    elif res.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise ServerError(res.text)
-    elif res.status_code == HTTPStatus.BAD_GATEWAY:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise BadGatewayError(res.text)
-    elif res.status_code == HTTPStatus.SERVICE_UNAVAILABLE:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise ServiceUnavailableError(res.text)
-    elif res.status_code == HTTPStatus.GATEWAY_TIMEOUT:
+    if res.status_code == HTTPStatus.GATEWAY_TIMEOUT:
         logger.error("HTTP %s - %s", res.status_code, res.text)
         raise GatewayTimeoutError(
             "Your request timed out on the server. "
             "Consider reducing the complexity of your request."
         )
-    else:
-        logger.error("HTTP %s - %s", res.status_code, res.text)
-        raise ServerError(f"Unexpected HTTP status {res.status_code}: {res.text}")
+    exc_class = _HTTP_SATUS_MAP.get(res.status_code, ServerError)
+    logger.error("HTTP %s - %s", res.status_code, res.text)
+    raise exc_class(res.text)

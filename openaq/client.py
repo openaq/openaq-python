@@ -14,9 +14,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
 from typing import Mapping
-from urllib.parse import urljoin
-from urllib.parse import urlparse
-
+from urllib.parse import urljoin, urlparse
 
 from openaq import __version__
 from openaq.core.exceptions import ApiKeyMissingError, RateLimitError
@@ -24,9 +22,7 @@ from openaq.core.transport import (
     DEFAULT_LIMITS,
     DEFAULT_TIMEOUT,
     Headers,
-    Limits,
     Response,
-    Timeout,
     Transport,
 )
 from openaq.models.countries import Countries
