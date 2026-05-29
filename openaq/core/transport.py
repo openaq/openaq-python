@@ -560,6 +560,12 @@ def check_response(res: Response) -> Response:
             "Your request timed out on the server. "
             "Consider reducing the complexity of your request."
         )
-    exc_class = _HTTP_SATUS_MAP.get(res.status_code, ServerError)
+    try:
+        http_status = HTTPStatus(res.status_code)
+    except ValueError:
+        http_status = None
+    exc_class = (
+        _HTTP_SATUS_MAP.get(http_status, ServerError) if http_status else ServerError
+    )
     logger.error("HTTP %s - %s", res.status_code, res.text)
     raise exc_class(res.text)
