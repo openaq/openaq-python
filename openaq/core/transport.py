@@ -1,4 +1,4 @@
-"""Base class and utlity functions for working with client transport."""
+"""Base class and utility functions for working with client transport."""
 
 from __future__ import annotations
 
@@ -337,7 +337,7 @@ class ConnectionPool:
 
     def close_all(self) -> None:
         """Closes all idle connections in the pool and resets its state."""
-        with self._lock:
+        with self._has_capacity:
             for q in self._idle.values():
                 for pc in q:
                     try:
@@ -346,6 +346,7 @@ class ConnectionPool:
                         pass
             self._idle.clear()
             self._total = 0
+            self._has_capacity.notify_all()
 
 
 def _encode_params(
@@ -540,41 +541,41 @@ def check_response(res: Response) -> Response:
     if res.status_code >= HTTPStatus.OK and res.status_code < HTTPStatus.BAD_REQUEST:
         return res
     elif res.status_code == HTTPStatus.BAD_REQUEST:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise BadRequestError(res.text)
     elif res.status_code == HTTPStatus.NOT_FOUND:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise NotFoundError(res.text)
     elif res.status_code == HTTPStatus.REQUEST_TIMEOUT:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise TimeoutError(res.text)
     elif res.status_code == HTTPStatus.FORBIDDEN:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise ForbiddenError(res.text)
     elif res.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise ValidationError(res.text)
     elif res.status_code == HTTPStatus.TOO_MANY_REQUESTS:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise HTTPRateLimitError(res.text)
     elif res.status_code == HTTPStatus.UNAUTHORIZED:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise NotAuthorizedError(res.text)
     elif res.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise ServerError(res.text)
     elif res.status_code == HTTPStatus.BAD_GATEWAY:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise BadGatewayError(res.text)
     elif res.status_code == HTTPStatus.SERVICE_UNAVAILABLE:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise ServiceUnavailableError(res.text)
     elif res.status_code == HTTPStatus.GATEWAY_TIMEOUT:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise GatewayTimeoutError(
             "Your request timed out on the server. "
             "Consider reducing the complexity of your request."
         )
     else:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise Exception
+        logger.error("HTTP %s - %s", res.status_code, res.text)
+        raise ServerError(f"Unexpected HTTP status {res.status_code}: {res.text}")
