@@ -97,6 +97,10 @@ class TestClient:
     ):
         assert self.client.api_key == "abc123-def456-ghi789"
 
+    def test_raises_api_key_missing_error_when_key_is_none(self):
+        with pytest.raises(ApiKeyMissingError):
+            OpenAQ(api_key=None, _transport=MockTransport())
+
     @patch('openaq.client.datetime')
     @patch('time.sleep')
     @patch('openaq.client.logger')
@@ -352,6 +356,22 @@ class TestClient:
         assert "//" not in url.replace(
             "https://", ""
         ), f"URL contains double slash: {url}"
+
+    def test_raises_value_error_for_base_url_without_scheme(self):
+        with pytest.raises(ValueError, match="Invalid base_url"):
+            OpenAQ(
+                api_key="abc123-def456-ghi789",
+                base_url="api.openaq.org/v3/",
+                _transport=MockTransport(),
+            )
+
+    def test_raises_value_error_for_base_url_without_netloc(self):
+        with pytest.raises(ValueError, match="Invalid base_url"):
+            OpenAQ(
+                api_key="abc123-def456-ghi789",
+                base_url="https://",
+                _transport=MockTransport(),
+            )
 
 
 def test_tomllib_conditional_import():
