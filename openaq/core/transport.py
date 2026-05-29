@@ -1,10 +1,11 @@
-"""Base class and utlity functions for working with client transport."""
+"""Base class and utility functions for working with client transport."""
 
 from __future__ import annotations
 
 import http.client
 import json
 import logging
+import ssl
 import threading
 import time
 import urllib.parse
@@ -336,7 +337,7 @@ class ConnectionPool:
 
     def close_all(self) -> None:
         """Closes all idle connections in the pool and resets its state."""
-        with self._lock:
+        with self._has_capacity:
             for q in self._idle.values():
                 for pc in q:
                     try:
@@ -345,6 +346,7 @@ class ConnectionPool:
                         pass
             self._idle.clear()
             self._total = 0
+            self._has_capacity.notify_all()
 
 
 def _encode_params(
@@ -434,21 +436,31 @@ class Transport:
         for attempt in range(2):
             pc = self._pool.acquire(host, self._pool_timeout)
             try:
-                if self._read_timeout is not None:
-                    if pc.conn.sock is not None:
-                        pc.conn.sock.settimeout(self._read_timeout)
-
                 pc.conn.request(method, path, headers=dict(headers))
-                raw = pc.conn.getresponse()
-
-                # After connect, set socket timeout for the read.
                 if self._read_timeout is not None and pc.conn.sock is not None:
                     pc.conn.sock.settimeout(self._read_timeout)
-
+                raw = pc.conn.getresponse()
                 body = raw.read()
                 resp = Response(raw.status, body, raw.msg)
                 self._pool.release(pc)
                 return resp
+
+            except ssl.SSLCertVerificationError as exc:
+                self._pool.release(pc, discard=True)
+                logger.error(
+                    "SSL certificate verification failed for %s: %s. "
+                    "On macOS, run 'Install Certificates.command' in your Python "
+                    "installation directory to fix this.",
+                    host,
+                    exc,
+                )
+                raise
+
+            except ssl.SSLError as exc:
+                self._pool.release(pc, discard=True)
+                logger.error("SSL error for %s: %s", host, exc)
+                raise
+
             except (OSError, http.client.HTTPException) as exc:
                 self._pool.release(pc, discard=True)
                 if attempt == 1:
@@ -495,13 +507,27 @@ class Transport:
         if parsed.query:
             path = f"{path}?{parsed.query}"
 
-        res = self._raw_request(method, host, path, headers)
+        res = self._raw_request(method.upper(), host, path, headers)
         logger.debug("Received response: %s from %s", res.status_code, url)
         return check_response(res)
 
     def close(self) -> None:
         """Closes all pooled connections and releases pool resources."""
         self._pool.close_all()
+
+
+_HTTP_SATUS_MAP = {
+    HTTPStatus.BAD_REQUEST: BadRequestError,
+    HTTPStatus.NOT_FOUND: NotFoundError,
+    HTTPStatus.REQUEST_TIMEOUT: TimeoutError,
+    HTTPStatus.FORBIDDEN: ForbiddenError,
+    HTTPStatus.UNPROCESSABLE_ENTITY: ValidationError,
+    HTTPStatus.TOO_MANY_REQUESTS: HTTPRateLimitError,
+    HTTPStatus.UNAUTHORIZED: NotAuthorizedError,
+    HTTPStatus.INTERNAL_SERVER_ERROR: ServerError,
+    HTTPStatus.BAD_GATEWAY: BadGatewayError,
+    HTTPStatus.SERVICE_UNAVAILABLE: ServiceUnavailableError,
+}
 
 
 def check_response(res: Response) -> Response:
@@ -528,42 +554,18 @@ def check_response(res: Response) -> Response:
     """
     if res.status_code >= HTTPStatus.OK and res.status_code < HTTPStatus.BAD_REQUEST:
         return res
-    elif res.status_code == HTTPStatus.BAD_REQUEST:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise BadRequestError(res.text)
-    elif res.status_code == HTTPStatus.NOT_FOUND:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise NotFoundError(res.text)
-    elif res.status_code == HTTPStatus.REQUEST_TIMEOUT:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise TimeoutError(res.text)
-    elif res.status_code == HTTPStatus.FORBIDDEN:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise ForbiddenError(res.text)
-    elif res.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise ValidationError(res.text)
-    elif res.status_code == HTTPStatus.TOO_MANY_REQUESTS:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise HTTPRateLimitError(res.text)
-    elif res.status_code == HTTPStatus.UNAUTHORIZED:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise NotAuthorizedError(res.text)
-    elif res.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise ServerError(res.text)
-    elif res.status_code == HTTPStatus.BAD_GATEWAY:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise BadGatewayError(res.text)
-    elif res.status_code == HTTPStatus.SERVICE_UNAVAILABLE:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise ServiceUnavailableError(res.text)
-    elif res.status_code == HTTPStatus.GATEWAY_TIMEOUT:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
+    if res.status_code == HTTPStatus.GATEWAY_TIMEOUT:
+        logger.error("HTTP %s - %s", res.status_code, res.text)
         raise GatewayTimeoutError(
             "Your request timed out on the server. "
             "Consider reducing the complexity of your request."
         )
-    else:
-        logger.exception(f"HTTP {res.status_code} - {res.text}")
-        raise Exception
+    try:
+        http_status = HTTPStatus(res.status_code)
+    except ValueError:
+        http_status = None
+    exc_class = (
+        _HTTP_SATUS_MAP.get(http_status, ServerError) if http_status else ServerError
+    )
+    logger.error("HTTP %s - %s", res.status_code, res.text)
+    raise exc_class(res.text)

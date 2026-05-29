@@ -2,7 +2,7 @@
 
 import logging
 
-__version__ = "1.0.0rc3"
+__version__ = "1.0.0rc4"
 
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,7 @@ from .core.exceptions import (
     GatewayTimeoutError,
     HTTPRateLimitError,
     IdentifierOutOfBoundsError,
+    InvalidParameterError,
     NotAuthorizedError,
     NotFoundError,
     RateLimitError,
@@ -34,6 +35,7 @@ __all__ = [
     "NotAuthorizedError",
     "NotFoundError",
     "TimeoutError",
+    "InvalidParameterError",
     "ValidationError",
     "GatewayTimeoutError",
     "HTTPRateLimitError",
@@ -43,4 +45,5 @@ __all__ = [
     "ServerError",
     "ServiceUnavailableError",
     "BadGatewayError",
+    "__version__",
 ]

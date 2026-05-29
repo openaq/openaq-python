@@ -1,3 +1,5 @@
+"""Resource model for interacting with the sensors endpoints of the OpenAQ API."""
+
 from openaq.core.responses import SensorsResponse
 from openaq.core.validators import validate_integer_id
 

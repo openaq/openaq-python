@@ -861,7 +861,7 @@ def validate_datetime_params(
         if date_to:
             if not date_check(date_from) or not date_check(date_to):
                 raise InvalidParameterError(
-                    f"Invalid date_from or date_to, must be either date type or ISO-8601 formatted date string, got {type(date_from)} and {type(date_to)}"
+                    f"Invalid date_from or date_to, must be either datetime.date type or ISO-8601 formatted date string, got {type(date_from)} and {type(date_to)}"
                 )
             date_from_date = to_date(date_from)
             date_to_date = to_date(date_to)
@@ -888,7 +888,7 @@ def validate_datetime_params(
         if datetime_to is not None:
             if not datetime_check(datetime_from) or not datetime_check(datetime_to):
                 raise InvalidParameterError(
-                    f"Invalid datetime_from or datetime_to, must be either datetime type or ISO-8601 formatted string, got {type(datetime_from)} and {type(datetime_to)}"
+                    f"Invalid datetime_from or datetime_to, must be either datetime.datetime type or ISO-8601 formatted string, got {type(datetime_from)} and {type(datetime_to)}"
                 )
             datetime_from_datetime = to_datetime(datetime_from)
             datetime_to_datetime = to_datetime(datetime_to)
@@ -902,7 +902,7 @@ def validate_datetime_params(
         elif datetime_from is not None:
             if not datetime_check(datetime_from):
                 raise InvalidParameterError(
-                    f"Invalid datetime_from, must be either datetime type or ISO-8601 formatted string, got {type(datetime_from)}"
+                    f"Invalid datetime_from, must be either datetime.datetime type or ISO-8601 formatted string, got {type(datetime_from)}"
                 )
             datetime_from_datetime = to_datetime(datetime_from)
             if not datetime_from_lesser_check(datetime_from_datetime):

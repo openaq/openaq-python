@@ -1,3 +1,5 @@
+"""Resource model for interacting with the measurements endpoints of the OpenAQ API."""
+
 import datetime
 from typing import overload
 

@@ -1,4 +1,5 @@
 import http.client
+import ssl
 import threading
 import time
 from unittest import mock
@@ -290,3 +291,57 @@ class TestTransport:
         with acquire, release:
             with pytest.raises(OSError):
                 transport._raw_request("GET", "api.openaq.org", "/v3/locations", {})
+
+    def test_send_request_uppercases_method(self):
+        transport = Transport()
+        transport._raw_request = mock.Mock(
+            return_value=Response(200, b'{}', http.client.HTTPMessage())
+        )
+
+        transport.send_request(
+            "get", "https://api.openaq.org/v3/locations/1", None, Headers()
+        )
+
+        method = transport._raw_request.call_args.args[0]
+        assert method == "GET"
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ssl.SSLCertVerificationError("cert verify failed"),
+            ssl.SSLError("ssl error"),
+        ],
+    )
+    def test_ssl_error_discards_connection_and_raises(self, exc):
+        transport = self.make_transport()
+        raw = make_raw_response()
+        acquire, release, pc = self.patch_pool(transport, raw)
+        pc.conn.request.side_effect = exc
+
+        with acquire, release as mock_release:
+            with pytest.raises(ssl.SSLError):
+                transport._raw_request("GET", "api.openaq.org", "/v3/locations", {})
+            mock_release.assert_called_once_with(pc, discard=True)
+
+    def test_ssl_error_logs(self):
+        transport = self.make_transport()
+        raw = make_raw_response()
+        acquire, release, pc = self.patch_pool(transport, raw)
+        pc.conn.request.side_effect = ssl.SSLCertVerificationError("cert verify failed")
+
+        with acquire, release:
+            with pytest.raises(ssl.SSLCertVerificationError):
+                with mock.patch("openaq.core.transport.logger") as mock_logger:
+                    transport._raw_request("GET", "api.openaq.org", "/v3/locations", {})
+            mock_logger.error.assert_called_once()
+
+    def test_ssl_error_does_not_retry(self):
+        transport = self.make_transport()
+        raw = make_raw_response()
+        acquire, release, pc = self.patch_pool(transport, raw)
+        pc.conn.request.side_effect = ssl.SSLError("SSL error")
+
+        with acquire, release:
+            with pytest.raises(ssl.SSLError):
+                transport._raw_request("GET", "api.openaq.org", "/v3/locations", {})
+            assert pc.conn.request.call_count == 1

@@ -1,3 +1,5 @@
+"""Resource model for interacting with the licenses endpoints of the OpenAQ API."""
+
 from openaq.core.models import build_query_params
 from openaq.core.responses import LicensesResponse
 from openaq.core.types import SortOrder

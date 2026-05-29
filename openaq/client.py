@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
 from typing import Mapping
+from urllib.parse import urljoin, urlparse
 
 from openaq import __version__
 from openaq.core.exceptions import ApiKeyMissingError, RateLimitError
@@ -21,9 +22,7 @@ from openaq.core.transport import (
     DEFAULT_LIMITS,
     DEFAULT_TIMEOUT,
     Headers,
-    Limits,
     Response,
-    Timeout,
     Transport,
 )
 from openaq.models.countries import Countries
@@ -83,17 +82,11 @@ class OpenAQ:
         auto_wait: Whether to automatically wait when rate limited. Defaults to
             True.
         base_url: The base URL for the API endpoint.
-        transport: The transport instance for making HTTP requests. For internal
+        _transport: The transport instance for making HTTP requests. For internal
             use.
         rate_limit_override: Override the default rate limit capacity of 60
             requests per minute. Useful for accounts with a higher rate limit.
             Defaults to None.
-        timeout: Timeout configuration for HTTP requests. Defaults to 5 seconds
-            for connection and pool, and 8 seconds for read to account for the
-            API's 6 second processing limit. Pass None for no timeout.
-        limits: Connection pool limits for the HTTP transport. Defaults to 20
-            maximum connections with 10 keepalive connections. Keepalive
-            connections expire after 30 seconds.
 
     Note:
         An API key can either be passed directly to the OpenAQ client class at
@@ -131,9 +124,7 @@ class OpenAQ:
         headers: Mapping[str, str] | None = None,
         auto_wait: bool = True,
         base_url: str = DEFAULT_BASE_URL,
-        transport: Transport | None = None,
-        timeout: float | Timeout | None = DEFAULT_TIMEOUT,
-        limits: Limits = DEFAULT_LIMITS,
+        _transport: Transport | None = None,  # internal use only
         rate_limit_override: int | None = None,
     ) -> None:
         """Initializes the OpenAQ client.
@@ -146,14 +137,8 @@ class OpenAQ:
             auto_wait: Whether to automatically wait when rate limited. Defaults
                 to True.
             base_url: The base URL for the API endpoint.
-            transport: The transport instance for making HTTP requests. For
+            _transport: The transport instance for making HTTP requests. For
                 internal use.
-            timeout: Timeout configuration for HTTP requests. Defaults to 5
-                seconds for connection and 8 seconds for read. Pass None for no
-                timeout.
-            limits: Connection pool limits for the HTTP transport. Defaults to
-                20 maximum connections with 10 keepalive connections expiring
-                after 30 seconds.
             rate_limit_override: Initial rate limit capacity in requests per
                 minute. Defaults to 60 and is corrected automatically from
                 server response headers after the first request.
@@ -163,12 +148,17 @@ class OpenAQ:
                 URL is used.
         """
         self._api_key = _resolve_api_key(api_key)
-        self._base_url = base_url
+        parsed = urlparse(base_url)
+        if not parsed.scheme or not parsed.netloc:
+            raise ValueError(
+                f"Invalid base_url, must be a fully qualified URL: {base_url!r}"
+            )
+        self._base_url = parsed.geturl()
         self._auto_wait = auto_wait
         self._transport = (
-            transport
-            if transport is not None
-            else Transport(timeout=timeout, limits=limits)
+            _transport
+            if _transport is not None
+            else Transport(timeout=DEFAULT_TIMEOUT, limits=DEFAULT_LIMITS)
         )
         self._headers = Headers(headers or {})
 
@@ -181,8 +171,8 @@ class OpenAQ:
             )
 
         self._user_agent = f"openaq-python-{__version__}-{platform.python_version()}"
-        assert self._api_key is not None
-        self._headers["X-API-Key"] = self._api_key
+        if self._api_key:
+            self._headers["X-API-Key"] = self._api_key
         self._headers["User-Agent"] = self._user_agent
         self._headers["Accept"] = ACCEPT_HEADER
 
@@ -251,9 +241,13 @@ class OpenAQ:
                 self._wait_for_rate_limit_reset()
                 self._rate_limit_remaining = self._rate_limit_capacity
             else:
-                message = f"Rate limit exceeded. Limit resets in {self._rate_limit_reset_seconds} seconds"
-                logger.error(message)
-                raise RateLimitError(message)
+                logger.error(
+                    "Rate limit exceeded. Limit resets in %s seconds",
+                    self._rate_limit_reset_seconds,
+                )
+                raise RateLimitError(
+                    f"Rate limit exceeded. Limit resets in {self._rate_limit_reset_seconds} seconds"
+                )
         self._rate_limit_remaining -= 1
 
     def _set_rate_limit(self, headers: Headers) -> None:
@@ -286,7 +280,7 @@ class OpenAQ:
         """
         wait_seconds = self._rate_limit_reset_seconds
         if wait_seconds > 0:
-            logger.info(f"Rate limit hit. Waiting {wait_seconds} seconds for reset.")
+            logger.info("Rate limit hit. Waiting %s seconds for reset.", wait_seconds)
             time.sleep(wait_seconds)
 
     def _get_int_header(self, headers: Headers, key: str, default: int) -> int:
@@ -349,7 +343,7 @@ class OpenAQ:
         """
         self._check_rate_limit()
         request_headers = self._build_request_headers(headers)
-        url = self._base_url + path
+        url = urljoin(self._base_url, path.lstrip("/"))
         data = self._transport.send_request(
             method=method, url=url, params=params, headers=request_headers
         )
