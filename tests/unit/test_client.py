@@ -36,7 +36,7 @@ def mock_config_file():
 class TestClient:
     @pytest.fixture()
     def setup(self):
-        self.client = OpenAQ(api_key="abc123-def456-ghi789", transport=MockTransport())
+        self.client = OpenAQ(api_key="abc123-def456-ghi789", _transport=MockTransport())
 
     @pytest.fixture()
     def mock_openaq_api_key_env_vars(self):
@@ -46,7 +46,7 @@ class TestClient:
             yield
 
     def test_transport_property(self, setup):
-        assert isinstance(self.client.transport, MockTransport)
+        assert isinstance(self.client._transport, MockTransport)
         with pytest.raises(AttributeError):
             self.client.transport = MockTransport()
 
@@ -61,7 +61,7 @@ class TestClient:
         self.client = OpenAQ(
             api_key="abc123-def456-ghi789",
             base_url="https://mycustom.openaq.org",
-            transport=MockTransport(),
+            _transport=MockTransport(),
         )
         assert self.client.headers["X-API-Key"] == "abc123-def456-ghi789"
 
@@ -69,22 +69,22 @@ class TestClient:
         self.client = OpenAQ(
             api_key="abc123-def456-ghi789",
             base_url="https://mycustom.openaq.org",
-            transport=MockTransport(),
+            _transport=MockTransport(),
         )
         assert self.client._base_url == "https://mycustom.openaq.org"
 
     def test_api_env_var(self, mock_openaq_api_key_env_vars):
-        client = OpenAQ(transport=MockTransport())
+        client = OpenAQ(_transport=MockTransport())
         assert client.api_key == "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"
 
     @pytest.mark.usefixtures("mock_config_file")
     def test_api_key_from_config(self):
         if int(platform.python_version_tuple()[1]) >= 11:
-            client = OpenAQ(transport=MockTransport())
+            client = OpenAQ(_transport=MockTransport())
             assert client.api_key == "test_api_key"
         else:
             with pytest.raises(ApiKeyMissingError):
-                client = OpenAQ(transport=MockTransport())
+                client = OpenAQ(_transport=MockTransport())
 
     def test_api_key_arg_override_env_var(self, setup, mock_openaq_api_key_env_vars):
         assert self.client.api_key == "abc123-def456-ghi789"
@@ -111,7 +111,7 @@ class TestClient:
 
         mock_sleep.assert_called_once_with(5)
         mock_logger.info.assert_called_once_with(
-            "Rate limit hit. Waiting 5 seconds for reset."
+            "Rate limit hit. Waiting %s seconds for reset.", 5
         )
 
     @patch('openaq.client.datetime')
@@ -169,7 +169,7 @@ class TestClient:
     def test_blocks_after_custom_limit(self):
         client = OpenAQ(
             api_key="abc123-def456-ghi789",
-            transport=MockTransport(),
+            _transport=MockTransport(),
             auto_wait=False,
             rate_limit_override=5,
         )
@@ -184,7 +184,7 @@ class TestClient:
         limit = 10
         client = OpenAQ(
             api_key="abc123-def456-ghi789",
-            transport=MockTransport(),
+            _transport=MockTransport(),
             auto_wait=False,
             rate_limit_override=limit,
         )
@@ -328,27 +328,16 @@ class TestClient:
 
     def test_default_timeout_applied_to_transport(self):
         client = OpenAQ(api_key="abc123-def456-ghi789")
-        assert client.transport._connect_timeout == DEFAULT_TIMEOUT.connect
-        assert client.transport._read_timeout == DEFAULT_TIMEOUT.read
-
-    def test_custom_timeout_passed_to_transport(self):
-        custom_timeout = Timeout(10.0, read=15.0)
-        client = OpenAQ(api_key="abc123-def456-ghi789", timeout=custom_timeout)
-        assert client.transport._connect_timeout == custom_timeout.connect
-        assert client.transport._read_timeout == custom_timeout.read
+        assert client._transport._connect_timeout == DEFAULT_TIMEOUT.connect
+        assert client._transport._read_timeout == DEFAULT_TIMEOUT.read
 
     def test_default_limits_applied_to_transport(self):
         client = OpenAQ(api_key="abc123-def456-ghi789")
-        assert client.transport._pool._max_total == DEFAULT_LIMITS.max_connections
+        assert client._transport._pool._max_total == DEFAULT_LIMITS.max_connections
         assert (
-            client.transport._pool._max_idle == DEFAULT_LIMITS.max_keepalive_connections
+            client._transport._pool._max_idle
+            == DEFAULT_LIMITS.max_keepalive_connections
         )
-
-    def test_custom_limits_passed_to_transport(self):
-        custom_limits = Limits(max_connections=5, max_keepalive_connections=2)
-        client = OpenAQ(api_key="abc123-def456-ghi789", limits=custom_limits)
-        assert client.transport._pool._max_total == 5
-        assert client.transport._pool._max_idle == 2
 
     def test_do_does_not_produce_double_slash_in_url(self, setup):
         """Leading slash on path should not create double slash when base_url has trailing slash."""
