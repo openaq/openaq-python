@@ -1,0 +1,16 @@
+:root {
+	--sky: #1e64ab;
+	--overlay-sky:  rgb(from var(--sky) r g b / 0.9);
+}
+
+:root[data-theme='light'] {
+	--sky: #b3d9ff;
+}
+
+[data-has-hero] .page {
+	background:
+		linear-gradient(215deg, var(--overlay-sky), transparent 50%),
+		radial-gradient(var(--overlay-sky), transparent 40%) no-repeat -50vw -40vh / 95vw 310vh,
+		radial-gradient(var(--overlay-sky), transparent 45%) no-repeat 80% calc(100% + 20rem) /
+			60rem 30rem;
+}

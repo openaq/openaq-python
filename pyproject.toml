@@ -109,18 +109,6 @@ fmt = [
     "black .", 
 ]
 
-[tool.hatch.envs.docs]
-dependencies = [
-  "mkdocs",
-  "mkdocstrings[python]",
-  "mkdocs-material[imaging]",
-  "material-plausible-plugin",
-]
-
-[tool.hatch.envs.docs.scripts]
-build = ["mkdocs build -c"]
-serve = ["mkdocs serve -a localhost:8090"]
-
 [tool.coverage.run]
 branch = true
 parallel = true

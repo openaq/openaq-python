@@ -1,0 +1,95 @@
+---
+title: Responses
+---
+
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+The OpenAQ API and Python SDK use a common response format to ensure
+consistency. The Python SDK automatically deserializes API responses and
+transforms raw JSON into convenient Python objects with dot notation access.
+This design simplifies data retrieval and reduces boilerplate code while
+maintaining flexibility. You can still access raw JSON or dictionary formats
+when needed. Understanding this response structure helps you work effectively
+with any OpenAQ resource.
+
+
+
+## Response structure
+
+All response objects follow a common top-level form, with specific data objects
+for each resource within the results. The `results` object in each response
+remains a `list`, or array in JSON. This applies even when requesting a single
+object by keys, like in a `get()` function call, or when filtering removes all
+possible results. In the latter case, you receive an empty list.
+
+```
+├── headers
+│   ├── x_ratelimit_limit: int | None
+│   ├── x_ratelimit_remaining: int | None
+│   ├── x_ratelimit_used: int | None
+│   └── x_ratelimit_reset: int | None
+├── meta
+│   ├── name: str
+│   ├── website: str
+│   ├── page: int
+│   ├── limit: int
+│   └── found: int
+└── results: list[]
+```
+
+Find the structure of individual resource response results in their respective
+pages in Resources section of the docs.
+
+## Accessing response data
+
+The SDK provides three ways to access response data, depending on your needs.
+
+### *Response objects*
+
+By default, resource methods deserialize OpenAQ API JSON responses into data
+objects for easier access. These data objects support convenient dot notation
+access to attributes. You can retrieve values directly from the response
+structure shown above.
+
+```py
+# Access the page number
+response.meta.page
+
+# Access the remaining rate limits available for use
+response.headers.x_ratelimit_remaining
+
+# Access the first item in the results list
+response.results[0]
+```
+
+### *Dictionary*
+
+You can also return responses as a Python dictionary. All resource responses
+include a `dict()` method that allows property access using either Python
+dictionary key syntax:
+
+```py
+response.dict()['results']
+```
+
+or the built-in `get()`:
+```py
+response.dict().get('results')
+```
+
+Just like in the deserialized object, the `results` key has a Python `list` for
+its value.
+
+
+### *JSON*
+
+Response objects also provide the option to return the raw JSON string of the
+response payload. You can access this on all response objects by using the
+`json()` method:
+
+```py
+response.json()
+```
+
+<FeedbackForm />

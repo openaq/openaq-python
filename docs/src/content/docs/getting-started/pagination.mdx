@@ -1,0 +1,77 @@
+---
+title: Pagination
+---
+
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+The OpenAQ platform contains a large amount of data, and the OpenAQ API
+can only return a subset in a single request. Pagination lets you query large
+result sets across many requests.
+
+## Page and limit
+
+The OpenAQ Python SDK provides `page` and `limit` arguments for all resources
+with a `list()` method.
+
+- `page` - the page number to retrieve. Defaults to `1`. Must exceed zero.
+- `limit` - the number of results per page. Defaults to `100`. Must range from
+`1` to `1000`.
+
+To retrieve the first 50 results:
+```py
+locations = client.locations.list(page=1, limit=50)
+```
+
+To retrieve the next 50 results, increment `page`:
+```py
+locations = client.locations.list(page=2, limit=50)
+```
+
+To paginate through an entire result set, use a `for` loop:
+```py
+# If the result set returns <=1,000 records
+import math
+
+limit = 100
+locations = []
+
+first_page = client.locations.list(page=1, limit=limit)
+locations.extend(first_page.results)
+total_pages = math.ceil(first_page.meta.found / limit)
+
+for page in range(2, total_pages + 1):
+    response = client.locations.list(page=page, limit=limit)
+    locations.extend(response.results)
+```
+
+```py
+# If the result set returns >1,000 records
+results = True
+limit = 1000
+page_num = 1
+locations = []
+
+while results:
+    response = client.locations.list(page=page_num, limit=limit)
+    locations.extend(response.results)
+    page_num += 1
+    
+    if response.meta.found == 0:
+        results = False
+```
+
+## The meta object
+
+All responses include a `meta` object with metadata about the result
+set. The `meta.found` field holds the total number of records matching your
+query, which you can use to calculate the total page count as shown preceding if
+the result set contain 1,000 or fewer records.
+
+When `meta.found` returns `'>1000'`, you can't calculate the exact page count
+ahead of time. Consider narrowing your query with filters like `countries_id`
+or `parameters_id` to reduce the result set. See the meta object reference for
+a full list of available fields.
+
+
+<FeedbackForm />

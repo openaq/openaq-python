@@ -1,0 +1,25 @@
+---
+title: Rate limiting
+---
+
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+By default the OpenAQ Python SDK provides automatic rate limiting, where the 
+client class will track and ensure that the API rate limit is not exceeded. For 
+more fine grained control of the client class this option can be toggled off 
+by setting the `auto_wait` option to `False`. e.g.
+
+```py 
+from openaq import OpenAQ
+
+client = OpenAQ(auto_wait=False)
+
+```
+
+## Rate limit headers
+
+The OpenAQ API provides HTTP headers that include information on current rate
+limit usage. 
+
+<FeedbackForm />
