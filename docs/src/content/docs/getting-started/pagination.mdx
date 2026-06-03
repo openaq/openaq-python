@@ -18,6 +18,7 @@ with a `list()` method.
 - `limit` - the number of results per page. Defaults to `100`. Must range from
 `1` to `1000`.
 
+#### *Examples*
 To retrieve the first 50 results:
 ```py
 locations = client.locations.list(page=1, limit=50)
@@ -26,39 +27,6 @@ locations = client.locations.list(page=1, limit=50)
 To retrieve the next 50 results, increment `page`:
 ```py
 locations = client.locations.list(page=2, limit=50)
-```
-
-To paginate through an entire result set, use a `for` loop:
-```py
-# If the result set returns <=1,000 records
-import math
-
-limit = 100
-locations = []
-
-first_page = client.locations.list(page=1, limit=limit)
-locations.extend(first_page.results)
-total_pages = math.ceil(first_page.meta.found / limit)
-
-for page in range(2, total_pages + 1):
-    response = client.locations.list(page=page, limit=limit)
-    locations.extend(response.results)
-```
-
-```py
-# If the result set returns >1,000 records
-results = True
-limit = 1000
-page_num = 1
-locations = []
-
-while results:
-    response = client.locations.list(page=page_num, limit=limit)
-    locations.extend(response.results)
-    page_num += 1
-    
-    if response.meta.found == 0:
-        results = False
 ```
 
 ## The meta object
@@ -72,6 +40,9 @@ When `meta.found` returns `'>1000'`, you can't calculate the exact page count
 ahead of time. Consider narrowing your query with filters like `countries_id`
 or `parameters_id` to reduce the result set. See the meta object reference for
 a full list of available fields.
+
+The Paging Results page talks more about how you can leverage the meta object
+and pagination logic to query large results sets.
 
 
 <FeedbackForm />

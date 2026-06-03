@@ -1,0 +1,52 @@
+---
+title: Querying measurements
+description: tbd
+---
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+
+The OpenAQ Python SDK returns data as deserialized Python objects rather than
+Pandas DataFrames. This guide shows you how to convert OpenAQ API responses into
+DataFrames in 2 steps:
+1. First, serialize the response objects by using `.dict()`
+2. Then, use Pandas's
+`json_normalize()` function to flatten the nested structure into a tabular format
+
+## Code sample
+
+The code below demonstrates getting locations data into a Pandas DataFrame stored
+in variable `df`. To run it, make sure you have OpenAQ Python SDK and Pandas
+installed. Remember to also replace the `replace-me-with-a-valid-key` below with
+your OpenAQ API key.
+
+
+  ```py
+  from openaq import OpenAQ
+  import pandas as pd
+
+  # Initialize client
+  client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+  # Fetch locations around Accra, Ghana
+  response = client.locations.list(
+      bbox=(-0.464172, 5.449908, 0.030212, 5.691491)
+  )
+
+  # Read the results into a Pandas DataFrame (2 steps)
+  data = response.dict()
+  df = pd.json_normalize(data['results'])
+
+  # Close the connection when done
+  client.close()
+  ```
+  
+To walk you through what this code does after data is fetched from the API: 
+- The `response.dict()` method converts the OpenAQ response object
+to a Python dictionary. 
+- The `json_normalize()` function then flattens the nested results array into a
+two-dimensional DataFrame where nested fields become columns with dot notation
+(e.g. `coordinates.latitude`).
+
+
+<FeedbackForm/>

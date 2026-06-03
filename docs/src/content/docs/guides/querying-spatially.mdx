@@ -17,8 +17,48 @@ geospatial features you can use to query for locations spatially:
 
 ## Querying within the radius of a point
 
+To query for locations within the radius of a point, you will need the
+coordinates in WGS84 format (EPSG:4326) of the center point and the radius (in
+meters) within which you want to search. The query below is an example of how
+you can query locations that are within 10,000 meters from Accra's city center.
 
+```py
+# Initialize client
+client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+# Fetch locations within 10,000 meters of Accra's center
+accra_locations_radius = client.locations.list(
+    coordinates=(5.556031, -0.204461), # (Y: latitude, X: longitude)
+    radius=10000, # in meters
+    limit=1000
+)
+
+# Close the connection when done
+client.close()
+```
 
 ## Querying within a bounding box
+
+To query for locations within a specified bounding box, you will need the
+coordinates of the four points that make up the bounding box in WGS84 format
+(EPSG:4326). The query below is an example of how you can query locations from a
+bounding box that roughly covers the City of Accra, Ghana.
+
+```py
+from openaq import OpenAQ
+import pandas as pd
+
+# Initialize client
+client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+# Fetch locations around Accra, Ghana
+accra_locations_bbox = client.locations.list(
+    bbox=(-0.271464, 5.513141, -0.131388, 5.600960), # minX, minY, maxX, maxY (X: longitude, Y: latitude)
+    limit=1000
+)
+
+# Close the connection when done
+client.close()
+```
 
 <FeedbackForm />

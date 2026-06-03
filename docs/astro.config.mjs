@@ -85,6 +85,11 @@ export default defineConfig({
               label: 'Writing data to csv',
               slug: 'guides/write-to-csv',
             },
+            {
+              label: 'Querying measurements',
+              slug: 'guides/querying-measurements',
+            },
+
           ],
         },
         {
