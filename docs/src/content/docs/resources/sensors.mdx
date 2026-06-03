@@ -36,26 +36,13 @@ get(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve information about the sensor with ID=1 on OpenAQ
-    with OpenAQ() as client:
-        client.sensors.get(sensors_id=1)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve information about the sensor with ID=1 on OpenAQ
-    async with AsyncOpenAQ() as client:
-        await client.sensors.get(sensors_id=1)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve information about the sensor with ID=1 on OpenAQ
+with OpenAQ() as client:
+    client.sensors.get(sensors_id=1)
+```
 
 ## Response object
 

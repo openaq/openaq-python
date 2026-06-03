@@ -85,8 +85,6 @@ list(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
 ```py
 from openaq import OpenAQ
 
@@ -94,17 +92,6 @@ from openaq import OpenAQ
 with OpenAQ() as client:
     client.licenses.list()
 ```
-  </TabItem>
-  <TabItem label="async">
-```py
-from openaq import AsyncOpenAQ
-
-# List all licenses on OpenAQ
-async with AsyncOpenAQ() as client:
-    await client.licenses.list()
-```
-  </TabItem>
-</Tabs>
 
 ## Response object
 

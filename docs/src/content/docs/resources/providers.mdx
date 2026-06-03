@@ -100,26 +100,13 @@ list(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # List all providers on OpenAQ
-    with OpenAQ() as client:
-        client.providers.list()
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # List all providers on OpenAQ
-    async with AsyncOpenAQ() as client:
-        await client.providers.list()
-    ```
-  </TabItem>
-</Tabs>
+# List all providers on OpenAQ
+with OpenAQ() as client:
+    client.providers.list()
+```
 
 ## Response object
 

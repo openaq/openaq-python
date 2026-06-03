@@ -42,26 +42,13 @@ get(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+  ```py
+  from openaq import OpenAQ
 
-    # Retrieve the owner with ID 14
-    with OpenAQ() as client:
-        client.owners.get(owners_id=14)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve the owner with ID 14
-    async with AsyncOpenAQ() as client:
-        await client.owners.get(owners_id=14)
-    ```
-  </TabItem>
-</Tabs>
+  # Retrieve the owner with ID 14
+  with OpenAQ() as client:
+      client.owners.get(owners_id=14)
+  ```
 
 ### List multiple owners
 
@@ -90,26 +77,13 @@ list(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # List all owners on OpenAQ
-    with OpenAQ() as client:
-        client.owners.list()
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # List all owners on OpenAQ
-    async with AsyncOpenAQ() as client:
-        await client.owners.list()
-    ```
-  </TabItem>
-</Tabs>
+# List all owners on OpenAQ
+with OpenAQ() as client:
+    client.owners.list()
+```
 
 ## Response objects
 

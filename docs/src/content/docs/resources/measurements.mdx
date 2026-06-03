@@ -32,8 +32,8 @@ list(
   sensors_id: int,
   data: str,
   rollup: str | None = None,
-  datetime_from: datetime.datetime | datetime.date | str | None = None,
-  datetime_to: datetime.datetime | datetime.date | str | None = None,
+  datetime_from: datetime.datetime | str | None = None,
+  datetime_to: datetime.datetime | str | None = None,
   date_from: datetime.date | str | None = None,
   date_to: datetime.date | str | None = None,
   page: int = 1,
@@ -57,8 +57,6 @@ list(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
 ```py
 from openaq import OpenAQ
 
@@ -70,21 +68,6 @@ with OpenAQ() as client:
                              date_from="2026-01-01",
                              date_to="2026-03-31")
 ```
-  </TabItem>
-  <TabItem label="async">
-```py
-from openaq import AsyncOpenAQ
-
-# Retrieve days measurements data for the first three months of 2026 for sensor 
-# with ID 10330999
-async with AsyncOpenAQ() as client:
-    await client.measurements.list(sensors_id=10330999,
-                                   data="days",
-                                   date_from="2026-01-01",
-                                   date_to="2026-03-31")
-```
-  </TabItem>
-</Tabs>
 
 ### Data and Rollup
 
@@ -141,36 +124,18 @@ The columns are `data` values whereas the rows are `rollup` values.
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve monthly measurements data aggregated from the hours base
-    # measurements for the first three months of 2026 for sensor with ID 10330999
-    with OpenAQ() as client:
-        client.measurements.list(sensors_id=10330999,
-                                data="hours",
-                                rollup="monthly",
-                                date_from="2026-01-01",
-                                date_to="2026-03-31")
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve monthly measurements data aggregated from the hours base
-    # measurements for the first three months of 2026 for sensor with ID 10330999
-    async with AsyncOpenAQ() as client:
-        await client.measurements.list(sensors_id=10330999,
-                                data="hours",
-                                rollup="monthly",
-                                date_from="2026-01-01",
-                                date_to="2026-03-31")
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve monthly measurements data aggregated from the hours base
+# measurements for the first three months of 2026 for sensor with ID 10330999
+with OpenAQ() as client:
+    client.measurements.list(sensors_id=10330999,
+                            data="hours",
+                            rollup="monthly",
+                            date_from="2026-01-01",
+                            date_to="2026-03-31")
+```
 
 ## Response object
 

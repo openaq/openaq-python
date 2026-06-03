@@ -38,26 +38,13 @@ get(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve the parameter with ID 2
-    with OpenAQ() as client:
-        client.parameters.get(parameters_id=2)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve the parameter with ID 2
-    async with AsyncOpenAQ() as client:
-        await client.parameters.get(parameters_id=2)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve the parameter with ID 2
+with OpenAQ() as client:
+    client.parameters.get(parameters_id=2)
+```
 
 ### List multiple parameters
 
@@ -98,26 +85,13 @@ list(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # List all meteorological parameters that OpenAQ ingests
-    with OpenAQ() as client:
-        client.parameters.list(parameter_type="meteorological")
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # List all meteorological parameters that OpenAQ ingests
-    async with AsyncOpenAQ() as client:
-        await client.parameters.list(parameter_type="meteorological")
-    ```
-  </TabItem>
-</Tabs>
+# List all meteorological parameters that OpenAQ ingests
+with OpenAQ() as client:
+    client.parameters.list(parameter_type="meteorological")
+```
 
 ### List latest measurements from a parameter
 
@@ -139,28 +113,14 @@ latest(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve the latest measurement readings for PM2.5 (parameter ID 2) at all
-    # locations on OpenAQ
-    with OpenAQ() as client:
-        client.parameters.latest(parameters_id=2)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve the latest measurement readings for PM2.5 (ID=2) at all
-    # locations on OpenAQ
-    async with AsyncOpenAQ() as client:
-        await client.parameters.latest(parameters_id=2)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve the latest measurement readings for PM2.5 (parameter ID 2) at all
+# locations on OpenAQ
+with OpenAQ() as client:
+    client.parameters.latest(parameters_id=2)
+```
 
 ## Response objects
 

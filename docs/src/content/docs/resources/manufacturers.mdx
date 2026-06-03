@@ -40,26 +40,13 @@ get(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve the manufacturer with ID 12
-    with OpenAQ() as client:
-        client.manufacturers.get(manufacturers_id=12)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-    
-    # Retrieve the manufacturer with ID 12
-    async with AsyncOpenAQ() as client:
-        await client.manufacturers.get(manufacturers_id=12)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve the manufacturer with ID 12
+with OpenAQ() as client:
+    client.manufacturers.get(manufacturers_id=12)
+```
 
 ### List multiple manufacturers
 
@@ -88,26 +75,13 @@ list(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # List all manufacturers on OpenAQ
-    with OpenAQ() as client:
-        client.manufacturers.list()
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # List all manufacturers on OpenAQ
-    async with AsyncOpenAQ() as client:
-        await client.manufacturers.list()
-    ```
-  </TabItem>
-</Tabs>
+# List all manufacturers on OpenAQ
+with OpenAQ() as client:
+    client.manufacturers.list()
+```
 
 ### List instruments from a manufacturer
 
@@ -129,26 +103,13 @@ instruments(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve all instruments produced by the manufacturer with ID 12
-    with OpenAQ() as client:
-        client.manufacturers.instruments(manufacturers_id=12)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve all instruments produced by the manufacturer with ID 12
-    async with AsyncOpenAQ() as client:
-        await client.manufacturers.instruments(manufacturers_id=12)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve all instruments produced by the manufacturer with ID 12
+with OpenAQ() as client:
+    client.manufacturers.instruments(manufacturers_id=12)
+```
 
 ## Response objects
 

@@ -45,8 +45,6 @@ get(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
 ```py
 from openaq import OpenAQ
 
@@ -54,17 +52,6 @@ from openaq import OpenAQ
 with OpenAQ() as client:
     client.countries.get(countries_id=1)
 ```
-  </TabItem>
-  <TabItem label="async">
-```py
-from openaq import AsyncOpenAQ
-
-# Retrieve information about Indonesia (ID=1) on OpenAQ
-async with AsyncOpenAQ() as client:
-    await client.countries.get(countries_id=1)
-```
-  </TabItem>
-</Tabs>
 
 ### List multiple countries
 
@@ -97,8 +84,6 @@ list(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
 ```py
 from openaq import OpenAQ
 
@@ -108,19 +93,6 @@ with OpenAQ() as client:
     client.countries.list(parameters_id=2,
                           providers_id=66)
 ```
-  </TabItem>
-  <TabItem label="async">
-```py
-from openaq import AsyncOpenAQ
-
-# List countries where there is a PM2.5 reading and where AirGradient is present 
-# as a data provider
-async with AsyncOpenAQ() as client:
-    await client.countries.list(parameters_id=2,
-                                providers_id=66)
-```
-  </TabItem>
-</Tabs>
 
 ## Response objects
 

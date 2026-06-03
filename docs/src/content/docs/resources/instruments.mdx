@@ -35,26 +35,13 @@ get(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve information about the instrument with ID=1 on OpenAQ
-    with OpenAQ() as client:
-        client.instruments.get(instruments_id=1)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve information about the instrument with ID=1 on OpenAQ
-    async with AsyncOpenAQ() as client:
-        await client.instruments.get(instruments_id=1)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve information about the instrument with ID=1 on OpenAQ
+with OpenAQ() as client:
+    client.instruments.get(instruments_id=1)
+```
 
 ### List multiple instruments
 
@@ -83,26 +70,13 @@ list(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # List all instruments on OpenAQ
-    with OpenAQ() as client:
-        client.instruments.list()
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # List all instruments on OpenAQ
-    async with AsyncOpenAQ() as client:
-        await client.instruments.list()
-    ```
-  </TabItem>
-</Tabs>
+# List all instruments on OpenAQ
+with OpenAQ() as client:
+    client.instruments.list()
+```
 
 ## Response objects
 

@@ -40,26 +40,13 @@ get(
 
 #### *Example*
 
-<Tabs  syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve the location with ID 4845127
-    with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
-        client.locations.get(4845127)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve the location with ID 4845127
-    async with AsyncOpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
-        await client.locations.get(4845127)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve the location with ID 4845127
+with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+    client.locations.get(4845127)
+```
 
 ### List multiple locations
 
@@ -114,28 +101,14 @@ list(
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # List all locations in Morocco where there is a PM2.5 reading
-    with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
-        client.locations.list(countries_id=27,
-                              parameters_id=2)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # List all locations in Morocco where there is a PM2.5 reading
-    async with AsyncOpenAQ() as client:
-        await client.locations.list(countries_id=27,
-                                    parameters_id=2)
-    ```
-  </TabItem>
-</Tabs>
+# List all locations in Morocco where there is a PM2.5 reading
+with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+    client.locations.list(countries_id=27,
+                          parameters_id=2)
+```
 
 ### List latest measurements from a location
 
@@ -157,26 +130,13 @@ the last measurement readings of all sensors at that location in a
 
 #### *Example*
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve the latest measurement readings at the location with ID 4845127
-    with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
-        client.locations.latest(4845127)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve the latest measurement readings at the location with ID 4845127
-    async with AsyncOpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
-        await client.locations.latest(4845127)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve the latest measurement readings at the location with ID 4845127
+with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+    client.locations.latest(4845127)
+```
 
 ### Retrieve all sensors at a location
 
@@ -197,26 +157,13 @@ returns all sensors at that location in a `SensorsResponse` object.
 
 #### *Example*
 
-<Tabs  syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve all sensors at location with ID 4845127
-    with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
-        client.locations.sensors(4845127)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve all sensors at location with ID 4845127
-    async with AsyncOpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
-        await client.locations.sensors(4845127)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve all sensors at location with ID 4845127
+with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+    client.locations.sensors(4845127)
+```
 
 ## Response objects
 
