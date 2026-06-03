@@ -70,8 +70,8 @@ export default defineConfig({
           label: 'Common workflows',
           items: [
             {
-              label: 'Querying spatially',
-              slug: 'guides/querying-spatially',
+              label: 'Geospatial queryies',
+              slug: 'guides/geospatial-queries',
             },
             {
               label: 'Integrating with Pandas',

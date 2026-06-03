@@ -1,5 +1,5 @@
 ---
-title: Querying spatially
+title: Geospatial queries
 description: Use geospatial queries to find monitoring locations on OpenAQ
 ---
 
@@ -21,9 +21,9 @@ To query for locations within the radius of a point, you will need the
 coordinates in WGS84 format (EPSG:4326) of the center point and the radius (in
 meters) within which you want to search. The query below is an example of how
 you can query locations that are within 10,000 meters from Accra's city center.
+The API only support query radius up to 25,0000 meters (25 km.).
 
 ```py
-# Initialize client
 client = OpenAQ(api_key='replace-me-with-a-valid-key')
 
 # Fetch locations within 10,000 meters of Accra's center
@@ -40,13 +40,12 @@ client.close()
 ## Querying within a bounding box
 
 To query for locations within a specified bounding box, you will need the
-coordinates of the four points that make up the bounding box in WGS84 format
-(EPSG:4326). The query below is an example of how you can query locations from a
-bounding box that roughly covers the City of Accra, Ghana.
+WGS84 (EPSG:4326) coordinates of the four points that make up the bounding box
+in the form minX, minY, maxX, maxY. The example below is an example of how you
+can query locations from a bounding box that roughly covers the City of Accra, Ghana.
 
 ```py
 from openaq import OpenAQ
-import pandas as pd
 
 # Initialize client
 client = OpenAQ(api_key='replace-me-with-a-valid-key')
