@@ -63,7 +63,7 @@ export default defineConfig({
           items: [
             { label: 'Custom serialization', slug: 'advanced/json' },
             { label: 'Logging', slug: 'advanced/logging' },
-            { label: 'Custom rate limiting', slug: 'advanced/rate-limiting' },
+            { label: 'Handling rate limits', slug: 'advanced/rate-limiting' },
           ],
         },
         {

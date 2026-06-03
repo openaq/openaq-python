@@ -1,25 +1,83 @@
 ---
-title: Rate limiting
+title: Handling rate limits
 ---
 
 import FeedbackForm from '@components/FeedbackForm.astro'
 
+The OpenAQ Python SDK tracks rate limit state automatically using headers
+returned by the API. By default, when the rate limit is exhausted the client
+will call `time.sleep()` and block until the limit resets before continuing.
+This behaviour is controlled by the `auto_wait` parameter on the `OpenAQ` client.
 
-By default the OpenAQ Python SDK provides automatic rate limiting, where the 
-client class will track and ensure that the API rate limit is not exceeded. For 
-more fine grained control of the client class this option can be toggled off 
-by setting the `auto_wait` option to `False`. e.g.
+## Automatic rate limiting
 
-```py 
+`auto_wait` is enabled by default. No additional configuration is required.
+
+```py
 from openaq import OpenAQ
 
-client = OpenAQ(auto_wait=False)
+with OpenAQ(api_key="your-api-key") as client:
+    # requests will block automatically if the rate limit is reached
+    locations = client.locations.list()
+```
 
+## Manual rate limiting
+
+Setting `auto_wait=False` disables the automatic wait behaviour. The client will
+instead raise a `RateLimitError` when the rate limit is exhausted, allowing you
+to handle it yourself.
+
+```py
+from openaq import OpenAQ
+from openaq.exceptions import RateLimitError
+
+with OpenAQ(api_key="your-api-key", auto_wait=False) as client:
+    try:
+        locations = client.locations.list()
+    except RateLimitError as e:
+        print(f"Rate limit exceeded: {e}")
+        # handle the error — wait, retry, back off, etc.
 ```
 
 ## Rate limit headers
 
-The OpenAQ API provides HTTP headers that include information on current rate
-limit usage. 
+Every response from the OpenAQ API includes headers describing the current state
+of your rate limit window. The SDK exposes these on each response object under
+the `headers` attribute:
+
+```
+├── headers
+│   ├── x-ratelimit-limit: int | None
+│   ├── x-ratelimit-remaining: int | None
+│   ├── x-ratelimit-used: int | None
+│   └── x-ratelimit-reset: int | None
+```
+
+| Header | Description |
+| --- | --- |
+| `x-ratelimit-limit` | Maximum number of requests allowed in the current window. |
+| `x-ratelimit-remaining` | Requests remaining before the limit is reached. |
+| `x-ratelimit-used` | Requests made so far in the current window. |
+| `x-ratelimit-reset` | Seconds until the current rate limit window resets. |
+
+When `auto_wait=False`, you can read these headers directly to implement your own
+back-off or retry strategy:
+
+```py
+from openaq import OpenAQ
+from openaq.exceptions import RateLimitError
+import time
+
+with OpenAQ(api_key="your-api-key", auto_wait=False) as client:
+    while True:
+        try:
+            locations = client.locations.list()
+            break
+        except RateLimitError:
+            reset = client.locations.last_response.headers.get("x-ratelimit-reset")
+            wait = int(reset) if reset else 60
+            print(f"Rate limited. Retrying in {wait}s.")
+            time.sleep(wait)
+```
 
 <FeedbackForm />
