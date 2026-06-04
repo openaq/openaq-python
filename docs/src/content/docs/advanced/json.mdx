@@ -21,14 +21,15 @@ Then when serializing results pass `orjson` to the `json()` method's
 encoder parameter, which defaults to the built-in `json` module:
 
 ```py
+from openaq import OpenAQ
 import orjson
 
-# create a client
-# ...
-# call a resource
+client = OpenAQ('replace-with-valid-openaq-api-key')
+res = client.locations.get(42)
 
 res.json(encoder = orjson)
 
+client.close()
 ```
 
 <FeedbackForm />
