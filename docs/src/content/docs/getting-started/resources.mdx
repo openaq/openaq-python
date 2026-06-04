@@ -5,11 +5,10 @@ title: Resources
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 
-The OpenAQ API follows a resource-based design where each endpoint returns a 
-response corresponding to the endpoint. The OpenAQ Python SDK further simplifies
-this by providing convenient resources from the client with methods to call the 
-endpoints. All API responses through the SDK provide common features for reading
-data as convenient Python objects, a dictionary, or a JSON string. 
+The OpenAQ API uses a resource-based design. Each endpoint returns data specific
+to that resource. The OpenAQ Python SDK simplifies these calls by exposing
+resources directly through the client. Every SDK response supports reading data
+as a Python object, a dictionary, or a JSON string.
 
 ```py
 from openaq import OpenAQ
@@ -18,9 +17,9 @@ with OpenAQ() as client:
     response = client.instruments.get(instruments_id=1)
 ```
 
-Here, `client.instruments` is the Instruments resource, and .get() calls the
-corresponding endpoint. Other resources follow the same or similar pattern
-`client.locations.get()`, `client.sensors.list()`, and so on.
+In this example, `client.instruments `represents the Instruments resource, and
+`.get()` executes the API call. Other resources share this pattern, such as
+`client.locations.get()` or `client.sensors.list()`.
 
 
 <FeedbackForm />

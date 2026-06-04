@@ -41,7 +41,7 @@ list(
   ) -> MeasurementsResponse
 ```
 
-#### *Query arguments*
+#### Query arguments
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
@@ -55,7 +55,7 @@ list(
 | page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
 | limit | `int` The number of results returned per page, defaults to 1,000 | Must be between 1 and 1,000 |
 
-#### *Example*
+#### Example
 
 ```py
 from openaq import OpenAQ
@@ -86,7 +86,7 @@ need to use `rollup` for a customized aggregation:
 - double check to see if it's a query that could be done with just using `data`
 - limit your queries to smaller time periods
 
-#### *Possible combinations*
+#### Possible combinations
 
 The table below presents acceptable combinations of `data` and `rollup` values.
 The columns are `data` values whereas the rows are `rollup` values.
@@ -122,7 +122,7 @@ The columns are `data` values whereas the rows are `rollup` values.
 | dayofweek | Aggregates across the selected base measurement and returns the average value for each day in a week (Monday-Sunday). | |
 | monthofyear | Aggregates across the selected base measurement and returns the average value for each month in a year (January-December). | |
 
-#### *Example*
+#### Example
 
 ```py
 from openaq import OpenAQ

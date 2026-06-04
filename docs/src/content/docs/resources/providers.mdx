@@ -30,13 +30,13 @@ get(
   ) -> ProvidersResponse
 ```
 
-#### *Query arguments*
+#### Query arguments
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
 | providers_id | `int` OpenAQ's unique ID for each provider | Required |
 
-#### *Example*
+#### Example
 
 <Tabs syncKey="client">
   <TabItem label="sync">
@@ -82,7 +82,7 @@ list(
   ) -> ProvidersResponse
 ```
 
-#### *Query arguments*
+#### Query arguments
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
@@ -98,7 +98,7 @@ list(
 | iso | `str \| None` The ISO 3166-1 alpha-2 code for the country or territory where the provider operates | Must be a valid ISO 3166-1 alpha-2 code representation of the country. Cannot be used at the same time as `countries_id` |
 | countries_id | `int \| list[int] \| None` Filter by the country or territory where the provider operates | Must be OpenAQ unique ID for the country or territory. Cannot be used at the same time as `iso` |
 
-#### *Example*
+#### Example
 
 ```py
 from openaq import OpenAQ

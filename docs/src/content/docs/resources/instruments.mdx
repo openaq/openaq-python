@@ -27,13 +27,13 @@ get(
   ) -> InstrumentsResponse
 ```
 
-#### *Query arguments*
+#### Query arguments
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
 | instruments_id | `int` OpenAQ's unique ID for each instrument | Required |
 
-#### *Example*
+#### Example
 
 ```py
 from openaq import OpenAQ
@@ -59,7 +59,7 @@ list(
   ) -> InstrumentsResponse
 ```
 
-#### *Query arguments*
+#### Query arguments
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
@@ -68,7 +68,7 @@ list(
 | order_by | `str \| None` The instrument field by which to sort results, defaults to `id`. Currently only `id` is supported | |
 | sort_order | `SortOrder \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
 
-#### *Example*
+#### Example
 
 ```py
 from openaq import OpenAQ

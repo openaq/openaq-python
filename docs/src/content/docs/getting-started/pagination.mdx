@@ -5,44 +5,46 @@ title: Pagination
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 
-The OpenAQ platform contains a large amount of data, and the OpenAQ API
-can only return a subset in a single request. Pagination lets you query large
-result sets across many requests.
+The OpenAQ platform holds vast amounts of data. Because of this, the API returns 
+data in smaller subsets. Pagination helps you fetch large datasets across 
+multiple requests.
 
 ## Page and limit
 
-The OpenAQ Python SDK provides `page` and `limit` arguments for all resources
-with a `list()` method.
+The OpenAQ Python SDK supports `page` and `limit` arguments for all resources 
+that use a `list()` method.
 
 - `page` - the page number to retrieve. Defaults to `1`. Must exceed zero.
 - `limit` - the number of results per page. Defaults to `100`. Must range from
 `1` to `1000`.
 
-#### *Examples*
+#### Examples
+
 To retrieve the first 50 results:
+
 ```py
 locations = client.locations.list(page=1, limit=50)
 ```
 
 To retrieve the next 50 results, increment `page`:
+
 ```py
 locations = client.locations.list(page=2, limit=50)
 ```
 
 ## The meta object
 
-All responses include a `meta` object with metadata about the result
-set. The `meta.found` field holds the total number of records matching your
-query, which you can use to calculate the total page count as shown preceding if
-the result set contain 1,000 or fewer records.
+Every response includes a `meta` object with metadata. The `meta.found `field
+shows the total number of matching records. Use this value to calculate the
+total page count for datasets with 1,000 or fewer records.
 
-When `meta.found` returns `'>1000'`, you can't calculate the exact page count
-ahead of time. Consider narrowing your query with filters like `countries_id`
-or `parameters_id` to reduce the result set. See the meta object reference for
-a full list of available fields.
+If `meta.found `returns '>1000', you cannot calculate the exact page count in
+advance. Narrow your query using filters like `countries_id` or `parameters_id`
+to reduce the dataset size. See the `meta` object reference for all available
+fields.
 
-The Paging Results page talks more about how you can leverage the meta object
-and pagination logic to query large results sets.
+The Paging Results page provides more details on using the `meta` object and
+pagination logic.
 
 
 <FeedbackForm />

@@ -37,13 +37,13 @@ get(
   ) -> CountriesResponse
 ```
 
-#### *Query arguments*
+#### Query arguments
 
 | argument | description | input requirements |
 | -------- | ----------- | ---- |
 | countries_id | `int` OpenAQ's unique ID for each country | Required |
 
-#### *Example*
+#### Example
 
 ```py
 from openaq import OpenAQ
@@ -71,7 +71,7 @@ list(
   ) -> CountriesResponse
 ```
 
-#### *Query arguments*
+#### Query arguments
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
@@ -82,7 +82,7 @@ list(
 | parameters_id | `int \| list[int] \| None` Filter by a pollutant or meteorological parameter | Must be OpenAQ unique ID for the pollutant or meteorlogical parameter |
 | providers_id | `int \| list[int] \| None` Filter by the ID of the data provider | Must be OpenAQ unique ID for the provider that facilitates data sharing |
 
-#### *Example*
+#### Example
 
 ```py
 from openaq import OpenAQ

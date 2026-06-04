@@ -29,13 +29,13 @@ get(
   ) -> LicensesResponse
 ```
 
-#### *Query arguments*
+#### Query arguments
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
 | licenses_id | `int` OpenAQ's unique ID for each license | Required |
 
-#### *Example*
+#### Example
 
 <Tabs syncKey="client">
   <TabItem label="sync">
@@ -74,7 +74,7 @@ list(
   ) -> LicensesResponse
 ```
 
-#### *Query arguments*
+#### Query arguments
 
 | argument | description | input requirements |
 | -------- | ----------- | ------------------ |
@@ -83,7 +83,7 @@ list(
 | order_by | `str \| None` The license field by which to sort results, defaults to `id`. Currently only `id` is supported | |
 | sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
 
-#### *Example*
+#### Example
 
 ```py
 from openaq import OpenAQ
