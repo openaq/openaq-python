@@ -70,7 +70,7 @@ export default defineConfig({
           label: 'Common workflows',
           items: [
             {
-              label: 'Geospatial queryies',
+              label: 'Geospatial queries',
               slug: 'guides/geospatial-queries',
             },
             {
