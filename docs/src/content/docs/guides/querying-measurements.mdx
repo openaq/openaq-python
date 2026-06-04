@@ -1,52 +1,98 @@
 ---
 title: Querying measurements
-description: tbd
+description: Querying historical measurements from a monitoring station
 ---
 import FeedbackForm from '@components/FeedbackForm.astro'
+import { Steps } from '@astrojs/starlight/components';
 
 
+One of the most common uses of the OpenAQ API is to fetch historical
+measurements from one or multiple monitoring stations that would then be fed
+into an analysis pipeline or local data infrastructure. This guide will walk you
+through the basics of that workflow by answering the following question:
 
-The OpenAQ Python SDK returns data as deserialized Python objects rather than
-Pandas DataFrames. This guide shows you how to convert OpenAQ API responses into
-DataFrames in 2 steps:
-1. First, serialize the response objects by using `.dict()`
-2. Then, use Pandas's
-`json_normalize()` function to flatten the nested structure into a tabular format
+```
+What are the averaged daily PM2.5 measurements as reported at location with ID
+3025582 (Accra, Ghana) for the year 2025?
+```
 
-## Code sample
+This guide assumes you have installed OpenAQ Python SDK and had a working API
+key at your disposal.
 
-The code below demonstrates getting locations data into a Pandas DataFrame stored
-in variable `df`. To run it, make sure you have OpenAQ Python SDK and Pandas
-installed. Remember to also replace the `replace-me-with-a-valid-key` below with
-your OpenAQ API key.
+## Tutorial
 
+The OpenAQ API is designed such that data is accessed from the top down, much
+like traversing a tree data structure. For this task, the tree goes from the top
+down with the 3 resources we will need to use: Locations >> Sensors >>
+Measurements. In other words, we will:
 
-  ```py
-  from openaq import OpenAQ
-  import pandas as pd
+1. **First**, access the Locations resource using the ID provided to find the ID of
+   the sensor that measures PM2.5 at that location
+2. **Then**, access the Measurements resource using the ID of the sensor that we
+   found at the granularity and timeframe as desired
 
-  # Initialize client
-  client = OpenAQ(api_key='replace-me-with-a-valid-key')
+Below is the step-by-step for this workflow with code that you can play with in
+a Python notebook environment.
 
-  # Fetch locations around Accra, Ghana
-  response = client.locations.list(
-      bbox=(-0.464172, 5.449908, 0.030212, 5.691491)
-  )
+<Steps>
 
-  # Read the results into a Pandas DataFrame (2 steps)
-  data = response.dict()
-  df = pd.json_normalize(data['results'])
+1. Instantiate the client.
 
-  # Close the connection when done
-  client.close()
-  ```
-  
-To walk you through what this code does after data is fetched from the API: 
-- The `response.dict()` method converts the OpenAQ response object
-to a Python dictionary. 
-- The `json_normalize()` function then flattens the nested results array into a
-two-dimensional DataFrame where nested fields become columns with dot notation
-(e.g. `coordinates.latitude`).
+    ```py
+    from openaq import OpenAQ
+    from datetime import date
 
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+    locations_id = 3025582
+    ```
+
+2. Retrieve the ID of the sensor that measures PM2.5 at the provided location.
+
+    ```py
+    sensors_list = client.locations.get(locations_id).results[0].sensors
+    pm25_sensors_id = 0
+
+    for sensor in sensors_list:
+        if "pm25" in sensor.name:
+            pm25_sensors_id = sensor.id
+            break
+    ```
+
+3. Fetch the measurements and print them to a .json file.
+
+    ```py
+    import json
+
+    response = client.measurements.list(pm25_sensors_id,
+                                        data="days",
+                                        date_from=date(2025, 1, 1),
+                                        date_to=date(2025, 12, 31)
+                                        )
+
+    with open("daily_measurements_2025.json", "w") as f:
+        f.write(json.dumps(response.dict()))
+
+    client.close()
+    ```
+
+    If you follow the steps correctly, you will now have a
+    "daily_measurements_2025.json" file newly created in the directory from
+    which you run the code. This file contains the MeasurementsResponse in a
+    .json format. The daily measurements are stored as a list in the `results`
+    key.
+
+</Steps>
+
+While you can get the results set of this example in the first page of the
+response (i.e. we are expecting 365 records in the results of this query), there
+will be instances where the records will be spread across several pages when you
+query at different granularity levels (e.g. `hours`) or over a longer period of
+time. In those cases, it will be necessary to [page the
+results](/guides/paging-results) to get the full data you request.
+
+You might find .json to not be optimal for your purpose of use. We have a
+guide where you can instead [output the data to a .csv
+file](/guides/write-to-csv). If you want to work with the datasets using Python,
+we also have a tutorial on [basic pandas integration](/guides/pandas).
 
 <FeedbackForm/>

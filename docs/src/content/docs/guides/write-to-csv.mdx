@@ -3,7 +3,6 @@ title: Writing data to csv
 description: Write measurements data in OpenAQ API responses to .csv fies
 ---
 import FeedbackForm from '@components/FeedbackForm.astro'
-
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 
@@ -15,13 +14,13 @@ might simply be to store the data locally.
 This guide demonstrates how you can write the measurements data you query using
 OpenAQ SDK to a .csv file for later access.
 
-## Getting measurements data
+## Step 1: Getting measurements data
 
 As an example, let's say you want to get all hourly PM2.5 data for location ID
 2178 reported for the last month of 2025. To get this data:
-1. First, use the `.get()` method of the Locations resource to get the sensors_id that report PM2.5
-at this location. 
-2. Then, you can use that sensors_id to get measurements data from the
+1. **First**, use the `.get()` method of the Locations resource to get the
+sensors_id that report PM2.5 at this location. 
+2. **Then**, you can use that sensors_id to get measurements data from the
 Measurements resource.
 
 The code below demonstrates the workflow above to get measurements data and
@@ -51,10 +50,10 @@ response = client.measurements.list(pm25_sensors_id,
 measurements = response.results
 ```
 
-## Using built-in Python module
-To write the fetched data to file, you can use Python's built-in `csv` module
-that is available in its standard library. Outside of OpenAQ Python SDK, no
-installation of other external packages is necessary with this approach.
+## Step 2a: Using built-in Python module
+To write the fetched data to file, one way is you can use Python's built-in
+`csv` module that is available in its standard library. Outside of OpenAQ Python
+SDK, no installation of other external packages is necessary with this approach.
 
 ```py
 import csv
@@ -78,10 +77,10 @@ with open("csv_pm25_2178_2025_12.csv", 'w', newline='') as csvfile:
         writer.writerow(row)
 ```
 
-## Using Pandas
+## Step 2b: Using Pandas
 Alternatively, data can be written to file using third-party packages such as
 Pandas. In addition to installing Pandas, this approach also requires
-[converting the MeasurementsResponse object into a Pandas DataFrame](link) in
+[converting the MeasurementsResponse object into a Pandas DataFrame](/guides/pandas) in
 the process. While less clean than the built-in `csv` method, because Pandas can
 automatically flatten the nested results, you can pick all columns or filter out
 unwanted columns in the output to be exported instead of manually extracting

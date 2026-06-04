@@ -6,10 +6,11 @@ description: Get data stored across multiple pages
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 
-The OpenAQ API and our Python SDK by design return subsets of data if the amount
-of data queried is too large to contain in one single response. To ensure that
-you're getting all data available that matches your queries, this guide is a
-tutorial for you to navigate the behavior of pagination and work with it.
+The OpenAQ API and our Python SDK by design return only a subset of the data if
+the amount of data queried is too large to contain in one single response. To
+ensure that you're getting all data available that matches your queries, this
+guide is a tutorial for you to navigate the behavior of pagination and work with
+it.
 
 The Pagination page covers how `meta.found` in the query response could be an
 integer or a string, depending on how computationally expensive it is to count
@@ -45,6 +46,8 @@ try:
 
 except TypeError:
     print("Records count in meta.found is not a valid number.")
+
+client.close()
 ```
 
 ## Get all records with any response
@@ -74,6 +77,8 @@ while results:
     
     if response.meta.found == 0:
         results = False
+
+client.close()
 ```
 
 <FeedbackForm />

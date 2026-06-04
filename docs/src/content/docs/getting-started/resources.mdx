@@ -18,7 +18,7 @@ with OpenAQ() as client:
     response = client.instruments.get(instruments_id=1)
 ```
 
-Here, `client.instruments` is the instruments resource, and .get() calls the
+Here, `client.instruments` is the Instruments resource, and .get() calls the
 corresponding endpoint. Other resources follow the same or similar pattern
 `client.locations.get()`, `client.sensors.list()`, and so on.
 
