@@ -33,10 +33,10 @@ from openaq import OpenAQ
 from datetime import datetime
 
 client = OpenAQ(api_key='replace-me-with-a-valid-key')
-sensors_list = client.locations.get(2178).results[0].sensors
+sensors_resp = client.locations.sensors(2178)
 pm25_sensors_id = 0
 
-for sensor in sensors_list:
+for sensor in sensors_resp.results:
     if "pm25" in sensor.name:
         pm25_sensors_id = sensor.id
         break
