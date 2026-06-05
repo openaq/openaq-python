@@ -1,7 +1,7 @@
 """Shared utility functions for working with query parameter models."""
 
 import datetime
-from typing import Sequence
+from collections.abc import Sequence
 
 from .types import Data, Rollup
 
@@ -36,13 +36,13 @@ def build_query_params(
     for k, v in kwargs.items():
         if v is None:
             continue
-        if isinstance(v, (list, tuple)):
+        if isinstance(v, list | tuple):
             params[k] = ",".join(str(x) for x in v)
         elif isinstance(
             v, datetime.date
         ):  # checks for both datetime and date since datetime is subclass of date
             params[k] = v.isoformat()
-        elif isinstance(v, (str, int, float, bool)):
+        elif isinstance(v, str | int | float | bool):
             params[k] = v
     return params
 
@@ -60,9 +60,9 @@ def build_measurements_path(
     Returns:
         string of url path
     """
-    path = f'/sensors/{sensors_id}/{data}'
+    path = f"/sensors/{sensors_id}/{data}"
 
     if rollup:
-        path += f'/{rollup}'
+        path += f"/{rollup}"
 
     return path

@@ -86,7 +86,7 @@ def validate_radius(radius: object) -> int:
     """
     if not radius_check(radius):
         raise InvalidParameterError(
-            f"Radius must be an integer greater than zero and less that 25,000 (25km)"
+            "Radius must be an integer greater than zero and less that 25,000 (25km)"
         )
     return radius
 
@@ -113,13 +113,15 @@ def validate_coordinates(coordinates: object) -> tuple[float, float]:
             f"Coordinates must have exactly 2 values, got {len(coordinates)}"
         )
 
-    if not all(isinstance(x, (int, float)) for x in coordinates):
+    if not all(isinstance(x, int | float) for x in coordinates):
         raise InvalidParameterError("Coordinates must contain only numbers")
 
     lat, lon = coordinates
 
     if not -90 <= lat <= 90:
-        raise InvalidParameterError(f"Latitude must be between -90 and 90, got {lat}")
+        raise InvalidParameterError(
+            f"Latitude must be between -90 and 90, got {lat}"
+        )
 
     if not -180 <= lon <= 180:
         raise InvalidParameterError(
@@ -151,7 +153,7 @@ def validate_bbox(bbox: object) -> tuple[float, float, float, float]:
             f"Bounding box must have exactly 4 values, got {len(bbox)}"
         )
 
-    if not all(isinstance(x, (int, float)) for x in bbox):
+    if not all(isinstance(x, int | float) for x in bbox):
         raise InvalidParameterError("Bounding box must contain only numbers")
 
     min_lon, min_lat, max_lon, max_lat = bbox
@@ -213,7 +215,7 @@ def validate_countries_query_parameters(
 
     if countries_id is not None:
         countries_id = validate_integer_or_list_integer_params(
-            'countries_id', countries_id
+            "countries_id", countries_id
         )
     return (countries_id, iso)
 
@@ -241,11 +243,7 @@ def geospatial_params_exclusivity_check(
 
     if has_coordinates != has_radius:
         return False
-
-    if has_bbox and (has_coordinates or has_radius):
-        return False
-
-    return True
+    return not (has_bbox and (has_coordinates or has_radius))
 
 
 def validate_geospatial_params(
@@ -428,9 +426,7 @@ def validate_iso_param(code: str) -> str:
         InvalidParameterError: If code is not a valid ISO-3166-1 alpha-2 country code.
     """
     if not iso_check(code):
-        message = (
-            f"iso value must be a valid ISO-3166-1 alpha-2 country code, got {code}"
-        )
+        message = f"iso value must be a valid ISO-3166-1 alpha-2 country code, got {code}"
         raise InvalidParameterError(message)
     return code
 
@@ -502,7 +498,9 @@ def validate_sort_order(sort_order: object) -> SortOrder:
         InvalidParameterError: If sort_order is not a valid sort order string.
     """
     if not isinstance(sort_order, str):
-        message = f"sort_order parameter must be a string, got: {type(sort_order)}"
+        message = (
+            f"sort_order parameter must be a string, got: {type(sort_order)}"
+        )
         raise InvalidParameterError(message)
 
     if sort_order not in _SORT_ORDER_VALUES:
@@ -650,7 +648,7 @@ def check_valid_date_parameter(
     Returns:
         True if the data is paired with valie date query parameters, False if not.
     """
-    if data in ['days', 'years']:
+    if data in ["days", "years"]:
         return datetime_from is not None or datetime_to is not None
     else:
         return date_from is not None or date_to is not None
@@ -665,7 +663,9 @@ def date_check(value: object) -> TypeGuard[datetime.date | str]:
     Returns:
         True if value is a date object or valid ISO-8601 date string, False otherwise.
     """
-    if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
+    if isinstance(value, datetime.date) and not isinstance(
+        value, datetime.datetime
+    ):
         return True
     if isinstance(value, str):
         return iso8601_date_check(value)
@@ -737,7 +737,7 @@ def iso8601_datetime_check(value: object) -> TypeGuard[str]:
     try:
         # Replace 'Z' with '+00:00' for Python 3.10
         # https://docs.python.org/3/whatsnew/3.11.html#datetime
-        datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+        datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
         return True
     except ValueError:
         return False
@@ -776,7 +776,8 @@ def to_datetime(value: datetime.datetime | str) -> datetime.datetime:
 
 
 def datetime_from_lesser_check(
-    datetime_from: datetime.datetime, datetime_to: datetime.datetime | None = None
+    datetime_from: datetime.datetime,
+    datetime_to: datetime.datetime | None = None,
 ) -> bool:
     """Checks that datetime_from is either less than now or less than datetime_to.
 
@@ -810,7 +811,9 @@ def datetime_date_params_exclusivity_check(
         True if datetime_from and/or datetime_to is not used with date_from and/or date_to, otherwise False
     """
     date_params_used = (date_from is not None) or (date_to is not None)
-    datetime_params_used = (datetime_from is not None) or (datetime_to is not None)
+    datetime_params_used = (datetime_from is not None) or (
+        datetime_to is not None
+    )
 
     return not (date_params_used and datetime_params_used)
 
@@ -842,7 +845,9 @@ def validate_datetime_params(
     Raises:
         InvalidParameterError: If parameters are invalid or incompatible with data value.
     """
-    if check_valid_date_parameter(data, date_from, date_to, datetime_from, datetime_to):
+    if check_valid_date_parameter(
+        data, date_from, date_to, datetime_from, datetime_to
+    ):
         raise InvalidParameterError(
             f"Invalid parameter combination for data='{data}'. "
             f"Use datetime_from/datetime_to for 'measurements'/'hours', "
@@ -857,7 +862,7 @@ def validate_datetime_params(
             "Use either date_from/date_to OR datetime_from/datetime_to, not both."
         )
 
-    if data in ['days', 'years']:
+    if data in ["days", "years"]:
         if date_to:
             if not date_check(date_from) or not date_check(date_to):
                 raise InvalidParameterError(
@@ -886,7 +891,9 @@ def validate_datetime_params(
 
     else:  # data in ['measurements', 'hours']
         if datetime_to is not None:
-            if not datetime_check(datetime_from) or not datetime_check(datetime_to):
+            if not datetime_check(datetime_from) or not datetime_check(
+                datetime_to
+            ):
                 raise InvalidParameterError(
                     f"Invalid datetime_from or datetime_to, must be either datetime.datetime type or ISO-8601 formatted string, got {type(datetime_from)} and {type(datetime_to)}"
                 )

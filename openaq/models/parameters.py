@@ -126,7 +126,7 @@ class Parameters(ResourceBase):
         validate_geospatial_params(coordinates, radius, bbox)
         if countries_id is not None:
             countries_id = validate_integer_or_list_integer_params(
-                'countries_id', countries_id
+                "countries_id", countries_id
             )
         if iso is not None:
             iso = validate_iso_param(iso)

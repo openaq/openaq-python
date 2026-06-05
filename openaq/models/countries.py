@@ -94,11 +94,11 @@ class Countries(ResourceBase):
             order_by = validate_order_by(order_by)
         if parameters_id is not None:
             parameters_id = validate_integer_or_list_integer_params(
-                'parameters_id', parameters_id
+                "parameters_id", parameters_id
             )
         if providers_id is not None:
             providers_id = validate_integer_or_list_integer_params(
-                'providers_id', providers_id
+                "providers_id", providers_id
             )
         params = build_query_params(
             page=page,

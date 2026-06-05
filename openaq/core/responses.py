@@ -67,7 +67,9 @@ class _ModelBase:
 
         # Filter out fields that are not in the class annotations
         expected_fields = {
-            k: v for k, v in deserialized_data.items() if k in cls.__annotations__
+            k: v
+            for k, v in deserialized_data.items()
+            if k in cls.__annotations__
         }
         return cls(**expected_fields)
 
@@ -143,13 +145,13 @@ class _ResponseBase(Generic[TResult]):
         return cls(
             Headers(
                 **{
-                    k.replace('-', '_'): int(v) if v.isdigit() else None
+                    k.replace("-", "_"): int(v) if v.isdigit() else None
                     for k, v in response.headers.items()
-                    if k.replace('-', '_') in valid_headers
+                    if k.replace("-", "_") in valid_headers
                 }
             ),
-            json_data['meta'],
-            json_data['results'],
+            json_data["meta"],
+            json_data["results"],
         )
 
     def __post_init__(self) -> None:
@@ -157,13 +159,18 @@ class _ResponseBase(Generic[TResult]):
         if isinstance(self.meta, dict):
             self.meta = Meta.load(self.meta)
 
-        if hasattr(self.__class__, '__orig_bases__'):
+        if hasattr(self.__class__, "__orig_bases__"):
             for base in self.__class__.__orig_bases__:
-                if hasattr(base, '__args__'):
+                if hasattr(base, "__args__"):
                     result_type = get_args(base)[0]
-                    if isinstance(self.results, list) and self.results:
-                        if isinstance(self.results[0], dict):
-                            self.results = [result_type.load(x) for x in self.results]
+                    if (
+                        isinstance(self.results, list)
+                        and self.results
+                        and isinstance(self.results[0], dict)
+                    ):
+                        self.results = [
+                            result_type.load(x) for x in self.results
+                        ]
                     break
 
     def _serialize(self, data: Mapping | list) -> dict[str, Any] | list[Any]:
@@ -174,12 +181,12 @@ class _ResponseBase(Generic[TResult]):
         """
         if isinstance(data, list):
             return [
-                self._serialize(i) if isinstance(i, (Mapping, list)) else i
+                self._serialize(i) if isinstance(i, Mapping | list) else i
                 for i in data
             ]
         return {
             cast(str, camelize(k)): (
-                self._serialize(v) if isinstance(v, (Mapping, list)) else v
+                self._serialize(v) if isinstance(v, Mapping | list) else v
             )
             for k, v in data.items()
         }
@@ -394,7 +401,8 @@ class Location(_ModelBase):
             ]
         if isinstance(self.sensors, list):
             self.sensors = [
-                SensorBase.load(x) if isinstance(x, dict) else x for x in self.sensors
+                SensorBase.load(x) if isinstance(x, dict) else x
+                for x in self.sensors
             ]
         if isinstance(self.coordinates, dict):
             self.coordinates = Coordinates.load(self.coordinates)
@@ -484,7 +492,8 @@ class Provider(_ModelBase):
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.parameters, list):
             self.parameters = [
-                ParameterBase.load(cast(dict[str, Any], x)) for x in self.parameters
+                ParameterBase.load(cast(dict[str, Any], x))
+                for x in self.parameters
             ]
         if isinstance(self.bbox, dict):
             self.bbox = Bbox.load(self.bbox)
@@ -563,7 +572,8 @@ class Country(_ModelBase):
         """Sets class attributes to correct type after checking input type."""
         if isinstance(self.parameters, list):
             self.parameters = [
-                ParameterBase.load(cast(dict[str, Any], x)) for x in self.parameters
+                ParameterBase.load(cast(dict[str, Any], x))
+                for x in self.parameters
             ]
 
 
@@ -676,7 +686,8 @@ class Manufacturer(_ModelBase):
     def __post_init__(self) -> None:
         """Sets class attributes to correct type after checking input type."""
         self.instruments = [
-            InstrumentBase.load(cast(dict[str, Any], x)) for x in self.instruments
+            InstrumentBase.load(cast(dict[str, Any], x))
+            for x in self.instruments
         ]
 
 

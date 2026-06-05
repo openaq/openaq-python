@@ -8,16 +8,15 @@ description = "Official OpenAQ Python SDK."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
-keywords = []
+keywords = ["air quality", "environment", "openaq"]
 maintainers = [
   { name = "OpenAQ", email = "dev@openaq.org" },
 ]
 authors = [
-  { name = "Russ Biggs", email = "russ@openaq.org" },
-  { name = "Gabe Fosse", email = "gabe@openaq.org" },
+  { name = "Russ Biggs", email = "russ@openaq.org" }
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -96,18 +95,13 @@ check = "mypy -p openaq --install-types --non-interactive"
 ci = "mypy -p openaq"
 cov = "mypy -p openaq --exclude 'openaq/vendor/.*' --install-types --html-report mypy-report"
 
-
 [tool.hatch.envs.style]
 detached = true
-dependencies = ["ruff", "black", "isort", "pydocstyle"]
+dependencies = ["ruff"]
 
 [tool.hatch.envs.style.scripts]
-check = ["ruff check", "black --check --diff .", "isort --check-only --diff ."]
-fmt = [
-    "ruff check --select F401 --fix openaq",
-    "isort openaq tests", 
-    "black .", 
-]
+check = ["ruff check .", "ruff format --check ."]
+fmt = ["ruff check --fix .", "ruff format ."]
 
 [tool.hatch.envs.docs]
 dependencies = [
@@ -124,7 +118,7 @@ serve = ["mkdocs serve -a localhost:8090"]
 [tool.coverage.run]
 branch = true
 parallel = true
-omit = ["openaq/__about__.py", "openaq/vendor/*", "tests/*"]
+omit = ["openaq/__init__.py", "openaq/vendor/*", "tests/*"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
@@ -135,6 +129,7 @@ exclude_also = [
 ]
 
 [tool.ruff]
+line-length = 80
 extend-exclude = ["tests"]
 
 [tool.ruff.lint]
@@ -142,15 +137,5 @@ ignore = [
   "E501", # line too long, handled by black
   "D104",
 ]
-select = ["D"]
+select = ["E", "F", "I", "D", "UP", "B", "SIM"]
 pydocstyle.convention = "google"
-
-[tool.black]
-target-version = ['py313']
-skip-string-normalization = true
-
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-combine_as_imports = true
