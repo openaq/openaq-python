@@ -115,7 +115,7 @@ class Meta(_ModelBase):
     found: int
 
 
-R = TypeVar("R", bound="_ResponseBase")
+R = TypeVar("R", bound="_ResponseBase[Any]")
 
 TResult = TypeVar("TResult")
 
@@ -169,7 +169,9 @@ class _ResponseBase(Generic[TResult]):
                         self.results = [result_type.load(x) for x in self.results]
                     break
 
-    def _serialize(self, data: Mapping | list) -> dict[str, Any] | list[Any]:
+    def _serialize(
+        self, data: Mapping[str, Any] | list[Any]
+    ) -> dict[str, Any] | list[Any]:
         """Serializes data and convert keys to camel case.
 
         Args:
@@ -186,7 +188,7 @@ class _ResponseBase(Generic[TResult]):
             for k, v in data.items()
         }
 
-    def dict(self) -> dict:
+    def dict(self) -> dict[str, Any]:
         """Serializes response data to Python dictionary.
 
         Returns:
@@ -207,7 +209,7 @@ class _ResponseBase(Generic[TResult]):
         """
         if encoder == orjson:
             assert orjson is not None, "orjson must be installed."
-        return encoder.dumps(self._serialize(self.dict()), ensure_ascii=False)
+        return str(encoder.dumps(self._serialize(self.dict()), ensure_ascii=False))
 
 
 @dataclass(slots=True)

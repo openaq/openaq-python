@@ -75,7 +75,7 @@ class Limits:
     keepalive_expiry: float = 30.0
 
 
-class Headers(dict):
+class Headers(dict[str, str]):
     """A case-insensitive dictionary for HTTP headers.
 
     Keys are normalized to lowercase on insertion and lookup, ensuring that

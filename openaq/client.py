@@ -49,7 +49,7 @@ except ModuleNotFoundError:
     _has_toml = False
 
 
-def _get_openaq_config() -> dict | None:
+def _get_openaq_config() -> dict[str, str] | None:
     """Read api_key from ~/.openaq.toml if present."""
     config_path = Path.home() / ".openaq.toml"
     if config_path.is_file():
