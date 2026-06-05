@@ -4,10 +4,10 @@ title: Measurements
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-The Measurements resources provide measurements data from sensors. OpenAQ
-ingests raw measurements at the hourly interval at the very least, but also
-hosts data at a much higher frequency (e.g. 5 minutes interval). In addition to
-providing raw measurement values as reported by providers, we also provides
+The Measurements resources provide measurements data from sensors. OpenAQ 
+attempts to ingest raw measurements at least hourly, but also
+hosts data at a much higher frequency (e.g. five minute interval). In addition to
+providing raw measurement values as reported by providers, we also provide
 options for accessing the data at different levels of aggregation.
 
 ## Methods
@@ -48,8 +48,8 @@ list(
 | sensors_id | `int` OpenAQ's unique ID for the sensor from which measurements should be retrieved. | Required |
 | data | `str` The base measurement unit to query. | Required, must be one of: `measurements`, `hours`, `days`, `years` | 
 | rollup | `str \| None` The period by which to roll up the base measurement data. | Must be one of: `hourly`, `daily`, `monthly`, `yearly`, `hourofday`, `dayofweek`, `monthofyear` |
-| datetime_from | `datetime.datetime \| str \| None` Starting datetime to retrieve measurements. Defaults to local time unless timezone information is included. | If not a datetime object then must be a ISO-8601 formatted datetime string i.e. `YYYY-MM-DDTHH:mm:ss`. Can only be used when `data` is either `measurements` or `hours`. Cannot be used with `date_form` or `date_to` |
-| datetime_to | `datetime.datetime \| str \| None` Ending datetime to retrieve measurements. Defaults to local time unless timezone information is included. | If not a datetime object then must be a ISO-8601 formatted datetime string i.e. `YYYY-MM-DDTHH:mm:ss`. Can only be used when `data` is either `measurements` or `hours`. Cannot be used with `date_form` or `date_to` |
+| datetime_from | `datetime.datetime \| str \| None` Starting datetime to retrieve measurements. Defaults to local time unless timezone information is included. | If not a datetime object then must be a ISO-8601 formatted datetime string i.e. `YYYY-MM-DDTHH:mm:ss`. Can only be used when `data` is either `measurements` or `hours`. Cannot be used with `date_from` or `date_to` |
+| datetime_to | `datetime.datetime \| str \| None` Ending datetime to retrieve measurements. Defaults to local time unless timezone information is included. | If not a datetime object then must be a ISO-8601 formatted datetime string i.e. `YYYY-MM-DDTHH:mm:ss`. Can only be used when `data` is either `measurements` or `hours`. Cannot be used with `date_from` or `date_to` |
 | date_from | `datetime.date \| str \| None` Starting date to retrieve measurements. Defaults to local time unless timezone information is included. | If not a datetime object then must be a ISO-8601 formatted date string i.e. `YYYY-MM-DD`. Can only be used when `data` is either `days` or `years`. Cannot be used with `datetime_from` or `datetime_to` |
 | date_to | `datetime.date \| str \| None` Ending date to retrieve measurements. Defaults to local time unless timezone information is included. | If not a datetime object then must be a ISO-8601 formatted date string i.e. `YYYY-MM-DD`. Can only be used when `data` is either `days` or `years`. Cannot be used with `datetime_from` or `datetime_to` |
 | page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
@@ -71,8 +71,8 @@ with OpenAQ() as client:
 
 ### Data and Rollup
 
-Understanding data and rollups concepts is the key to using the Measurements
-resource effectively. While `data` gives you the benefits of speed as it fetches
+Understanding data and rollup concepts is the key to using the Measurements
+resource effectively. While `data` gives you the benefit of speed as it fetches
 pre-computed measurements data, it is limited in the level of aggregation
 (covering only `measurements`, `hours`, `days`, and `years` data) and the base
 measurement from which data is aggregated (i.e. the hourly average values).
@@ -83,7 +83,7 @@ in `data`. However, because rollups are computed on the fly, it will be slower
 and more resources-consuming than simply using `data`, especially when rolling
 up from `data`="measurements". As such, prioritize `data` where you can and if you
 need to use `rollup` for a customized aggregation:
-- double check to see if it's a query that could be done with just using `data`
+- double check to see if it's a query that could be done just using `data`
 - limit your queries to smaller time periods
 
 #### Possible combinations

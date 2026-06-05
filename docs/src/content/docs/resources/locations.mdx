@@ -88,7 +88,7 @@ list(
 | bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be used at the same time as `coordinates` or `radius` |
 | providers_id | `int \| list[int] \| None` Filter by the ID of the data provider | Must be OpenAQ unique ID for the provider that facilitates data sharing |
 | countries_id | `int \| list[int] \| None` Filter by the country or territory where the location operates | Must be OpenAQ unique ID for the country or territory. Cannot be used at the same time as `iso` |
-| parameters_id | `int \| list[int] \| None` Filter by a pollutant or meteorological parameter | Must be OpenAQ unique ID for the pollutant or meteorlogical parameter |
+| parameters_id | `int \| list[int] \| None` Filter by a pollutant or meteorological parameter | Must be OpenAQ unique ID for the pollutant or meteorological parameter |
 | licenses_id | `int \| list[int] \| None` Filter by the license that governs the usage and sharing of data at the location | Must be OpenAQ unique ID for the license |
 | instruments_id | `int \| list[int] \| None` Filter by the instrument or equipment that gathers data at the location | Must be OpenAQ unique ID for the instrument |
 | manufacturers_id | `int \| list[int] \| None` Filter by the company or organization that produces the air quality monitoring instruments at the location | Must be OpenAQ unique ID for the manufacturer |
