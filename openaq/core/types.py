@@ -3,29 +3,35 @@
 from typing import Literal, TypeAlias, TypedDict, get_args
 
 _ROLLUP_VALUES = (
-    'hourly',
-    'daily',
-    'monthly',
-    'yearly',
-    'hourofday',
-    'dayofweek',
-    'monthofyear',
+    "hourly",
+    "daily",
+    "monthly",
+    "yearly",
+    "hourofday",
+    "dayofweek",
+    "monthofyear",
 )
 Rollup: TypeAlias = Literal[
-    'hourly', 'daily', 'monthly', 'yearly', 'hourofday', 'dayofweek', 'monthofyear'
+    "hourly",
+    "daily",
+    "monthly",
+    "yearly",
+    "hourofday",
+    "dayofweek",
+    "monthofyear",
 ]
 
-DatetimeData: TypeAlias = Literal['measurements', 'hours']
+DatetimeData: TypeAlias = Literal["measurements", "hours"]
 
-DateData: TypeAlias = Literal['days', 'years']
+DateData: TypeAlias = Literal["days", "years"]
 
 Data: TypeAlias = DatetimeData | DateData
 _DATA_VALUES = get_args(DatetimeData) + get_args(DateData)
 
-ParameterType: TypeAlias = Literal['pollutant', 'meteorological']
+ParameterType: TypeAlias = Literal["pollutant", "meteorological"]
 _PARAMETER_TYPE_VALUES = get_args(ParameterType)
 
-SortOrder: TypeAlias = Literal['ASC', 'DESC', 'asc', 'desc']
+SortOrder: TypeAlias = Literal["ASC", "DESC", "asc", "desc"]
 _SORT_ORDER_VALUES = get_args(SortOrder)
 
 

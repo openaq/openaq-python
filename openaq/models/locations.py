@@ -163,26 +163,26 @@ class Locations(ResourceBase):
         countries_id, iso = validate_countries_query_parameters(countries_id, iso)
         if providers_id is not None:
             providers_id = validate_integer_or_list_integer_params(
-                'providers_id', providers_id
+                "providers_id", providers_id
             )
         if parameters_id is not None:
             parameters_id = validate_integer_or_list_integer_params(
-                'parameters_id', parameters_id
+                "parameters_id", parameters_id
             )
         if licenses_id is not None:
             licenses_id = validate_integer_or_list_integer_params(
-                'licenses_id', licenses_id
+                "licenses_id", licenses_id
             )
         if instruments_id:
             instruments_id = validate_integer_or_list_integer_params(
-                'instruments_id', instruments_id
+                "instruments_id", instruments_id
             )
         if manufacturers_id:
             manufacturers_id = validate_integer_or_list_integer_params(
-                'manufacturers_id', manufacturers_id
+                "manufacturers_id", manufacturers_id
             )
         if owners_id:
-            owners_id = validate_integer_or_list_integer_params('owners_id', owners_id)
+            owners_id = validate_integer_or_list_integer_params("owners_id", owners_id)
         if monitor is not None:
             monitor = validate_monitor(monitor)
         if mobile is not None:

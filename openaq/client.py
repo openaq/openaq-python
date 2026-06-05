@@ -10,10 +10,10 @@ import logging
 import os
 import platform
 import time
+from collections.abc import Mapping
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
-from typing import Mapping
 from urllib.parse import urljoin, urlparse
 
 from openaq import __version__
@@ -45,7 +45,7 @@ DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 _has_toml = True
 try:
     import tomllib
-except ImportError:
+except ModuleNotFoundError:
     _has_toml = False
 
 

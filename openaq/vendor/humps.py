@@ -6,8 +6,8 @@ Thanks to Nick Ficano for the original implementation.
 """
 
 import re
-from collections.abc import Mapping
-from typing import Any, Callable
+from collections.abc import Callable, Mapping
+from typing import Any
 
 UNDERSCORE_RE: re.Pattern[str] = re.compile(r"(?<=[^\-_])[\-_]+[^\-_]")
 ACRONYM_RE: re.Pattern[str] = re.compile(r"([A-Z\d]+)(?=[A-Z\d]|$)")
@@ -26,7 +26,7 @@ def camelize(
     :returns:
         camelized string, dictionary, or list of dictionaries.
     """
-    if isinstance(str_or_iter, (list, Mapping)):
+    if isinstance(str_or_iter, list | Mapping):
         return _process_keys(str_or_iter, camelize)
 
     s: str = _is_none(str_or_iter)
@@ -53,7 +53,7 @@ def decamelize(
     :returns:
         snake cased string, dictionary, or list of dictionaries.
     """
-    if isinstance(str_or_iter, (list, Mapping)):
+    if isinstance(str_or_iter, list | Mapping):
         return _process_keys(str_or_iter, decamelize)
 
     s: str = _is_none(str_or_iter)
