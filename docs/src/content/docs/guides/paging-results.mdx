@@ -55,7 +55,7 @@ A large results set often comes from MeasurementsResponse where the amount of
 data is often too large for an exact records count to return reliably within a
 short time. In this case, `meta.found` returns the string `'>1000'`. If no
 filtering can be done to narrow down the results, the code below can paginate
-through the entire results set until there is no more records found. The code
+through the entire results set until there are no more records found. The code
 can also handle the case above where an exact count of records is available.
 
 ```py

@@ -11,7 +11,7 @@ import radiusGeoJson from '@data/radius.json';
 
 While the various categorical arguments in the `.list()` method of the Locations
 resource allow for diverse filtering options for locating air monitoring
-stations (e.g. by country, providers, etc), categorical filtering sometimes fail
+stations (e.g. by country, providers, etc), categorical filtering sometimes fails
 to capture stations of lower-level administrative groupings, such as city or
 district. To address that, the `.list()` method also contains 2 sets of
 geospatial features you can use to query for locations spatially:
@@ -24,7 +24,7 @@ To query for locations within the radius of a point, you will need the
 coordinates in WGS84 format (EPSG:4326) of the center point and the radius (in
 meters) within which you want to search. The query below is an example of how
 you can query locations that are within 10,000 meters from Accra's city center.
-The API only support query radius up to 25,0000 meters (25 km.).
+The API only supports query radius up to 25,0000 meters (25 km.).
 
 <Map
   latitude={5.5583456}
