@@ -160,9 +160,7 @@ class Locations(ResourceBase):
         page = validate_page_param(page)
         limit = validate_limit_param(limit)
         validate_geospatial_params(coordinates, radius, bbox)
-        countries_id, iso = validate_countries_query_parameters(
-            countries_id, iso
-        )
+        countries_id, iso = validate_countries_query_parameters(countries_id, iso)
         if providers_id is not None:
             providers_id = validate_integer_or_list_integer_params(
                 "providers_id", providers_id
@@ -184,9 +182,7 @@ class Locations(ResourceBase):
                 "manufacturers_id", manufacturers_id
             )
         if owners_id:
-            owners_id = validate_integer_or_list_integer_params(
-                "owners_id", owners_id
-            )
+            owners_id = validate_integer_or_list_integer_params("owners_id", owners_id)
         if monitor is not None:
             monitor = validate_monitor(monitor)
         if mobile is not None:

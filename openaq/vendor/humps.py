@@ -11,9 +11,7 @@ from typing import Any
 
 UNDERSCORE_RE: re.Pattern[str] = re.compile(r"(?<=[^\-_])[\-_]+[^\-_]")
 ACRONYM_RE: re.Pattern[str] = re.compile(r"([A-Z\d]+)(?=[A-Z\d]|$)")
-SPLIT_RE: re.Pattern[str] = re.compile(
-    r"([\-_]*(?<=[^0-9])(?=[A-Z])[^A-Z]*[\-_]*)"
-)
+SPLIT_RE: re.Pattern[str] = re.compile(r"([\-_]*(?<=[^0-9])(?=[A-Z])[^A-Z]*[\-_]*)")
 
 
 def camelize(

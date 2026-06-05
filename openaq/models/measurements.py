@@ -98,10 +98,8 @@ class Measurements(ResourceBase):
         limit = validate_limit_param(limit)
 
         data, rollup = validate_data_rollup_compatibility(data, rollup)
-        datetime_from, datetime_to, date_from, date_to = (
-            validate_datetime_params(
-                data, datetime_from, datetime_to, date_from, date_to
-            )
+        datetime_from, datetime_to, date_from, date_to = validate_datetime_params(
+            data, datetime_from, datetime_to, date_from, date_to
         )
         params = build_query_params(
             page=page,

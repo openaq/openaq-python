@@ -43,9 +43,7 @@ class Instruments(ResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         instruments_id = validate_integer_id(instruments_id)
-        instrument_response = self._client._get(
-            f"/instruments/{instruments_id}"
-        )
+        instrument_response = self._client._get(f"/instruments/{instruments_id}")
         return InstrumentsResponse.read_response(instrument_response)
 
     def list(

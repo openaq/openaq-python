@@ -26,17 +26,16 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Typing :: Typed",
 ]
-dependencies = []
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://python.openaq.org" 
+Documentation = "https://python.openaq.org"
 Issues = "https://github.com/openaq/openaq-python/issues"
 Source = "https://github.com/openaq/openaq-python"
 Changelog = "https://github.com/openaq/openaq-python/releases"
 
 [project.optional-dependencies]
-all = ["orjson >=3.2.1"]
+all = ["orjson >=3.11.6"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["openaq"]
@@ -81,6 +80,10 @@ python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 [tool.hatch.envs.types]
 detached = true
 dependencies = ["mypy", "lxml"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
 
 [[tool.mypy.overrides]]
 module = ["orjson"]
@@ -129,13 +132,12 @@ exclude_also = [
 ]
 
 [tool.ruff]
-line-length = 80
 extend-exclude = ["tests"]
 
 [tool.ruff.lint]
 ignore = [
-  "E501", # line too long, handled by black
-  "D104",
+  "E501",
 ]
 select = ["E", "F", "I", "D", "UP", "B", "SIM"]
 pydocstyle.convention = "google"
+

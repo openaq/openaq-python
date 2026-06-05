@@ -43,9 +43,7 @@ class Manufacturers(ResourceBase):
             GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
         """
         manufacturers_id = validate_integer_id(manufacturers_id)
-        manufacturer_response = self._client._get(
-            f"/manufacturers/{manufacturers_id}"
-        )
+        manufacturer_response = self._client._get(f"/manufacturers/{manufacturers_id}")
         return ManufacturersResponse.read_response(manufacturer_response)
 
     def list(
@@ -93,9 +91,7 @@ class Manufacturers(ResourceBase):
             page=page, limit=limit, order_by=order_by, sort_order=sort_order
         )
 
-        manufacturer_response = self._client._get(
-            "/manufacturers", params=params
-        )
+        manufacturer_response = self._client._get("/manufacturers", params=params)
         return ManufacturersResponse.read_response(manufacturer_response)
 
     def instruments(self, manufacturers_id: int) -> InstrumentsResponse:

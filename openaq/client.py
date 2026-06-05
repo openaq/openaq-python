@@ -45,7 +45,7 @@ DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 _has_toml = True
 try:
     import tomllib
-except ImportError:
+except ModuleNotFoundError:
     _has_toml = False
 
 
@@ -170,18 +170,14 @@ class OpenAQ:
                 "API key not set: An API key is required when using the OpenAQ API"
             )
 
-        self._user_agent = (
-            f"openaq-python-{__version__}-{platform.python_version()}"
-        )
+        self._user_agent = f"openaq-python-{__version__}-{platform.python_version()}"
         if self._api_key:
             self._headers["X-API-Key"] = self._api_key
         self._headers["User-Agent"] = self._user_agent
         self._headers["Accept"] = ACCEPT_HEADER
 
         # assumes default until corrected by the first response
-        rate_limit = (
-            rate_limit_override if rate_limit_override is not None else 60
-        )
+        rate_limit = rate_limit_override if rate_limit_override is not None else 60
         self._rate_limit_capacity = float(rate_limit)
         self._rate_limit_reset_datetime = datetime.min
         self._rate_limit_remaining = self._rate_limit_capacity
@@ -220,9 +216,7 @@ class OpenAQ:
     @property
     def _rate_limit_reset_seconds(self) -> int:
         """Seconds remaining until the rate limit window resets."""
-        return int(
-            (self._rate_limit_reset_datetime - datetime.now()).total_seconds()
-        )
+        return int((self._rate_limit_reset_datetime - datetime.now()).total_seconds())
 
     def _is_rate_limited(self) -> bool:
         """Returns True if the rate limit is exhausted and the reset time has not yet passed."""
@@ -266,12 +260,8 @@ class OpenAQ:
         Args:
             headers: The response headers from a completed request.
         """
-        rate_limit_capacity = self._get_int_header(
-            headers, "x-ratelimit-limit", 60
-        )
-        rate_limit_remaining = self._get_int_header(
-            headers, "x-ratelimit-remaining", 0
-        )
+        rate_limit_capacity = self._get_int_header(headers, "x-ratelimit-limit", 60)
+        rate_limit_remaining = self._get_int_header(headers, "x-ratelimit-remaining", 0)
         rate_limit_reset_seconds = self._get_int_header(
             headers, "x-ratelimit-reset", 60
         )
@@ -290,9 +280,7 @@ class OpenAQ:
         """
         wait_seconds = self._rate_limit_reset_seconds
         if wait_seconds > 0:
-            logger.info(
-                "Rate limit hit. Waiting %s seconds for reset.", wait_seconds
-            )
+            logger.info("Rate limit hit. Waiting %s seconds for reset.", wait_seconds)
             time.sleep(wait_seconds)
 
     def _get_int_header(self, headers: Headers, key: str, default: int) -> int:
@@ -315,9 +303,7 @@ class OpenAQ:
         except ValueError:
             return default
 
-    def _build_request_headers(
-        self, headers: Mapping[str, str] | None
-    ) -> Headers:
+    def _build_request_headers(self, headers: Mapping[str, str] | None) -> Headers:
         """Merges per-request headers with the client's default headers.
 
         Args:

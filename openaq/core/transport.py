@@ -109,9 +109,7 @@ class Headers(dict):
         """Gets a header by key, normalizing the key to lowercase."""
         return super().get(key.lower(), default)
 
-    def update(
-        self, other: Mapping[str, str] | None = None, **kwargs: str
-    ) -> None:  # type: ignore[override]
+    def update(self, other: Mapping[str, str] | None = None, **kwargs: str) -> None:  # type: ignore[override]
         """Updates headers from a mapping or keyword arguments, normalizing keys to lowercase."""
         if other:
             for k, v in other.items():
@@ -216,9 +214,7 @@ class PooledConnection:
 
     def __post_init__(self) -> None:
         """Initializes the underlying HTTPS connection after the dataclass is created."""
-        self.conn = http.client.HTTPSConnection(
-            self.host, timeout=self.connect_timeout
-        )
+        self.conn = http.client.HTTPSConnection(self.host, timeout=self.connect_timeout)
 
 
 class ConnectionPool:
@@ -271,9 +267,7 @@ class ConnectionPool:
                 )
             self._total -= 1
 
-    def acquire(
-        self, host: str, pool_timeout: float | None = None
-    ) -> PooledConnection:
+    def acquire(self, host: str, pool_timeout: float | None = None) -> PooledConnection:
         """Checks out a connection for the given host.
 
         Reuses an idle connection if one is available, or creates a new one if
@@ -391,10 +385,7 @@ def _encode_params(
     if not params:
         return ""
     return urllib.parse.urlencode(
-        {
-            k: str(v).lower() if isinstance(v, bool) else v
-            for k, v in params.items()
-        }
+        {k: str(v).lower() if isinstance(v, bool) else v for k, v in params.items()}
     )
 
 
@@ -579,10 +570,7 @@ def check_response(res: Response) -> Response:
         ServiceUnavailableError: Raised for HTTP 503, indicating that the server is not ready to handle the request.
         GatewayTimeoutError: Raised for HTTP 504 error, indicating a gateway timeout.
     """
-    if (
-        res.status_code >= HTTPStatus.OK
-        and res.status_code < HTTPStatus.BAD_REQUEST
-    ):
+    if res.status_code >= HTTPStatus.OK and res.status_code < HTTPStatus.BAD_REQUEST:
         return res
     if res.status_code == HTTPStatus.GATEWAY_TIMEOUT:
         logger.error("HTTP %s - %s", res.status_code, res.text)
@@ -595,9 +583,7 @@ def check_response(res: Response) -> Response:
     except ValueError:
         http_status = None
     exc_class = (
-        _HTTP_SATUS_MAP.get(http_status, ServerError)
-        if http_status
-        else ServerError
+        _HTTP_SATUS_MAP.get(http_status, ServerError) if http_status else ServerError
     )
     logger.error("HTTP %s - %s", res.status_code, res.text)
     raise exc_class(res.text)

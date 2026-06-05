@@ -119,9 +119,7 @@ def validate_coordinates(coordinates: object) -> tuple[float, float]:
     lat, lon = coordinates
 
     if not -90 <= lat <= 90:
-        raise InvalidParameterError(
-            f"Latitude must be between -90 and 90, got {lat}"
-        )
+        raise InvalidParameterError(f"Latitude must be between -90 and 90, got {lat}")
 
     if not -180 <= lon <= 180:
         raise InvalidParameterError(
@@ -426,7 +424,9 @@ def validate_iso_param(code: str) -> str:
         InvalidParameterError: If code is not a valid ISO-3166-1 alpha-2 country code.
     """
     if not iso_check(code):
-        message = f"iso value must be a valid ISO-3166-1 alpha-2 country code, got {code}"
+        message = (
+            f"iso value must be a valid ISO-3166-1 alpha-2 country code, got {code}"
+        )
         raise InvalidParameterError(message)
     return code
 
@@ -498,9 +498,7 @@ def validate_sort_order(sort_order: object) -> SortOrder:
         InvalidParameterError: If sort_order is not a valid sort order string.
     """
     if not isinstance(sort_order, str):
-        message = (
-            f"sort_order parameter must be a string, got: {type(sort_order)}"
-        )
+        message = f"sort_order parameter must be a string, got: {type(sort_order)}"
         raise InvalidParameterError(message)
 
     if sort_order not in _SORT_ORDER_VALUES:
@@ -663,9 +661,7 @@ def date_check(value: object) -> TypeGuard[datetime.date | str]:
     Returns:
         True if value is a date object or valid ISO-8601 date string, False otherwise.
     """
-    if isinstance(value, datetime.date) and not isinstance(
-        value, datetime.datetime
-    ):
+    if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
         return True
     if isinstance(value, str):
         return iso8601_date_check(value)
@@ -811,9 +807,7 @@ def datetime_date_params_exclusivity_check(
         True if datetime_from and/or datetime_to is not used with date_from and/or date_to, otherwise False
     """
     date_params_used = (date_from is not None) or (date_to is not None)
-    datetime_params_used = (datetime_from is not None) or (
-        datetime_to is not None
-    )
+    datetime_params_used = (datetime_from is not None) or (datetime_to is not None)
 
     return not (date_params_used and datetime_params_used)
 
@@ -845,9 +839,7 @@ def validate_datetime_params(
     Raises:
         InvalidParameterError: If parameters are invalid or incompatible with data value.
     """
-    if check_valid_date_parameter(
-        data, date_from, date_to, datetime_from, datetime_to
-    ):
+    if check_valid_date_parameter(data, date_from, date_to, datetime_from, datetime_to):
         raise InvalidParameterError(
             f"Invalid parameter combination for data='{data}'. "
             f"Use datetime_from/datetime_to for 'measurements'/'hours', "
@@ -891,9 +883,7 @@ def validate_datetime_params(
 
     else:  # data in ['measurements', 'hours']
         if datetime_to is not None:
-            if not datetime_check(datetime_from) or not datetime_check(
-                datetime_to
-            ):
+            if not datetime_check(datetime_from) or not datetime_check(datetime_to):
                 raise InvalidParameterError(
                     f"Invalid datetime_from or datetime_to, must be either datetime.datetime type or ISO-8601 formatted string, got {type(datetime_from)} and {type(datetime_to)}"
                 )
