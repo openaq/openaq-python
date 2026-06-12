@@ -1,0 +1,96 @@
+---
+title: Instruments
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The Instruments resource provides information about the air quality measuring
+devices that gather the data at each monitoring location. You can use it to get
+an instrument's available details: name, manufacturer, and whether it is used
+for regulatory purposes.
+
+## Methods
+
+The Instruments resource provides the following methods:
+
+- `get()` - For accessing a single instrument by instrument ID.
+- `list()` - For accessing multiple instruments.
+
+### Get a single instrument
+
+The `get()` method accepts one single `instruments_id` as an argument and returns
+details about that instrument in a `InstrumentsResponse` object.
+
+```py
+get(
+  instruments_id: int
+  ) -> InstrumentsResponse
+```
+
+#### Query arguments
+
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| instruments_id | `int` OpenAQ's unique ID for each instrument | Required |
+
+#### Example
+
+```py
+from openaq import OpenAQ
+
+# Retrieve information about the instrument with ID=1 on OpenAQ
+with OpenAQ() as client:
+    client.instruments.get(instruments_id=1)
+```
+
+### List multiple instruments
+
+The `list()` method takes optional arguments and returns instruments on the
+OpenAQ platform that meet all the conditions specified in a
+`InstrumentsResponse` object. If no argument is included, the method returns all
+instruments using the default arguments.
+
+```py
+list(
+  page: int = 1,
+  limit: int = 1000,
+  order_by: str | None = None,
+  sort_order: SortOrder | None = None
+  ) -> InstrumentsResponse
+```
+
+#### Query arguments
+
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must be between 1 and 1,000 |
+| order_by | `str \| None` The instrument field by which to sort results, defaults to `id`. Currently only `id` is supported | |
+| sort_order | `SortOrder \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
+
+#### Example
+
+```py
+from openaq import OpenAQ
+
+# List all instruments on OpenAQ
+with OpenAQ() as client:
+    client.instruments.list()
+```
+
+## Response objects
+
+The Instrument objects in the results of the
+`InstrumentsResponse` contain attributes that have all data about
+them. The hierarchy below presents the depth of the attributes and their
+datatypes.
+
+```
+results[]
+    ├── id: int
+    ├── name: str
+    ├── is_monitor: bool
+    └── manufacturer: 
+        ├── id: int
+        └── name: str
+```

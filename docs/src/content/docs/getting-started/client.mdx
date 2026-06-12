@@ -1,0 +1,75 @@
+---
+title: Client
+---
+
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+The OpenAQ SDK provides the `OpenAQ` class to call OpenAQ API endpoints.
+
+## API key
+
+To use the SDK, pass a valid OpenAQ API key directly during client
+initialization:
+
+```py
+from openaq import OpenAQ
+
+client = OpenAQ(api_key="replace-with-a-valid-openaq-api-key")
+```
+
+You can also set the `OPENAQ_API_KEY` environment variable. This configures the
+key without defining it during instantiation:
+
+```py title="main.py"
+from openaq import OpenAQ
+
+client = OpenAQ()
+```
+
+```sh
+OPENAQ_API_KEY=replace-with-a-valid-openaq-api-key python main.py
+```
+
+An explicit `api_key` argument always supersedes the `OPENAQ_API_KEY` environment
+variable.
+
+Without a key, the client raises an `ApiKeyMissingError` exception. An invalid
+key raises a `NotAuthorizedError` (HTTP 401) exception.
+
+## OpenAQ Client
+
+The `OpenAQ` class provides a synchronous interface to access the API.
+
+```py
+from openaq import OpenAQ
+```
+
+The client uses HTTP connection pooling for better performance. Always close
+the connection after finishing requests to release the pool.
+
+```py
+from openaq import OpenAQ
+
+client = OpenAQ()
+
+# Call resources with the open connection pool
+...
+
+client.close()
+
+```
+
+### Context manager 
+
+The OpenAQ client can also be used as a context manager. Using a `with` block 
+will ensure the client closes after leaving the block. When using as a 
+context manager it is not necessary to call the `close()` method, as it is 
+handled automatically.
+
+```py
+with OpenAQ(api_key='replace-with-a-valid-openaq-api-key') as client:
+    ...
+```
+
+<FeedbackForm/ >

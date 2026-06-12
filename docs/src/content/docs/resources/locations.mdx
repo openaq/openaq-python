@@ -1,0 +1,278 @@
+---
+title: Locations
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The Locations resource provides air monitoring stations data from the OpenAQ
+database. You can use it to get details about stations: where they are located,
+what instruments they use, what pollutants they measure, and who owns or manages
+them. The resource has methods to query single stations, search many stations,
+and access live sensor data. This resource helps you work with station
+information and current conditions.
+
+## Methods
+
+The Locations resource provides the following methods:
+
+- `get()` - For accessing a single location by location ID.
+- `list()` - For accessing multiple locations.
+- `latest()` - For accessing the latest measurements for all sensors for a given
+  location ID.
+- `sensors()` - For accessing a list of available sensors at the location for a
+  given location ID.
+
+### Get a single location
+
+The `get()` method accepts one single `locations_id` as an argument and returns
+details about that location in a `LocationsResponse` object.
+
+#### Query arguments
+```py
+get(
+  locations_id: int
+  ) -> LocationsResponse
+```
+
+| argument | description | input requirements |
+| -------- | ----------- | ---- |
+| locations_id | `int` OpenAQ's unique ID for a location | Required |
+
+#### Example
+
+```py
+from openaq import OpenAQ
+
+# Retrieve the location with ID 4845127
+with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+    client.locations.get(4845127)
+```
+
+### List multiple locations
+
+The `list()` method takes optional arguments and returns locations on the OpenAQ
+platform that meet all the conditions specified in a `LocationsResponse` object.
+If no argument is included, the method returns all locations using the default
+arguments.
+
+```py
+list(
+  page: int = 1,
+  limit: int = 100,
+  radius: int | None = None,
+  coordinates: tuple[float, float] | None = None,
+  bbox: tuple[float, float, float, float] | None = None,
+  providers_id: int | list[int] | None = None,
+  countries_id: int | list[int] | None = None,
+  parameters_id: int | list[int] | None = None,
+  licenses_id: int | list[int] | None = None,
+  instruments_id: int | list[int] | None = None,
+  manufacturers_id: int | list[int] | None = None,
+  owners_id: int | list[int] | None = None,
+  iso: str | None = None,
+  monitor: bool | None = None,
+  mobile: bool | None = None,
+  order_by: str | None = None,
+  sort_order: str | None = None
+  ) -> LocationsResponse
+```
+
+#### Query arguments
+
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
+| limit | `int` The number of results returned per page, defaults to 100 | Must be between 1 and 1,000 |
+| radius | `int \| None` How far (in meters) to search for locations around the coordinate pair | Must be between 1 and 25,000. Must be accompanied by `coordinates` argument. Cannot be used at the same time as `bbox` |
+| coordinates | `tuple[float, float] \| None` The geographic position of a point from which to search for locations | Must be in WGS84 (EPSG:4326) in (latitude, longitude) or (Y, X) format and accompanied by radius. Cannot be used at the same time as `bbox` |
+| bbox | `tuple[float, float, float, float] \| None` The rectangular area within which locations are searched for and returned | Must be in WGS84 (EPSG:4326) and (minX, minY, maxX, maxY) format with maximum 4 decimals precision. Cannot be used at the same time as `coordinates` or `radius` |
+| providers_id | `int \| list[int] \| None` Filter by the ID of the data provider | Must be OpenAQ unique ID for the provider that facilitates data sharing |
+| countries_id | `int \| list[int] \| None` Filter by the country or territory where the location operates | Must be OpenAQ unique ID for the country or territory. Cannot be used at the same time as `iso` |
+| parameters_id | `int \| list[int] \| None` Filter by a pollutant or meteorological parameter | Must be OpenAQ unique ID for the pollutant or meteorological parameter |
+| licenses_id | `int \| list[int] \| None` Filter by the license that governs the usage and sharing of data at the location | Must be OpenAQ unique ID for the license |
+| instruments_id | `int \| list[int] \| None` Filter by the instrument or equipment that gathers data at the location | Must be OpenAQ unique ID for the instrument |
+| manufacturers_id | `int \| list[int] \| None` Filter by the company or organization that produces the air quality monitoring instruments at the location | Must be OpenAQ unique ID for the manufacturer |
+| owners_id | `int \| list[int] \| None` Filter by the owner that owns and reports the data at the location | Must be OpenAQ unique ID for the owner |
+| iso | `str \| None` The ISO 3166-1 alpha-2 code for the country or territory where the location operates | Must be a valid ISO 3166-1 alpha-2 code representation of the country. Cannot be used at the same time as `countries_id` |
+| monitor | `bool \| None` Filter for reference-grade monitors (`True`) or air sensor (`False`) locations | |
+| mobile | `bool \| None` Filter for mobile (`True`) or stationary (`False`) locations | |
+| order_by | `str \| None` The location field by which to sort results, defaults to `id`. Currently only `id` is supported | |
+| sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
+
+#### Example
+
+```py
+from openaq import OpenAQ
+
+# List all locations in Morocco where there is a PM2.5 reading
+with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+    client.locations.list(countries_id=27,
+                          parameters_id=2)
+```
+
+### List latest measurements from a location
+
+The `latest()` method takes one single `locations_id` as an argument and returns
+the last measurement readings of all sensors at that location in a
+`LatestResponse` object.
+
+```py
+.latest(
+  locations_id: int
+  ) -> LatestResponse
+```
+
+#### Query arguments
+
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| locations_id | `int` OpenAQ's unique ID for each location | Required |
+
+#### Example
+
+```py
+from openaq import OpenAQ
+
+# Retrieve the latest measurement readings at the location with ID 4845127
+with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+    client.locations.latest(4845127)
+```
+
+### Retrieve all sensors at a location
+
+The `sensors()` method accepts one single `locations_id` as an argument and
+returns all sensors at that location in a `SensorsResponse` object.
+
+```py
+.sensors(
+  locations_id: int
+  ) -> SensorsResponse
+```
+
+#### Query arguments
+
+| argument | description | input requirements |
+| -------- | ----------- | ---- |
+| locations_id | `int` OpenAQ's unique ID for a location | Required |
+
+#### Example
+
+```py
+from openaq import OpenAQ
+
+# Retrieve all sensors at location with ID 4845127
+with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+    client.locations.sensors(4845127)
+```
+
+## Response objects
+
+The Location, Latest, and Sensor objects in the results of their respective
+response contain attributes that have all data about them. The hierarchy below
+presents the depth of the attributes and their datatypes.
+
+### LocationsResponse
+```
+results[]
+    ├── id: int
+    ├── name: str
+    ├── locality: str | None
+    ├── timezone: str
+    ├── country: 
+    │   ├── id: int
+    │   ├── code: str
+    │   └── name: str
+    ├── owner: 
+    │   ├── id: int
+    │   └── name: str
+    ├── provider: 
+    │   ├── id: int
+    │   └── name: str
+    ├── is_mobile: bool
+    ├── is_monitor: bool
+    ├── instruments: []
+    │    ├── id: int
+    │    └── name: str
+    ├── sensors: []
+    │   ├── id: int
+    │   ├── name: str
+    │   └── parameter:
+    │       ├── id: int
+    │       ├── name: str
+    │       ├── units: str
+    │       └── display_name: str | None
+    ├── coordinates
+    │   ├── latitude: float
+    │   └── longitude: float
+    ├── bounds: tuple[float, float, float, float]
+    ├── distance: float | None
+    ├── datetime_first
+    │   ├── utc: str
+    │   └── local: str
+    └── datetime_last
+        ├── utc: str
+        └── local: str
+```
+
+### LatestResponse
+```
+results[]
+    ├── datetime:
+    │   ├── utc: str
+    │   └── local: str
+    ├── value: float
+    ├── coordinates: 
+    │   ├── latitude: float
+    │   └── longitude: float
+    ├── sensors_id: int
+    └── locations_id: int
+```
+
+### SensorsResponse
+```
+results[]
+    ├── id: int
+    ├── name: str
+    ├── parameter
+    │   ├── id: int
+    │   ├── name: str
+    │   ├── units: str
+    │   └── displayName: str
+    ├── datetime_first
+    │   ├── utc: str
+    │   └── local: str
+    ├── datetime_last
+    │   ├── utc: str
+    │   └── local: str
+    ├── coverage
+    │   ├── expectedCount: int
+    │   ├── expectedInterval: str
+    │   ├── observedCount: int
+    │   ├── observedInterval: str
+    │   ├── percentComplete: float
+    │   ├── percentCoverage: float
+    │   ├── datetimeFrom
+    │   │   ├── utc: str
+    │   │   └── local: str
+    │   └── datetimeTo
+    │       ├── utc: str
+    │       └── local: str
+    ├── latest
+    │   ├── datetime
+    │   │   ├── utc: str
+    │   │   └── local: str
+    │   ├── value: float
+    │   └── coordinates
+    │       ├── latitude: float
+    │       └── longitude: float
+    └── summary
+        ├── min: float
+        ├── q02: float | None
+        ├── q25: float | None
+        ├── median: float | None
+        ├── q75: float | None
+        ├── q98: float | None
+        ├── max: float
+        ├── avg: float
+        └── sd: float
+```

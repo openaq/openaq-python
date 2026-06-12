@@ -1,0 +1,25 @@
+---
+const res = await fetch(
+  `https://api.github.com/repos/openaq/openaq-python/releases/latest`,
+  {
+    headers: {
+      Accept: 'application/vnd.github+json',
+    },
+  },
+);
+
+const release = await res.json();
+const version : string = release.tag_name ?? null;
+
+import { makeBadge } from 'badge-maker';
+
+const format = {
+  label: version,
+  message: 'PyPI',
+  color: 'blue',
+  links: ['https://pypi.org/project/openaq/'],
+  logoBase64:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbDpzcGFjZT0icHJlc2VydmUiIHZpZXdCb3g9IjAuMiAtMC4xIDExMCAxMTAiPgogIDxsaW5lYXJHcmFkaWVudCBpZD0iYSIgeDE9IjYzLjgiIHgyPSIxMTguNSIgeTE9IjU2LjciIHkyPSIxLjgiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgLTEgLTUzIDY2KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMzg3ZWI4Ii8+CiAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMzNjY5OTQiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik01NSAwQzI5IDAgMjkgMTAgMjkgMTJ2MTNoMjd2M0gxOGMtOCAwLTE4IDUtMTggMjcgMCAxOSA4IDI3IDE2IDI3aDlWNjljMC02IDMtMTYgMTYtMTZoMjZjNCAwIDE1LTEgMTUtMTRWMTVjMC00IDAtMTUtMjctMTVNNDAgOGE1IDUgMCAxIDEgMCAxMCA1IDUgMCAwIDEgMC0xMCIvPgogIDxsaW5lYXJHcmFkaWVudCBpZD0iYiIgeDE9Ijk3IiB4Mj0iMTU1LjciIHkxPSIyMS42IiB5Mj0iLTM0LjUiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgLTEgLTUzIDY2KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZlMDUyIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZmMzMzEiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxwYXRoIGZpbGw9InVybCgjYikiIGQ9Ik01NSAxMTBjMjYgMCAyNy0xMCAyNy0xMlY4NUg1NXYtNGgzN2M4IDAgMTgtNSAxOC0yNiAwLTIzLTEwLTI3LTE1LTI3SDg1djEzYzAgNS0yIDE2LTE1IDE2SDQzYy00IDAtMTUgMi0xNSAxNHYyNGMwIDUgNCAxNSAyNyAxNW0xNS05YTUgNSAwIDEgMSAwLTkgNSA1IDAgMCAxIDAgOSIvPgo8L3N2Zz4K'};
+const svg = makeBadge(format);
+---
+
+<Fragment set:html={svg} />

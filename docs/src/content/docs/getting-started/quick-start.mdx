@@ -1,0 +1,148 @@
+---
+title: Quick start 
+description: A tutorial to get started using the OpenAQ Python SDK
+---
+import FeedbackForm from '@components/FeedbackForm.astro'
+import { Steps } from '@astrojs/starlight/components';
+
+
+This tutorial provides a quick start for making your first OpenAQ query using the 
+OpenAQ Python SDK. As a simple example, we will query a single air quality
+monitoring location and get the location's name from the response.
+
+## Tutorial
+
+<Steps>
+
+1. From your terminal, install the openaq package from [PyPI](https://pypi.org/project/openaq/): 
+
+    ```sh
+    pip install openaq
+    ```
+
+2. Get your OpenAQ API key
+
+    If you do not have an account with us, visit
+    [explore.openaq.org/register](https://explore.openaq.org/register) to
+    register for one. Once you have verified your email and logged in to your
+    account, you can find your OpenAQ API key at the bottom of your settings
+    page.
+
+
+3. Replace the `replace-me-with-a-valid-key` part in the code below with your
+   OpenAQ API key then run the code block in a Python REPL or from a .py file:
+
+    ```py
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+    If you follow the steps correctly, you will see `Del Norte` printed out in
+    your console. This is the name of the location with ID 2178 that we query
+    for.
+
+ </Steps>
+
+## Walkthrough
+
+
+Now let's walk through the code step by step:
+
+
+<Steps>
+
+1. **Import the client class from the `openaq` package.** The `OpenAQ` client
+provides all the options for querying resources.
+
+    ```py {1}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+2. **Set up the client by providing an OpenAQ API key to the client for
+authentication.** Remember to replace the value `replace-me-with-a-valid-key`
+with you actual API key, as this placeholder **will not work**.
+
+    ```py {3}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+3. **Access the locations resource to get a location's information by its ID.**
+Though we choose locations ID 2178 here, you can replace this with another other
+OpenAQ locations ID.
+
+    ```py {5}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+4. **Explicitly close the connection.**
+
+    ```py {7}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+
+5. **Print the results.**
+
+    ```py {9}
+    from openaq import OpenAQ
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+
+    location = client.locations.get(2178)
+
+    client.close()
+
+    print(location.results[0].name)
+    ```
+ </Steps>
+
+
+## Next Steps
+
+- Read the other getting started articles to familiarize yourself with the
+  basics of working with the SDK
+- Check out the common workflows for more real-world practices
+- Though we have inline documentation, you may find it helpful to use individual
+  resources pages as guides for terms, access methods, and examples as you
+  interact with each resource.
+
+
+<FeedbackForm />

@@ -1,0 +1,140 @@
+---
+title: Manufacturers
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The Manufacturers resource provides information about the companies or
+organizations that produce the air quality monitoring instruments. You can use
+it to learn about their different instruments or equipments that output
+pollutant concentrations and meteorological readings.
+
+In the cases this information is not available from the data providers, `OpenAQ
+admin` with ID 1 will be used as a placeholder.
+
+## Methods
+
+The Manufacturers resource provides the following methods:
+
+- `get()` - For accessing a single manufacturer by manufacturer ID.
+- `list()` - For accessing multiple manufacturers.
+- `instruments()` - For accessing the list of instruments produced by the
+  manufacturer of a given manufacturer ID.
+
+### Get a single manufacturer
+
+The `get()` method accepts one single `manufacturers_id` as an argument and returns
+details about that manufacturer in a `ManufacturersResponse` object.
+
+```py
+get(
+  manufacturers_id: int
+  ) -> ManufacturersResponse
+```
+
+#### Query arguments
+
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| manufacturers_id |  `int` OpenAQ's unique ID for each manufacturer | Required |
+
+#### Example
+
+```py
+from openaq import OpenAQ
+
+# Retrieve the manufacturer with ID 12
+with OpenAQ() as client:
+    client.manufacturers.get(manufacturers_id=12)
+```
+
+### List multiple manufacturers
+
+The `list()` method takes optional arguments and returns manufacturers on the
+OpenAQ platform that meet all the conditions specified in a
+`ManufacturersResponse` object. If no argument is included, the method returns
+all manufacturers using the default arguments.
+
+```py
+list(
+  page: int = 1,
+  limit: int = 1000,
+  order_by: str | None = None,
+  sort_order: SortOrder | None = None
+  ) -> ManufacturersResponse
+```
+
+#### Query arguments
+
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| page | `int` The page number to retrieve, defaults to 1 | Must be greater than zero |
+| limit | `int` The number of results returned per page, defaults to 1,000 | Must be between 1 and 1,000 |
+| order_by | `str \| None` The manufacturer field by which to sort results, defaults to `id`. Currently only `id` is supported | |
+| sort_order | `str \| None` The sort direction for the `order_by` field, defaults to `desc` | Must be one of: `asc`, `desc`, `ASC`, `DESC` |
+
+#### Example
+
+```py
+from openaq import OpenAQ
+
+# List all manufacturers on OpenAQ
+with OpenAQ() as client:
+    client.manufacturers.list()
+```
+
+### List instruments from a manufacturer
+
+The `instruments()` method accepts one single `manufacturers_id` as an argument
+and returns all instruments produced by that manufacturer in a
+`InstrumentsResponse` object.
+
+```py
+instruments(
+  manufacturers_id: int
+  ) -> InstrumentsResponse
+```
+
+#### Query arguments
+
+| argument | description | input requirements |
+| -------- | ----------- | ------------------ |
+| manufacturers_id | `int` OpenAQ's unique ID for each manufacturer | Required |
+
+#### Example
+
+```py
+from openaq import OpenAQ
+
+# Retrieve all instruments produced by the manufacturer with ID 12
+with OpenAQ() as client:
+    client.manufacturers.instruments(manufacturers_id=12)
+```
+
+## Response objects
+
+The Manufacturer and Instrument objects in the results of their respective
+response contain attributes that have all data about
+them. The hierarchy below presents the depth of the attributes and their
+datatypes.
+
+### ManufacturersResponse
+```
+results[]
+    ├── id: int
+    ├── name: str
+    └── instruments
+        ├── id: int
+        └── name: str
+```
+
+### InstrumentsResponse
+```
+results[]
+    ├── id: int
+    ├── name: str
+    ├── is_monitor: bool
+    └── manufacturer: 
+        ├── id: int
+        └── name: str
+```

@@ -1,0 +1,54 @@
+---
+title: Exceptions
+---
+
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+The OpenAQ Python SDK raises exceptions when an error occurs. The package
+includes two main exception types: `OpenAQError` and `APIError`.
+
+Using `try` and `except` blocks gives you a predictable interface for catching
+errors and identifying the specific error class.
+
+### OpenAQ error
+
+The `OpenAQError` class serves as a superclass for exceptions that show the
+OpenAQ SDK client or methods found an issue and threw an exception _before_
+sending a request to the API.
+
+All `OpenAQError` exceptions include a `message` field with a human-readable
+explanation of the error.
+
+```py
+try:
+    client = OpenAQ() # raises ApiKeyMissingError since no key is provided
+except ApiKeyMissingError as e:
+    print(e.message)
+```
+
+### API error
+
+The `APIError` class serves as a superclass for exceptions that show an error
+occurred _after_ the request to the API. All `APIError` exceptions wrap HTTP
+error codes (4xx and 5xx) and expose the `status_code` from the response body.
+
+All `APIError` exceptions include `message` and `status_code` fields with a
+human-readable explanation of the error and the HTTP status code number,
+respectively.
+
+```py
+from openaq import OpenAQ 
+
+with client as OpenAQ(api_key='replace-with-valid-openaq-api-key'):
+    try:
+        client.countries.get(999)
+    except NotFoundError as e:
+        print(e.message) # Country not found
+        print(e.status_code) # 404
+```
+
+See the Exception reference documentation for a detailed list of exceptions.
+
+
+<FeedbackForm />

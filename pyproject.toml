@@ -106,18 +106,6 @@ dependencies = ["ruff"]
 check = ["ruff check .", "ruff format --check ."]
 fmt = ["ruff check --fix .", "ruff format ."]
 
-[tool.hatch.envs.docs]
-dependencies = [
-  "mkdocs",
-  "mkdocstrings[python]",
-  "mkdocs-material[imaging]",
-  "material-plausible-plugin",
-]
-
-[tool.hatch.envs.docs.scripts]
-build = ["mkdocs build -c"]
-serve = ["mkdocs serve -a localhost:8090"]
-
 [tool.coverage.run]
 branch = true
 parallel = true

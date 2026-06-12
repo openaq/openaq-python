@@ -2,8 +2,6 @@
 
 The official Python SDK for the OpenAQ API.
 
-> :warning: OpenAQ python is still under active development and may be unstable until a v1.0.0 release
-
 [![PyPI - Version](https://img.shields.io/pypi/v/openaq.svg)](https://pypi.org/project/openaq)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/openaq.svg)](https://pypi.org/project/openaq)
 ![Codecov](https://img.shields.io/codecov/c/github/openaq/openaq-python)
@@ -17,8 +15,8 @@ The official Python SDK for the OpenAQ API.
 ## Table of Contents
 
 - [Installation](#installation)
-- [Documentation](#documentation)
 - [License](#license)
+- [Development](#development)
 
 ## Installation
 

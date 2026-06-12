@@ -1,0 +1,112 @@
+---
+title: Writing data to csv
+description: Write measurements data in OpenAQ API responses to .csv fies
+---
+import FeedbackForm from '@components/FeedbackForm.astro'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+
+Sometimes, you might want to have the data readily available without having to
+use the API again. It could be that you want to perform analyses at a later
+time, use a different tool to work with the data outside of Python, or your goal
+might simply be to store the data locally. 
+
+This guide demonstrates how you can write the measurements data you query using
+OpenAQ SDK to a .csv file for later access.
+
+## Step 1: Getting measurements data
+
+As an example, let's say you want to get all hourly PM2.5 data for location ID
+2178 reported for the last month of 2025. To get this data:
+1. **First**, use the `.get()` method of the Locations resource to get the
+sensors_id that report PM2.5 at this location. 
+2. **Then**, you can use that sensors_id to get measurements data from the
+Measurements resource.
+
+The code below demonstrates the workflow above to get measurements data and
+store them. To run it, make sure you already have OpenAQ Python SDK installed.
+Remember to also replace the `replace-me-with-a-valid-key` below with your
+OpenAQ API key.
+
+```py
+from openaq import OpenAQ
+from datetime import datetime
+
+client = OpenAQ(api_key='replace-me-with-a-valid-key')
+sensors_resp = client.locations.sensors(2178)
+pm25_sensors_id = 0
+
+for sensor in sensors_resp.results:
+    if "pm25" in sensor.name:
+        pm25_sensors_id = sensor.id
+        break
+
+response = client.measurements.list(pm25_sensors_id,
+                                    data="hours",
+                                    datetime_from=datetime(2025, 12, 1),
+                                    datetime_to=datetime(2025, 12, 31)
+                                    )
+
+measurements = response.results
+```
+
+## Step 2a: Using built-in Python module
+To write the fetched data to file, one way is you can use Python's built-in
+`csv` module that is available in its standard library. Outside of OpenAQ Python
+SDK, no installation of other external packages is necessary with this approach.
+
+```py
+import csv
+
+# Choose column names in .csv output
+headers = ["timestamp", "parameter", "unit", "value"]
+
+# Write each measurement data into .csv
+with open("csv_pm25_2178_2025_12.csv", 'w', newline='') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=headers)
+    writer.writeheader()
+
+    for item in measurements:
+        row = {
+            "timestamp": item.period.datetime_to.local,
+            "parameter": item.parameter.name,
+            "unit": item.parameter.units,
+            "value": item.value
+        }
+
+        writer.writerow(row)
+```
+
+## Step 2b: Using Pandas
+Alternatively, data can be written to file using third-party packages such as
+Pandas. In addition to installing Pandas, this approach also requires
+[converting the MeasurementsResponse object into a Pandas DataFrame](/guides/pandas) in
+the process. While less clean than the built-in `csv` method, because Pandas can
+automatically flatten the nested results, you can pick all columns or filter out
+unwanted columns in the output to be exported instead of manually extracting
+them.
+
+```py
+import pandas as pd
+
+# Flatten MeasuremensResponse into Pandas 2-dimensional DataFrame
+data = response.dict()
+df = pd.json_normalize(data["results"])
+
+# Rename columns as desired
+df = df.rename(columns={
+    "period.datetime_to.local": "timestamp",
+    "parameter.name": "parameter",
+    "parameter.units": "unit"
+    })
+
+# Filter columns to write to .csv
+df[["timestamp", "parameter", "unit", "value"]].to_csv(
+    "pd_pm25_2178_2025_12.csv", index=False
+    )
+
+# Close the connection when done
+client.close()
+```
+
+<FeedbackForm />

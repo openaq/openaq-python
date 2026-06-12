@@ -1,0 +1,170 @@
+---
+title: Client
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## `OpenAQ`
+
+`openaq.client`
+
+OpenAQ API client.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+| --- | --- | --- | --- |
+| `api_key` | `str \| None` | API key for authentication. | `None` |
+| `headers` | `Mapping[str, str]` | Additional headers sent with every request. | `{}` |
+| `auto_wait` | `bool` | Automatically wait when rate limited. | `True` |
+| `base_url` | `str` | Base URL for the API endpoint. | `DEFAULT_BASE_URL` |
+| `rate_limit_override` | `int \| None` | Initial rate limit capacity in requests per minute. Corrected automatically from server response headers after the first request. | `None` |
+| `_transport` | `Transport \| None` | Transport instance for HTTP requests. Internal use only. | `None` |
+
+<Aside type="note">
+    An API key can either be passed directly to the OpenAQ client class at
+    instantiation or can be accessed from a system environment variable
+    named `OPENAQ_API_KEY`. An API key added at instantiation will always
+    override one set in the environment variable.
+</Aside>
+
+<Aside type="tip">
+    Although the `api_key` parameter is not required for instantiating the
+    OpenAQ client, an API Key is required for using the OpenAQ API.
+</Aside>
+
+**Attributes:**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `countries` | `Countries` | Interface for the countries resource. |
+| `instruments` | `Instruments` | Interface for the instruments resource. |
+| `licenses` | `Licenses` | Interface for the licenses resource. |
+| `locations` | `Locations` | Interface for the locations resource. |
+| `manufacturers` | `Manufacturers` | Interface for the manufacturers resource. |
+| `measurements` | `Measurements` | Interface for the measurements resource. |
+| `owners` | `Owners` | Interface for the owners resource. |
+| `providers` | `Providers` | Interface for the providers resource. |
+| `parameters` | `Parameters` | Interface for the parameters resource. |
+| `sensors` | `Sensors` | Interface for the sensors resource. |
+
+**Raises:**
+
+| Type | Description |
+| --- | --- |
+| `ApiKeyMissingError` | Missing API key credentials. |
+| `BadRequestError` | HTTP 400 client request error. |
+| `NotAuthorizedError` | HTTP 401 client not authorized. |
+| `ForbiddenError` | HTTP 403 request forbidden. |
+| `NotFoundError` | HTTP 404 resource not found. |
+| `TimeoutError` | HTTP 408 request timed out. |
+| `ValidationError` | HTTP 422 invalid request parameters. |
+| `RateLimitError` | Rate limit exceeded and `auto_wait` is `False`. |
+| `HTTPRateLimitError` | HTTP 429 rate limit exceeded. |
+| `ServerError` | HTTP 500 internal server error. |
+| `BadGatewayError` | HTTP 502 invalid response from upstream server. |
+| `ServiceUnavailableError` | HTTP 503 server not ready to handle the request. |
+| `GatewayTimeoutError` | HTTP 504 gateway timeout. |
+
+
+```py
+class OpenAQ:
+    def __init__(
+        self,
+        api_key: str | None = None,
+        headers: Mapping[str, str] | None = None,
+        auto_wait: bool = True,
+        base_url: str = DEFAULT_BASE_URL,
+        _transport: Transport | None = None,
+        rate_limit_override: int | None = None,
+    ) -> None: ...
+
+    @property
+    def api_key(self) -> str | None: ...
+
+    @property
+    def transport(self) -> Transport: ...
+
+    @property
+    def headers(self) -> Headers: ...
+
+    @property
+    def base_url(self) -> str: ...
+
+    def close(self) -> None: ...
+
+    def __enter__(self) -> OpenAQ: ...
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None: ...
+```
+
+### Properties
+
+#### `api_key`
+
+**Returns:** `str | None`
+
+The API key used to authenticate requests.
+
+
+```py
+@property
+def api_key(self) -> str | None:
+    return self._api_key
+```
+
+#### `transport`
+
+**Returns:** `Transport`
+
+The transport instance used to send HTTP requests.
+
+
+```py
+@property
+def transport(self) -> Transport:
+    return self._transport
+```
+
+#### `headers`
+
+**Returns:** `Headers`
+
+The default headers sent with every request.
+
+
+```py
+@property
+def headers(self) -> Headers:
+    return self._headers
+```
+
+#### `base_url`
+
+**Returns:** `str`
+
+The base URL for the API.
+
+
+```py
+@property
+def base_url(self) -> str:
+    return self._base_url
+```
+
+### Methods
+
+#### `close()`
+
+Closes the transport and releases all pooled connections.
+
+
+```py
+def close(self) -> None:
+    self._transport.close()
+```

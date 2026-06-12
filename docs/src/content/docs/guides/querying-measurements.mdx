@@ -1,0 +1,110 @@
+---
+title: Querying measurements
+description: Querying historical measurements from a monitoring station
+---
+import FeedbackForm from '@components/FeedbackForm.astro'
+import { Steps } from '@astrojs/starlight/components';
+
+
+One of the most common uses of the OpenAQ API is to fetch historical
+measurements from one or multiple monitoring stations that would then be fed
+into an analysis pipeline or local data infrastructure. This guide will walk you
+through the basics of that workflow by answering the following question:
+
+```
+What's the level of PM2.5 in Accra, Ghana for the year 2025? To simplify this, 
+find the daily average PM2.5 as measured by one station within the city of Accra
+in 2025. 
+```
+
+This guide assumes you have installed OpenAQ Python SDK and had a working API
+key at your disposal.
+
+## Tutorial
+
+The OpenAQ API is designed such that data is accessed from the top down, much
+like traversing a tree data structure. For this task, the tree goes from the top
+down with the 3 resources we will need to use: Locations >> Sensors >>
+Measurements. In other words, we will:
+
+1. **First**, find the IDs of monitoring stations within the city of Accra
+2. **Second**, choose one location, then access the Locations resource using
+   that location's ID to find the ID of the sensor measuring PM2.5 at that
+   location
+2. **Then**, access the Measurements resource using the ID of the sensor that we
+   found at the granularity and timeframe as desired
+
+Below is the step-by-step for this workflow with code that you can play with in
+a Python notebook environment.
+
+<Steps>
+
+1. Instantiate the client.
+
+    ```py
+    from openaq import OpenAQ
+    from datetime import date
+
+    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+    ```
+
+2. Retrieve the ID of one location from Accra, Ghana.
+
+    ```py
+    # Accra's city center is at (lat: 5.54986, lon: -0.21068)
+    # Source: https://web.williams.edu/Economics/UrbanGrowth/Images/GroundTruth/Accra.html
+
+    accra_locations = client.locations.list(
+        coordinates=(5.54986, -0.21068),
+        radius=10000, # in meters
+        limit=1000
+    ).results
+
+    # We will pick a random location from the list
+    locations_id = accra_locations[0].id
+    ```
+
+3. Retrieve the ID of the sensor that measures PM2.5 at the chosen location.
+
+    ```py
+    sensors_resp = client.locations.sensors(locations_id)
+    pm25_sensors_id = 0
+
+    for sensor in sensors_resp.results:
+        if "pm25" in sensor.name:
+            pm25_sensors_id = sensor.id
+            break
+    ```
+
+4. Fetch the daily average measurements.
+
+    ```py
+    response = client.measurements.list(pm25_sensors_id,
+                                        data="days",
+                                        date_from=date(2025, 1, 1),
+                                        date_to=date(2025, 12, 31)
+                                        )
+
+    measurements = response.results
+
+    client.close()
+    ```
+
+    If you follow the steps correctly, you will now have the daily measurements
+    for 2025 at the chosen location in Accra stored as a list in `measurements`.
+
+</Steps>
+
+While you can get the results set of this example in the first page of the
+response (i.e. we are expecting 365 records in the results of this query), there
+will be instances where the records will be spread across several pages when you
+query at different granularity levels (e.g. `hours`) or over a longer period of
+time. In those cases, it will be necessary to [page the
+results](/guides/paging-results) to get the full data you request.
+
+Now that you have the measurements, if you want to work with the datasets using
+Python, we have a tutorial on [basic pandas integration](/guides/pandas). We
+also have a guide where you can instead [output the data to a .csv
+file](/guides/write-to-csv) for later use.
+
+<FeedbackForm/>

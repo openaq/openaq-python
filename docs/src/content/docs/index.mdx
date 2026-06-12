@@ -1,0 +1,40 @@
+---
+title: OpenAQ Python SDK
+description: Reference and learning resources for using the OpenAQ API with Python.
+template: splash 
+hero:
+  tagline: Reference and learning resources for using the OpenAQ API with Python!
+  image:
+    alt: OpenAQ Python ASCII Art in a terminal application
+    dark: ../../assets/term-light.png
+    light: ../../assets/term-dark.png
+  actions:
+    - text: Get started
+      link: introduction/about/
+      icon: right-arrow
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Icon } from 'astro-icon/components'
+
+import CustomIconCard from '@components/CustomIconCard.astro';
+
+## Key Features
+
+
+<CardGrid stagger>
+	<CustomIconCard title="Helpers" color="#b3d9ff">
+		<Icon slot="icon" name="component"/>
+		Helpful built-in features like automatic rate-limiting, expressive error 
+		handling and more.
+	</CustomIconCard>
+	<CustomIconCard title="Intuitive Access" color="#fee172">
+		<Icon slot="icon" name="component"/>
+		Converts API responses to Python objects for easier, more intuitive data access. Work with familiar object attributes instead of dictionary syntax
+	</CustomIconCard> 
+	<CustomIconCard title="Type annotations" color="#b0e8e6">
+		<Icon slot="icon" name="text"/>
+		Fully typed for excellent autocomplete, inline documentation, and catch errors before runtime
+	</CustomIconCard> 
+
+</CardGrid>
