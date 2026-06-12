@@ -14,7 +14,7 @@ from openaq.vendor.humps import camelize, decamelize
 try:
     import orjson
 except ImportError:
-    orjson = None  # type: ignore[assignment]
+    orjson = None  # type: ignore[assignment, unused-ignore]
 
 
 T = TypeVar("T", bound="_ModelBase")
