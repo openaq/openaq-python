@@ -50,8 +50,8 @@ except ModuleNotFoundError:
 
 
 def _get_openaq_config() -> dict[str, str] | None:
-    """Read api_key from ~/.openaq.toml if present."""
-    config_path = Path.home() / ".openaq.toml"
+    """Read api_key from ~/.config/openaq/config.toml if present."""
+    config_path = Path.home() / ".config" / "openaq" / "config.toml"
     if config_path.is_file():
         with open(config_path, "rb") as f:
             if _has_toml:
