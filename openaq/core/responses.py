@@ -16,6 +16,7 @@ try:
 except ImportError:
     orjson = None  # type: ignore[assignment]
 
+
 T = TypeVar("T", bound="_ModelBase")
 
 _DECAMELIZE_CACHE: dict[str, str] = {}
