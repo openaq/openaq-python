@@ -13,8 +13,8 @@ as a Python object, a dictionary, or a JSON string.
 ```py
 from openaq import OpenAQ
 
-with OpenAQ() as client:
-    response = client.instruments.get(instruments_id=1)
+with OpenAQ(api_key='replace-with-valid-openaq-api-key') as client:
+    response = client.instruments.get(instruments_id=2)
 ```
 
 In this example, `client.instruments `represents the Instruments resource, and

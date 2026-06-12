@@ -21,10 +21,13 @@ All `OpenAQError` exceptions include a `message` field with a human-readable
 explanation of the error.
 
 ```py
+from openaq import OpenAQ 
+
 try:
     client = OpenAQ() # raises ApiKeyMissingError since no key is provided
-except ApiKeyMissingError as e:
-    print(e.message)
+except Exception as e:
+    print(type(e))
+    print(e)
 ```
 
 ### API error
@@ -40,12 +43,12 @@ respectively.
 ```py
 from openaq import OpenAQ 
 
-with client as OpenAQ(api_key='replace-with-valid-openaq-api-key'):
+with OpenAQ(api_key='replace-with-valid-openaq-api-key') as client:
     try:
-        client.countries.get(999)
-    except NotFoundError as e:
-        print(e.message) # Country not found
-        print(e.status_code) # 404
+        client.countries.get(999) # raises NotFoundError since there's no country with this ID
+    except Exception as e:
+        print(type(e))
+        print(e)
 ```
 
 See the Exception reference documentation for a detailed list of exceptions.

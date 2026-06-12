@@ -33,7 +33,7 @@ client = OpenAQ(api_key='replace-me-with-a-valid-key')
 # Query for locations
 limit = 100
 locations = []
-first_page = client.locations.list(page=1, limit=limit)
+first_page = client.locations.list(iso="VN", page=1, limit=limit)
 
 # Paginate through sets of results
 try:
