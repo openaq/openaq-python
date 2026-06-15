@@ -200,7 +200,8 @@ class _ResponseBase(Generic[TResult]):
     def json(self, encoder: ModuleType = json) -> str:
         """Serializes response data to JSON string.
 
-        Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+        Allows for setting encoder module. Defaults to python core `json`,
+        `orjson` also supported with optional install `pip install openaq[orjson]`
 
         Args:
             encoder: JSON serializer module.
