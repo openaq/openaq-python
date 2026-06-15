@@ -84,10 +84,10 @@ class Headers:
         x_ratelimit_reset: The X-RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
     """
 
-    x_ratelimit_limit: int | None = None
-    x_ratelimit_remaining: int | None = None
-    x_ratelimit_used: int | None = None
-    x_ratelimit_reset: int | None = None
+    x_ratelimit_limit: int = 0
+    x_ratelimit_remaining: int = 0
+    x_ratelimit_used: int = 0
+    x_ratelimit_reset: int = 0
 
     def __post_init__(self) -> None:
         """Coerces attribute values to correct types."""
@@ -144,7 +144,7 @@ class _ResponseBase(Generic[TResult]):
         return cls(
             Headers(
                 **{
-                    k.replace("-", "_"): int(v) if v.isdigit() else None
+                    k.replace("-", "_"): int(v) if v.isdigit() else 0
                     for k, v in response.headers.items()
                     if k.replace("-", "_") in valid_headers
                 }

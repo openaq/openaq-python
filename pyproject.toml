@@ -35,7 +35,8 @@ Source = "https://github.com/openaq/openaq-python"
 Changelog = "https://github.com/openaq/openaq-python/releases"
 
 [project.optional-dependencies]
-all = ["orjson >=3.11.6"]
+orjson = ["orjson >=3.11.6"]
+all = ["openaq[orjson]"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["openaq"]

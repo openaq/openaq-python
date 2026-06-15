@@ -2,35 +2,32 @@
 title: Paging results
 description: Get data stored across multiple pages
 ---
+import { Aside } from '@astrojs/starlight/components';
 
 import FeedbackForm from '@components/FeedbackForm.astro'
 
+By design, the OpenAQ API and the Python SDK return only a subset of the data
+when a query matches too much data to fit in one response. To get all data
+matching a query, work with pagination as covered in this guide.
 
-The OpenAQ API and our Python SDK by design return only a subset of the data if
-the amount of data queried is too large to contain in one single response. To
-ensure that you're getting all data available that matches your queries, this
-guide is a tutorial for you to navigate the behavior of pagination and work with
-it.
-
-The Pagination page covers how `meta.found` in the query response could be an
-integer or a string, depending on how computationally expensive it is to count
-the records in the database that your query returns. There are two ways you can
-approach this behavior to get all the results.
+The [Pagination](/getting-started/pagination/) page covers how `meta.found` in
+the query response can be an integer or a string, depending on how
+computationally expensive counting the matching records becomes. Two approaches
+exist for getting all results.
 
 ## Get all records with exact count
-A result set containing fewer than 1,000 would almost always return an integer.
-Other queries from certain resources, such as locations, are also likely to
-return an exact count of records. In those cases, you can leverage this exact
-records count to paginate through the entire results set:
+
+A result set containing fewer than 1,000 records returns an integer. Queries
+from certain resources, such as locations, also tend to return an exact count of
+records. In those cases, you can use this exact record count to paginate through
+the entire result set:
 
 ```py
 from openaq import OpenAQ
 import math
 
-# Initialize client
 client = OpenAQ(api_key='replace-me-with-a-valid-key')
 
-# Query for locations
 limit = 100
 locations = []
 first_page = client.locations.list(iso="VN", page=1, limit=limit)
@@ -50,13 +47,19 @@ except TypeError:
 client.close()
 ```
 
+    <Aside type="caution">
+    This example use a placeholder API key `replace-me-with-a-valid-key` and 
+    will not work as-is. Replace this value with a valid OpenAQ API key.
+    </Aside>
+
 ## Get all records with any response
-A large results set often comes from MeasurementsResponse where the amount of
-data is often too large for an exact records count to return reliably within a
-short time. In this case, `meta.found` returns the string `'>1000'`. If no
-filtering can be done to narrow down the results, the code below can paginate
-through the entire results set until there are no more records found. The code
-can also handle the case above where an exact count of records is available.
+
+A large result set often comes from querying measurements, where the amount of
+data is often too large for an exact record count to return reliably and
+efficiently. In this case, `meta.found` returns the string `'>1000'`. When
+filtering can't narrow down the results further, the code below paginates
+through the entire result set until no records remain. This code also handles
+the case preceding this one, where an exact count of records is available.
 
 ```py
 from openaq import OpenAQ
@@ -80,5 +83,10 @@ while results:
 
 client.close()
 ```
+
+    <Aside type="caution">
+    This example use a placeholder API key `replace-me-with-a-valid-key` and 
+    will not work as-is. Replace this value with a valid OpenAQ API key.
+    </Aside>
 
 <FeedbackForm />

@@ -3,25 +3,25 @@ title: Integrating with Pandas
 description: Transform OpenAQ API responses into Pandas DataFrames for data analysis workflows.
 ---
 import FeedbackForm from '@components/FeedbackForm.astro'
+import { Aside } from '@astrojs/starlight/components';
 
 
+The OpenAQ Python SDK returns data as deserialized Python objects. If you prefer
+to work with this data using Pandas, you can convert it into a DataFrame using
+the following 2 steps:
 
-The OpenAQ Python SDK returns data as deserialized Python objects rather than
-Pandas DataFrames. This guide shows you how to convert OpenAQ API responses into
-DataFrames in 2 steps:
-1. First, serialize the response objects by using `.dict()`
-2. Then, use Pandas's
-`json_normalize()` function to flatten the nested structure into a tabular format
+1. Convert the response object to a dictionary using the `.dict()` method.
+2. Use the Pandas `json_normalize()` function to flatten the dictionary's nested
+  structure into a tabular format.
 
 ## Code sample
 
-The code below demonstrates getting locations data into a Pandas DataFrame stored
-in variable `df`. To run it, make sure you have OpenAQ Python SDK and Pandas
-installed. Remember to also replace the `replace-me-with-a-valid-key` below with
+The code below fetches locations data into a Pandas DataFrame stored in the
+variable `df`. To run it, make sure you have the OpenAQ Python SDK and Pandas
+installed. Remember to also replace `replace-me-with-a-valid-key` below with
 your OpenAQ API key.
 
-
-  ```py
+```py
   from openaq import OpenAQ
   import pandas as pd
 
@@ -33,20 +33,23 @@ your OpenAQ API key.
       bbox=(-0.464172, 5.449908, 0.030212, 5.691491)
   )
 
-  # Read the results into a Pandas DataFrame (2 steps)
+  # Convert to a DataFrame (2 steps)
   data = response.dict()
   df = pd.json_normalize(data['results'])
 
   # Close the connection when done
   client.close()
-  ```
-  
-To walk you through what this code does after data is fetched from the API: 
-- The `response.dict()` method converts the OpenAQ response object
-to a Python dictionary. 
-- The `json_normalize()` function then flattens the nested results array into a
-two-dimensional DataFrame where nested fields become columns with dot notation
-(e.g. `coordinates.latitude`).
 
+  print(df.head())
+```
+
+    <Aside type="caution">
+    This example use a placeholder API key `replace-me-with-a-valid-key` and 
+    will not work as-is. Replace this value with a valid OpenAQ API key.
+    </Aside>
+
+The `json_normalize()` function flattens the nested `results` list into a
+two-dimensional DataFrame, where nested fields become columns with dot
+notation, for example `coordinates.latitude`.
 
 <FeedbackForm/>

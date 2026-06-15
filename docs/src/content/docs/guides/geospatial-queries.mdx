@@ -2,6 +2,7 @@
 title: Geospatial queries
 description: Use geospatial queries to find monitoring locations on OpenAQ
 ---
+import { Aside } from '@astrojs/starlight/components';
 
 import FeedbackForm from '@components/FeedbackForm.astro';
 import Map from '@components/Map.astro';
@@ -15,6 +16,7 @@ stations (e.g. by country, providers, etc), categorical filtering sometimes fail
 to capture stations of lower-level administrative groupings, such as city or
 district. To address that, the `.list()` method also contains 2 sets of
 geospatial features you can use to query for locations spatially:
+
 1. Point and Radius
 2. Bounding Box
 
@@ -48,6 +50,10 @@ accra_locations_radius = client.locations.list(
 # Close the connection when done
 client.close()
 ```
+    <Aside type="caution">
+    This example use a placeholder API key `replace-me-with-a-valid-key` and 
+    will not work as-is. Replace this value with a valid OpenAQ API key.
+    </Aside>
 
 ## Querying within a bounding box
 

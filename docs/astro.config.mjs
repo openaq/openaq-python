@@ -70,26 +70,25 @@ export default defineConfig({
           label: 'Common workflows',
           items: [
             {
-              label: 'Geospatial queries',
-              slug: 'guides/geospatial-queries',
-            },
-            {
-              label: 'Integrating with Pandas',
-              slug: 'guides/pandas',
+              label: 'Querying measurements',
+              slug: 'guides/querying-measurements',
             },
             {
               label: 'Paging results',
               slug: 'guides/paging-results',
             },
             {
+              label: 'Geospatial queries',
+              slug: 'guides/geospatial-queries',
+            },
+            {
               label: 'Writing data to csv',
               slug: 'guides/write-to-csv',
             },
             {
-              label: 'Querying measurements',
-              slug: 'guides/querying-measurements',
-            },
-
+              label: 'Integrating with Pandas',
+              slug: 'guides/pandas',
+            }
           ],
         },
         {
