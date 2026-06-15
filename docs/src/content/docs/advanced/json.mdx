@@ -27,7 +27,7 @@ import orjson
 client = OpenAQ('replace-with-valid-openaq-api-key')
 res = client.locations.get(42)
 
-res.json(encoder = orjson)
+orjson.dumps(res)
 
 client.close()
 ```

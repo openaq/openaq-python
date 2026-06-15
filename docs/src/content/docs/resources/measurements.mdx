@@ -126,6 +126,7 @@ The columns are `data` values whereas the rows are `rollup` values.
 
 ```py
 from openaq import OpenAQ
+from datetime import datetime
 
 # Retrieve monthly measurements data aggregated from the hours base
 # measurements for the first three months of 2026 for sensor with ID 10330999
@@ -133,8 +134,9 @@ with OpenAQ() as client:
     client.measurements.list(sensors_id=10330999,
                             data="hours",
                             rollup="monthly",
-                            date_from="2026-01-01",
-                            date_to="2026-03-31")
+                            datetime_from=datetime(2026, 1, 1),
+                            datetime_to=datetime(2026, 3, 31)
+    )
 ```
 
 ## Response object

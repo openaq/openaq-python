@@ -44,7 +44,7 @@ get(
 from openaq import OpenAQ
 
 # Retrieve the location with ID 4845127
-with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+with OpenAQ() as client:
     client.locations.get(4845127)
 ```
 
@@ -105,7 +105,7 @@ list(
 from openaq import OpenAQ
 
 # List all locations in Morocco where there is a PM2.5 reading
-with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+with OpenAQ() as client:
     client.locations.list(countries_id=27,
                           parameters_id=2)
 ```
@@ -134,7 +134,7 @@ the last measurement readings of all sensors at that location in a
 from openaq import OpenAQ
 
 # Retrieve the latest measurement readings at the location with ID 4845127
-with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+with OpenAQ() as client:
     client.locations.latest(4845127)
 ```
 
@@ -161,7 +161,7 @@ returns all sensors at that location in a `SensorsResponse` object.
 from openaq import OpenAQ
 
 # Retrieve all sensors at location with ID 4845127
-with OpenAQ(api_key="YOUR-OPENAQ-API-KEY") as client:
+with OpenAQ() as client:
     client.locations.sensors(4845127)
 ```
 

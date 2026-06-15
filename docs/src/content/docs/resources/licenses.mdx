@@ -37,26 +37,13 @@ get(
 
 #### Example
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
 ```py
 from openaq import OpenAQ
 
 # Retrieve the license with ID 1
 with OpenAQ() as client:
-    client.licenses.get(licenses_id=1)
+    client.licenses.get(licenses_id=10)
 ```
-  </TabItem>
-  <TabItem label="async">
-```py
-from openaq import AsyncOpenAQ
-
-# Retrieve the license with ID 1
-async with AsyncOpenAQ() as client:
-    await client.licenses.get(licenses_id=1)
-```
-  </TabItem>
-</Tabs>
 
 ### List multiple licenses
 

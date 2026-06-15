@@ -38,26 +38,13 @@ get(
 
 #### Example
 
-<Tabs syncKey="client">
-  <TabItem label="sync">
-    ```py
-    from openaq import OpenAQ
+```py
+from openaq import OpenAQ
 
-    # Retrieve the provider with ID 66
-    with OpenAQ() as client:
-        client.providers.get(providers_id=66)
-    ```
-  </TabItem>
-  <TabItem label="async">
-    ```py
-    from openaq import AsyncOpenAQ
-
-    # Retrieve the provider with ID 66
-    async with AsyncOpenAQ() as client:
-        await client.providers.get(providers_id=66)
-    ```
-  </TabItem>
-</Tabs>
+# Retrieve the provider with ID 66
+with OpenAQ() as client:
+    client.providers.get(providers_id=66)
+```
 
 ### List multiple providers
 
@@ -132,5 +119,4 @@ results[]
         ├── name: str
         ├── units: str
         └── display_name: str | None
-
 ```
