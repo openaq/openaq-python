@@ -58,6 +58,7 @@ path = "openaq/__init__.py"
 
 
 [tool.hatch.envs.test]
+features = ["orjson"]
 dependencies = [
   "coverage[toml]",
   "pytest",
