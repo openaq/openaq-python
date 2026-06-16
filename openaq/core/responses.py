@@ -211,8 +211,8 @@ class _ResponseBase(Generic[TResult]):
         """
         if encoder == orjson:
             assert orjson is not None, "orjson must be installed."
-            return encoder.dumps(self._serialize(self.dict())).decode()
-        return encoder.dumps(self._serialize(self.dict()), ensure_ascii=False)
+            return str(encoder.dumps(self._serialize(self.dict())).decode())
+        return str(encoder.dumps(self._serialize(self.dict()), ensure_ascii=False))
 
 
 @dataclass(slots=True)
