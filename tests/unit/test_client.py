@@ -121,32 +121,73 @@ class TestClient:
     @patch("openaq.client.datetime")
     @patch("time.sleep")
     @patch("openaq.client.logger")
-    def test_wait_for_rate_limit_reset_does_not_wait_when_zero(
+    def test_wait_for_rate_limit_reset_waits_minimum_when_zero(
         self, mock_logger, mock_sleep, mock_datetime, setup
     ):
+        """ttl=0 from server should still wait 1 second to avoid racing the boundary."""
         now = datetime(2026, 2, 12, 0, 0, 0)
         mock_datetime.now.return_value = now
         self.client._rate_limit_reset_datetime = now
 
         self.client._wait_for_rate_limit_reset()
 
-        mock_sleep.assert_not_called()
-        mock_logger.info.assert_not_called()
+        mock_sleep.assert_called_once_with(1)
+        mock_logger.info.assert_called_once_with(
+            "Rate limit hit. Waiting %s seconds for reset.", 1
+        )
 
     @patch("openaq.client.datetime")
     @patch("time.sleep")
     @patch("openaq.client.logger")
-    def test_wait_for_rate_limit_reset_does_not_wait_when_negative(
+    def test_wait_for_rate_limit_reset_waits_minimum_when_negative(
         self, mock_logger, mock_sleep, mock_datetime, setup
     ):
+        """Reset time in the past (e.g. key expired mid-flight) should still wait 1 second."""
+        now = datetime(2026, 2, 12, 0, 0, 1)
+        mock_datetime.now.return_value = now
+        self.client._rate_limit_reset_datetime = datetime(2026, 2, 12, 0, 0, 0)
+
+        self.client._wait_for_rate_limit_reset()
+
+        mock_sleep.assert_called_once_with(1)
+        mock_logger.info.assert_called_once_with(
+            "Rate limit hit. Waiting %s seconds for reset.", 1
+        )
+
+    @patch("openaq.client.datetime")
+    @patch("time.sleep")
+    @patch("openaq.client.logger")
+    def test_wait_for_rate_limit_reset_waits_minimum_when_far_negative(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        """Reset time well in the past should also wait the minimum 1 second."""
         now = datetime(2026, 2, 12, 0, 0, 0)
         mock_datetime.now.return_value = now
         self.client._rate_limit_reset_datetime = now - timedelta(seconds=5)
 
         self.client._wait_for_rate_limit_reset()
 
-        mock_sleep.assert_not_called()
-        mock_logger.info.assert_not_called()
+        mock_sleep.assert_called_once_with(1)
+        mock_logger.info.assert_called_once_with(
+            "Rate limit hit. Waiting %s seconds for reset.", 1
+        )
+
+    @patch("openaq.client.datetime")
+    @patch("time.sleep")
+    @patch("openaq.client.logger")
+    def test_wait_for_rate_limit_reset_never_sleeps_zero(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        now = datetime(2026, 6, 16, 0, 0, 59)
+        mock_datetime.now.return_value = now
+        self.client._rate_limit_reset_datetime = now
+
+        self.client._wait_for_rate_limit_reset()
+
+        call_args = mock_sleep.call_args[0][0]
+        assert (
+            call_args >= 1
+        ), f"sleep({call_args}) is too short. Must wait at least 1 second when ttl=0."
 
     def test_close_closes_transport(self, setup):
         self.client._transport.close = Mock()

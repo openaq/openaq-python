@@ -279,9 +279,10 @@ class OpenAQ:
         Returns immediately if the reset time has already passed.
         """
         wait_seconds = self._rate_limit_reset_seconds
-        if wait_seconds > 0:
-            logger.info("Rate limit hit. Waiting %s seconds for reset.", wait_seconds)
-            time.sleep(wait_seconds)
+        if wait_seconds <= 0:
+            wait_seconds = 1
+        logger.info("Rate limit hit. Waiting %s seconds for reset.", wait_seconds)
+        time.sleep(wait_seconds)
 
     def _get_int_header(self, headers: Headers, key: str, default: int) -> int:
         """Reads an integer value from response headers with a fallback default.
