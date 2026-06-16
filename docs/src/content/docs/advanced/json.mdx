@@ -24,10 +24,10 @@ encoder parameter, which defaults to the built-in `json` module:
 from openaq import OpenAQ
 import orjson
 
-client = OpenAQ('replace-with-valid-openaq-api-key')
+client = OpenAQ(api_key="your-api-key")
 res = client.locations.get(42)
 
-orjson.dumps(res)
+res.json(encoder = orjson)
 
 client.close()
 ```

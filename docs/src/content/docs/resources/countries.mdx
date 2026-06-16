@@ -49,7 +49,7 @@ get(
 from openaq import OpenAQ
 
 # Retrieve information about Indonesia (ID=1) on OpenAQ
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.countries.get(countries_id=1)
 ```
 
@@ -89,7 +89,7 @@ from openaq import OpenAQ
 
 # List countries where there is a PM2.5 reading and where AirGradient is present 
 # as a data provider
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.countries.list(parameters_id=2,
                           providers_id=66)
 ```

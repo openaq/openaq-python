@@ -44,7 +44,7 @@ get(
 from openaq import OpenAQ
 
 # Retrieve the manufacturer with ID 12
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.manufacturers.get(manufacturers_id=12)
 ```
 
@@ -79,7 +79,7 @@ list(
 from openaq import OpenAQ
 
 # List all manufacturers on OpenAQ
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.manufacturers.list()
 ```
 
@@ -107,7 +107,7 @@ instruments(
 from openaq import OpenAQ
 
 # Retrieve all instruments produced by the manufacturer with ID 12
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.manufacturers.instruments(manufacturers_id=12)
 ```
 

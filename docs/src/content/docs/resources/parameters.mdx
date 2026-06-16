@@ -42,7 +42,7 @@ get(
 from openaq import OpenAQ
 
 # Retrieve the parameter with ID 2
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.parameters.get(parameters_id=2)
 ```
 
@@ -89,7 +89,7 @@ list(
 from openaq import OpenAQ
 
 # List all meteorological parameters that OpenAQ ingests
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.parameters.list(parameter_type="meteorological")
 ```
 
@@ -118,7 +118,7 @@ from openaq import OpenAQ
 
 # Retrieve the latest measurement readings for PM2.5 (parameter ID 2) at all
 # locations on OpenAQ
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.parameters.latest(parameters_id=2)
 ```
 

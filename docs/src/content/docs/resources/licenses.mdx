@@ -40,8 +40,8 @@ get(
 ```py
 from openaq import OpenAQ
 
-# Retrieve the license with ID 1
-with OpenAQ() as client:
+# Retrieve the license with ID 10
+with OpenAQ(api_key="your-api-key") as client:
     client.licenses.get(licenses_id=10)
 ```
 
@@ -76,7 +76,7 @@ list(
 from openaq import OpenAQ
 
 # List all licenses on OpenAQ
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.licenses.list()
 ```
 

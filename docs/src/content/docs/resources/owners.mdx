@@ -46,7 +46,7 @@ get(
   from openaq import OpenAQ
 
   # Retrieve the owner with ID 14
-  with OpenAQ() as client:
+  with OpenAQ(api_key="your-api-key") as client:
       client.owners.get(owners_id=14)
   ```
 
@@ -81,7 +81,7 @@ list(
 from openaq import OpenAQ
 
 # List all owners on OpenAQ
-with OpenAQ() as client:
+with OpenAQ(api_key="your-api-key") as client:
     client.owners.list()
 ```
 
