@@ -3,7 +3,7 @@ title: Client
 ---
 
 import { Aside } from '@astrojs/starlight/components';
-
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 
@@ -20,6 +20,9 @@ from openaq import OpenAQ
 client = OpenAQ(api_key="replace-with-a-valid-openaq-api-key")
 ```
 
+<PlaceholderWarning/ >
+
+
 You can also set the `OPENAQ_API_KEY` environment variable. This configures the
 key without defining it during instantiation:
 
@@ -32,6 +35,7 @@ client = OpenAQ()
 ```sh
 OPENAQ_API_KEY=replace-with-a-valid-openaq-api-key python main.py
 ```
+<PlaceholderWarning/ >
 
 <Aside type="note">
 Setting the `api_key` argument in the client always supersedes the
@@ -39,7 +43,7 @@ Setting the `api_key` argument in the client always supersedes the
 </Aside>
 
 Without a key, the client raises an [`ApiKeyMissingError`](/reference/exceptions/#apikeymissingerror) exception. An invalid
-key raises a [`NotAuthorizedError`](http://localhost:4321/reference/exceptions/#notauthorizederror) (HTTP 401) exception.
+key raises a [`NotAuthorizedError`](/reference/exceptions/#notauthorizederror) (HTTP 401) exception.
 
 ## OpenAQ Client
 
@@ -71,8 +75,10 @@ block ensures the client closes automatically upon exit, eliminating the need
 to manually call the `close()` method.
 
 ```py
-with OpenAQ(api_key='replace-with-a-valid-openaq-api-key') as client:
+with OpenAQ(api_key="replace-with-a-valid-openaq-api-key") as client:
     ...
 ```
+
+<PlaceholderWarning/ >
 
 <FeedbackForm/ >

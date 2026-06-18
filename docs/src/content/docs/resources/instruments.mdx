@@ -1,6 +1,7 @@
 ---
 title: Instruments
 ---
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
@@ -39,9 +40,11 @@ get(
 from openaq import OpenAQ
 
 # Retrieve information about the instrument with ID=1 on OpenAQ
-with OpenAQ(api_key="your-api-key") as client:
+with OpenAQ(api_key="replace-me-with-a-valid-key") as client:
     client.instruments.get(instruments_id=1)
 ```
+
+<PlaceholderWarning />
 
 ### List multiple instruments
 

@@ -1,7 +1,7 @@
 ---
 title: Handling rate limits
 ---
-
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 The OpenAQ Python SDK tracks rate limit state automatically using the [rate limit
@@ -17,10 +17,12 @@ This behavior is controlled by the `auto_wait` parameter on the `OpenAQ` client.
 ```py
 from openaq import OpenAQ
 
-with OpenAQ(api_key="your-api-key") as client:
+with OpenAQ(api_key="replace-me-with-a-valid-key",) as client:
     # requests will block automatically if the rate limit is reached
     locations = client.locations.list()
 ```
+
+<PlaceholderWarning/>
 
 ## Manual rate limiting
 
@@ -32,13 +34,16 @@ to handle it yourself.
 from openaq import OpenAQ
 from openaq.exceptions import RateLimitError
 
-with OpenAQ(api_key="your-api-key", auto_wait=False) as client:
+with OpenAQ(api_key="replace-me-with-a-valid-key", auto_wait=False) as client:
     try:
         locations = client.locations.list()
     except RateLimitError as e:
         print(f"Rate limit exceeded: {e}")
         # handle the error — wait, retry, back off, etc.
 ```
+
+<PlaceholderWarning/>
+
 
 ## Rate limit headers
 
@@ -69,7 +74,7 @@ from openaq import OpenAQ
 from openaq.exceptions import RateLimitError
 import time
 
-with OpenAQ(api_key="your-api-key", auto_wait=False) as client:
+with OpenAQ(api_key="replace-me-with-a-valid-key", auto_wait=False) as client:
     while True:
         try:
             locations = client.locations.list()
@@ -80,5 +85,8 @@ with OpenAQ(api_key="your-api-key", auto_wait=False) as client:
             print(f"Rate limited. Retrying in {wait}s.")
             time.sleep(wait)
 ```
+
+<PlaceholderWarning/>
+
 
 <FeedbackForm />

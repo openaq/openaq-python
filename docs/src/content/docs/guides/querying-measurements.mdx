@@ -2,8 +2,9 @@
 title: Querying measurements
 description: Querying historical measurements from a monitoring station
 ---
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 import FeedbackForm from '@components/FeedbackForm.astro'
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
 
 
 A common task with the OpenAQ API is fetching historical measurements from one
@@ -35,13 +36,10 @@ Below is the step-by-step workflow with code you can run in a Python notebook.
     from openaq import OpenAQ
     from datetime import date
 
-    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+    client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
     ```
 
-    <Aside type="caution">
-    This example use a placeholder API key `replace-me-with-a-valid-key` and 
-    will not work as-is. Replace this value with a valid OpenAQ API key.
-    </Aside>
+    <PlaceholderWarning/>
 
 
 2. Retrieve the ID of one location in Accra, Ghana. Search 10 km (10,000 meters)

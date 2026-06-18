@@ -2,8 +2,8 @@
 title: Paging results
 description: Get data stored across multiple pages
 ---
-import { Aside } from '@astrojs/starlight/components';
 
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 By design, the OpenAQ API and the Python SDK return only a subset of the data
@@ -26,7 +26,7 @@ the entire result set:
 from openaq import OpenAQ
 import math
 
-client = OpenAQ(api_key='replace-me-with-a-valid-key')
+client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
 limit = 100
 locations = []
@@ -47,10 +47,7 @@ except TypeError:
 client.close()
 ```
 
-    <Aside type="caution">
-    This example use a placeholder API key `replace-me-with-a-valid-key` and 
-    will not work as-is. Replace this value with a valid OpenAQ API key.
-    </Aside>
+    <PlaceholderWarning/>
 
 ## Get all records with any response
 
@@ -65,7 +62,7 @@ the case preceding this one, where an exact count of records is available.
 from openaq import OpenAQ
 
 # Initialize client
-client = OpenAQ(api_key='replace-me-with-a-valid-key')
+client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
 # Paginate through locations results set
 results = True
@@ -84,9 +81,7 @@ while results:
 client.close()
 ```
 
-    <Aside type="caution">
-    This example use a placeholder API key `replace-me-with-a-valid-key` and 
-    will not work as-is. Replace this value with a valid OpenAQ API key.
-    </Aside>
+    <PlaceholderWarning/>
+
 
 <FeedbackForm />

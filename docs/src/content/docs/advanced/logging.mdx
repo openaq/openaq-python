@@ -1,7 +1,7 @@
 ---
 title: Logging
 ---
-
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 
@@ -18,9 +18,11 @@ import openaq
 
 logging.basicConfig(level=logging.DEBUG)
 
-with openaq.OpenAQ(api_key="your-api-key") as client:
+with openaq.OpenAQ(api_key="replace-me-with-a-valid-key") as client:
     results = client.locations.list()
 ```
+
+<PlaceholderWarning />
 
 This prints all log messages from the `openaq` logger and every other library
 in your process, to stderr.
@@ -41,9 +43,11 @@ configure the `openaq` logger directly:
     handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
     logger.addHandler(handler)
 
-    with openaq.OpenAQ(api_key="your-api-key") as client:
+    with openaq.OpenAQ(api_key="replace-me-with-a-valid-key") as client:
         results = client.locations.list()
 ```
+
+<PlaceholderWarning/>
 
 ---
 

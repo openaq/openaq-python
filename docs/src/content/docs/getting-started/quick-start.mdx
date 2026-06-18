@@ -35,7 +35,7 @@ monitoring location and get the location's name from the response.
     ```py
     from openaq import OpenAQ
 
-    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+    client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
     location = client.locations.get(2178)
 
@@ -63,7 +63,7 @@ provides all the options for querying resources.
     ```py {1}
     from openaq import OpenAQ
 
-    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+    client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
     location = client.locations.get(2178)
 
@@ -79,7 +79,7 @@ with your API key, this placeholder value **will not work**.
     ```py {3}
     from openaq import OpenAQ
 
-    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+    client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
     location = client.locations.get(2178)
 
@@ -95,7 +95,7 @@ other OpenAQ locations ID.
     ```py {5}
     from openaq import OpenAQ
 
-    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+    client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
     location = client.locations.get(2178)
 
@@ -103,6 +103,7 @@ other OpenAQ locations ID.
 
     print(location.results[0].name)
     ```
+    
 
 4. **Close the connection.**  The OpenAQ Python SDK utilizes HTTP connection
 pooling to efficiently reuse connections, explicitly closing the connection
@@ -111,7 +112,7 @@ ensures that all network resources are properly released.
     ```py {7}
     from openaq import OpenAQ
 
-    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+    client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
     location = client.locations.get(2178)
 
@@ -125,7 +126,7 @@ ensures that all network resources are properly released.
     ```py {9}
     from openaq import OpenAQ
 
-    client = OpenAQ(api_key='replace-me-with-a-valid-key')
+    client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
     location = client.locations.get(2178)
 

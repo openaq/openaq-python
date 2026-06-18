@@ -2,8 +2,9 @@
 title: Writing data to csv
 description: Write measurements data in OpenAQ API responses to .csv fies
 ---
-import FeedbackForm from '@components/FeedbackForm.astro'
-import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import FeedbackForm from '@components/FeedbackForm.astro';
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 You may want a local copy of data instead of querying the API again. Reasons
 include analyzing it later or using a different tool outside of Python.
@@ -22,7 +23,7 @@ this workflow finds sensor IDs and queries measurements.
 from openaq import OpenAQ
 from datetime import datetime
 
-client = OpenAQ(api_key='replace-me-with-a-valid-key')
+client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 sensors_resp = client.locations.sensors(2178)
 pm25_sensors_id = 0
 
@@ -40,10 +41,7 @@ response = client.measurements.list(pm25_sensors_id,
 measurements = response.results
 ```
 
-    <Aside type="caution">
-    This example uses a placeholder API key `replace-me-with-a-valid-key` and
-    does not work as-is. Replace this value with a valid OpenAQ API key.
-    </Aside>
+    <PlaceholderWarning/>
 
 ## Writing to csv
 
@@ -64,7 +62,7 @@ SDK is the only dependency required.
     headers = ["timestamp", "parameter", "unit", "value"]
 
     # Write each measurement data into .csv
-    with open("csv_pm25_2178_2025_12.csv", 'w', newline='') as csvfile:
+    with open("csv_pm25_2178_2025_12.csv", "w", newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=headers)
         writer.writeheader()
 

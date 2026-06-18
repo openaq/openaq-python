@@ -1,7 +1,7 @@
 ---
 title: Exceptions
 ---
-
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 
@@ -45,13 +45,15 @@ respectively.
 ```py
 from openaq import OpenAQ 
 
-with OpenAQ(api_key='replace-with-valid-openaq-api-key') as client:
+with OpenAQ(api_key="replace-with-valid-openaq-api-key") as client:
     try:
         client.countries.get(999) # raises NotFoundError since there is no country with this ID
     except Exception as e:
         print(type(e))
         print(e)
 ```
+<PlaceholderWarning/ >
+
 
 See the [Exceptions](/reference/exceptions) reference documentation for a
 detailed list of exceptions.

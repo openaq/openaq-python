@@ -1,6 +1,7 @@
 ---
 title: Licenses
 ---
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
@@ -41,9 +42,11 @@ get(
 from openaq import OpenAQ
 
 # Retrieve the license with ID 10
-with OpenAQ(api_key="your-api-key") as client:
+with OpenAQ(api_key="replace-me-with-a-valid-key") as client:
     client.licenses.get(licenses_id=10)
 ```
+
+<PlaceholderWarning />
 
 ### List multiple licenses
 

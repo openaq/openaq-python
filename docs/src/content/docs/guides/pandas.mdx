@@ -2,9 +2,8 @@
 title: Integrating with Pandas
 description: Transform OpenAQ API responses into Pandas DataFrames for data analysis workflows.
 ---
-import FeedbackForm from '@components/FeedbackForm.astro'
-import { Aside } from '@astrojs/starlight/components';
-
+import FeedbackForm from '@components/FeedbackForm.astro';
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 
 The OpenAQ Python SDK deserializes API responses into Python objects. For users
 who prefer to work with tabular data structures, Pandas is a natural fit for
@@ -27,7 +26,7 @@ your OpenAQ API key.
   import pandas as pd
 
   # Initialize client
-  client = OpenAQ(api_key='replace-me-with-a-valid-key')
+  client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
   # Fetch locations around Accra, Ghana
   response = client.locations.list(
@@ -44,10 +43,9 @@ your OpenAQ API key.
   print(df.head())
 ```
 
-    <Aside type="caution">
-    This example uses a placeholder API key `replace-me-with-a-valid-key` and 
-    will not work as-is. Replace this value with a valid OpenAQ API key.
-    </Aside>
+<PlaceholderWarning/>
+
+
 
 The `json_normalize()` function flattens the nested `results` list into a
 two-dimensional DataFrame, where nested fields become columns with dot

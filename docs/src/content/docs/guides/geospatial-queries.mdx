@@ -2,8 +2,7 @@
 title: Geospatial queries
 description: Use geospatial queries to find monitoring locations on OpenAQ
 ---
-import { Aside } from '@astrojs/starlight/components';
-
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
 import FeedbackForm from '@components/FeedbackForm.astro';
 import Map from '@components/Map.astro';
 import bboxGeoJson from '@data/bbox.json';
@@ -37,7 +36,7 @@ The API supports a query radius up to 25,000 meters (25 km.).
 />
 
 ```py
-client = OpenAQ(api_key='replace-me-with-a-valid-key')
+client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
 # Fetch locations within 10,000 meters of Accra's center
 accra_locations_radius = client.locations.list(
@@ -49,10 +48,9 @@ accra_locations_radius = client.locations.list(
 # Close the connection when done
 client.close()
 ```
-    <Aside type="caution">
-    This example uses a placeholder API key `replace-me-with-a-valid-key` and 
-    will not work as-is. Replace this value with a valid OpenAQ API key.
-    </Aside>
+
+<PlaceholderWarning/>
+
 
 ## Querying within a bounding box
 
@@ -73,7 +71,7 @@ can query locations from a bounding box that roughly covers the City of Accra, G
 ```py
 from openaq import OpenAQ
 
-client = OpenAQ(api_key='replace-me-with-a-valid-key')
+client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
 
 accra_locations_bbox = client.locations.list(
     bbox=(-0.271464, 5.513141, -0.131388, 5.600960), # minX, minY, maxX, maxY (X: longitude, Y: latitude)
@@ -83,5 +81,8 @@ accra_locations_bbox = client.locations.list(
 # Close the connection when done
 client.close()
 ```
+
+<PlaceholderWarning/>
+
 
 <FeedbackForm />
