@@ -4,7 +4,33 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.0.0] - 2026-xx-xx
+## [1.0.0] - 2026-06-18
+
+### Added
+
+- orjson optional dependency extras group (`openaq[orjson]`)
+- Additional test coverage
+
+### Changed
+
+- Rate limit wait behavior now enforces a minimum 1-second sleep when reset time
+is zero or in the past, preventing races at the reset boundary.
+- Headers rate limit fields changed from `int | None` defaulting to `None` to
+`int` defaulting to 0.
+- `orjson` encoder path in json() now correctly decodes `bytes` to `str`.
+- Modernized type annotations throughout: `Mapping` and `Sequence` imports.
+migrated from typing to `collections.abc`. `isinstance` checks updated to union
+syntax `(X | Y)`. Headers typed as `dict[str, str]`; `_ResponseBase TypeVar`
+bound tightened to `_ResponseBase[Any]`. `dict()` return type annotated as
+`dict[str, Any]`.
+- Replaced Black and isort with Ruff as sole code style and formatting tool
+- Config file location moved from ~/.openaq.toml to ~/.config/openaq/config.toml.
+- Replaced mkdocs documentation with Astro Starlight.
+
+### Removed
+
+- mkdocs.yml and MkDocs-based documentation infrastructure
+- black, isort, and pydocstyle from style tooling dependencies
 
 ## [1.0.0rc3] - 2026-05-23
 

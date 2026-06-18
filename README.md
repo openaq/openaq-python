@@ -16,6 +16,7 @@ The official Python SDK for the OpenAQ API.
 
 - [Installation](#installation)
 - [License](#license)
+- [Documentation](#documentation)
 - [Development](#development)
 
 ## Installation
@@ -34,7 +35,7 @@ Information on building documentation site locally can be found in [docs/README.
 
 ## License
 
-The source code is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+The source code is distributed under the terms of the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt) license.
 
 ## Development
 
