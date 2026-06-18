@@ -5,18 +5,18 @@ title: Responses
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 
-OpenAQ API and Python SDK responses share a consistent format. The SDK 
-automatically transforms raw JSON from API into Python objects, enabling dot
-notation  access. This design simplifies data retrieval and cuts down
-boilerplate code. You can still access data as raw JSON or a standard dictionary
-when needed.
+The OpenAQ API and Python SDK responses share a consistent format. The SDK 
+automatically transforms raw JSON from the API into Python objects, enabling dot
+notation access. This design simplifies data retrieval and cuts down on
+boilerplate code. You can also still access data as raw JSON or a standard
+Python dictionary when needed.
 
 ## Response structure
 
-All response objects use a standard top-level structure. The `results` attribute 
-always contains a Python list (a JSON array). This rule applies even when 
-fetching a single object via `get()`, or when filters yield no matches. If 
-filters eliminate all matches, `results` returns an empty list.
+Every response returned by the OpenAQ client follows a consistent top-level
+layout. Along with the core data payload, responses include metadata and HTTP
+headers to help you manage pagination and API rate limits effectively.
+
 
 ```
 ├── headers
@@ -33,6 +33,32 @@ filters eliminate all matches, `results` returns an empty list.
 └── results: list[]
 ```
 
+### Headers
+
+The `headers` attribute provides information about your API usage using rate
+limit HTTP headers to help the SDK handle throttling proactively. The rate limit
+headers track your total rate limit allowance, how many requests you have used,
+and how many requests remain in the current window. When you approach your
+threshold, the reset field tells you exactly how many seconds remain until your
+limit refreshes, allowing your application to pause or back off dynamically.
+
+### Meta
+
+The `meta` attribute delivers essential context about the API response itself,
+which is especially critical for managing paginated datasets. Alongside basic
+provider information like the name and website, it tracks your current position
+in the dataset by displaying the active page number and the requested per-page
+limit. Crucially, the total found count reveals the entire pool of matching
+records, helping you calculate exactly how many subsequent pages are available
+to fetch.
+
+### Results
+
+The `results` attribute always contains a Python list (a serialized JSON array)
+holding the primary data payload. This rule applies consistently across the
+SDK, even when fetching a single object via get(), or when filters yield no
+matches (in which case results returns an empty list).
+
 Individual resource schemas reside in the Resources section of the
 documentation.
 
@@ -42,9 +68,9 @@ The SDK supports three formats for response data.
 
 ### Response objects
 
-By default, methods convert JSON responses into Python data objects. These 
+By default, resources convert JSON responses into Python data objects. These 
 objects support dot notation for quick property access. You can extract values 
-directly using the preceding structure:
+directly following the preceding structure described:
 
 ```py
 # Access the page number

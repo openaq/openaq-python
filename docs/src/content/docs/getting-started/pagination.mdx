@@ -4,7 +4,6 @@ title: Pagination
 
 import FeedbackForm from '@components/FeedbackForm.astro'
 
-
 The OpenAQ platform holds vast amounts of data. Because of this, the API returns 
 data in smaller subsets. Pagination helps you fetch large datasets across 
 multiple requests.
@@ -34,17 +33,17 @@ locations = client.locations.list(page=2, limit=50)
 
 ## The meta object
 
-Every response includes a `meta` object with metadata. The `meta.found `field
+Every response includes a `meta` object with metadata. The `meta.found` field
 shows the total number of matching records. Use this value to calculate the
-total page count for datasets with 1,000 or fewer records.
+total page count.
 
 If `meta.found `returns '>1000', you cannot calculate the exact page count in
 advance. Narrow your query using filters like `countries_id` or `parameters_id`
 to reduce the dataset size. See the `meta` object reference for all available
 fields.
 
-The Paging Results page provides more details on using the `meta` object and
-pagination logic.
+The [Paging Results](/guides/paging-results/) page provides examples on how to
+use the `meta` object and pagination logic.
 
 
 <FeedbackForm />

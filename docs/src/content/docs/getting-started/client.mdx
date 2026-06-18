@@ -2,6 +2,8 @@
 title: Client
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 import FeedbackForm from '@components/FeedbackForm.astro'
 
 
@@ -31,11 +33,13 @@ client = OpenAQ()
 OPENAQ_API_KEY=replace-with-a-valid-openaq-api-key python main.py
 ```
 
-An explicit `api_key` argument always supersedes the `OPENAQ_API_KEY` environment
-variable.
+<Aside type="note">
+Setting the `api_key` argument in the client always supersedes the
+`OPENAQ_API_KEY` environment variable.
+</Aside>
 
-Without a key, the client raises an `ApiKeyMissingError` exception. An invalid
-key raises a `NotAuthorizedError` (HTTP 401) exception.
+Without a key, the client raises an [`ApiKeyMissingError`](/reference/exceptions/#apikeymissingerror) exception. An invalid
+key raises a [`NotAuthorizedError`](http://localhost:4321/reference/exceptions/#notauthorizederror) (HTTP 401) exception.
 
 ## OpenAQ Client
 
@@ -45,8 +49,8 @@ The `OpenAQ` class provides a synchronous interface to access the API.
 from openaq import OpenAQ
 ```
 
-The client uses HTTP connection pooling for better performance. Always close
-the connection after finishing requests to release the pool.
+The client uses HTTP connection pooling to efficiently reuse connections. Always
+close the connection after finishing requests to release the pool.
 
 ```py
 from openaq import OpenAQ
@@ -62,10 +66,9 @@ client.close()
 
 ### Context manager 
 
-The OpenAQ client can also be used as a context manager. Using a `with` block 
-will ensure the client closes after leaving the block. When using as a 
-context manager it is not necessary to call the `close()` method, as it is 
-handled automatically.
+The OpenAQ client can also be used as a context manager. Utilizing a `with`
+block ensures the client closes automatically upon exit, eliminating the need
+to manually call the `close()` method.
 
 ```py
 with OpenAQ(api_key='replace-with-a-valid-openaq-api-key') as client:

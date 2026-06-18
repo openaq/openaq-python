@@ -4,7 +4,6 @@ title: Resources
 
 import FeedbackForm from '@components/FeedbackForm.astro'
 
-
 The OpenAQ API uses a resource-based design. Each endpoint returns data specific
 to that resource. The OpenAQ Python SDK simplifies these calls by exposing
 resources directly through the client. Every SDK response supports reading data
@@ -17,9 +16,49 @@ with OpenAQ(api_key='replace-with-valid-openaq-api-key') as client:
     response = client.instruments.get(instruments_id=2)
 ```
 
-In this example, `client.instruments `represents the Instruments resource, and
-`.get()` executes the API call. Other resources share this pattern, such as
-`client.locations.get()` or `client.sensors.list()`.
 
+```py
+from openaq import OpenAQ
+
+with OpenAQ(api_key='your-api-key') as client:
+    # client.instruments represents the Instruments resource
+    response = client.instruments.get(instruments_id=2)
+```
+
+## The Resource Model
+
+To make the SDK predictable and easy to navigate, every resource exposes a
+consistent interface. As you browse the individual resource pages, you will see
+the same design patterns repeated across all endpoints. 
+
+## Common Methods
+
+Most resources implement two primary methods for interacting with the underlying
+data:
+
+- `.get()`: Used when you know the unique identifier for a specific asset
+    (for example, a specific country or location ID). This targets a single
+    record and requires a path argument.
+- `.list()`: Used to browse, filter, or page through collections of records.
+    This method accepts optional query arguments and returns all records
+    matching your criteria.
+
+## SDK Resource Directory
+
+You can access the various aspects of the OpenAQ dataset using the following
+core client properties:
+
+| Resource | Client Property | Primary Purpose |
+| --- | ---- | ---- |
+| [Locations](/resources/locations) | `client.locations` | Query physical monitoring stations to find coordinates, operating hardware, and baseline metrics. |
+| [Sensors](/resources/sensors) | `client.sensors` | Query individual measuring units to check reporting intervals, physical locations, and data coverage stats. |
+| [Measurements](/resources/measurements) | `client.measurements` | Query raw or aggregated air quality data by fixed intervals or custom time-based averages. |
+| [Licenses](/resources/licenses) | `client.licenses` | Query data usage rules, including permissions for commercial use, attribution, and modification rights. |
+| [Manufacturers](/resources/manufacturers) | `client.manufacturers` | Query companies that build monitoring hardware and list all of their equipment models. |
+| [Instruments](/resources/instruments) | `client.instruments` | Query specific hardware details, device names, and whether equipment meets regulatory standards. |
+| [Parameters](/resources/parameters) | `client.parameters` | Query tracked variables (gases, particulates, weather metrics) and pull recent global readings. |
+| [Providers](/resources/providers) | `client.providers` | Query organizations supplying data feeds and filter them by region or reporting timelines. |
+| [Owners](/resources/owners) | `client.owners` | Query the upstream entities or individuals that own and manage the physical monitoring hardware. |
+| [Countries](/resources/countries) | `client.countries` | Query countries with active monitoring stations to track coverage windows and country codes. |
 
 <FeedbackForm />

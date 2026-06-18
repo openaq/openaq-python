@@ -6,7 +6,9 @@ import FeedbackForm from '@components/FeedbackForm.astro'
 
 
 The OpenAQ Python SDK raises exceptions when an error occurs. The package
-includes two main exception types: `OpenAQError` and `APIError`.
+includes two main exception types:
+[`OpenAQError`](/reference/exceptions/#openaqerror) and
+[`APIError`](/reference/exceptions/#apierror).
 
 Using `try` and `except` blocks gives you a predictable interface for catching
 errors and identifying the specific error class.
@@ -45,13 +47,14 @@ from openaq import OpenAQ
 
 with OpenAQ(api_key='replace-with-valid-openaq-api-key') as client:
     try:
-        client.countries.get(999) # raises NotFoundError since there's no country with this ID
+        client.countries.get(999) # raises NotFoundError since there is no country with this ID
     except Exception as e:
         print(type(e))
         print(e)
 ```
 
-See the Exception reference documentation for a detailed list of exceptions.
+See the [Exceptions](/reference/exceptions) reference documentation for a
+detailed list of exceptions.
 
 
 <FeedbackForm />
