@@ -54,7 +54,7 @@ to fetch.
 
 ### Results
 
-The `results` attribute always contains a Python list (a serialized JSON array)
+The `results` attribute always contains a Python list (a deserialized JSON array)
 holding the primary data payload. This rule applies consistently across the
 SDK, even when fetching a single object via get(), or when filters yield no
 matches (in which case results returns an empty list).

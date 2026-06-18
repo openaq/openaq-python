@@ -10,12 +10,11 @@ import bboxGeoJson from '@data/bbox.json';
 import radiusGeoJson from '@data/radius.json';
 
 
-While the various categorical arguments in the `.list()` method of the Locations
-resource allow for diverse filtering options for locating air monitoring
-stations (e.g. by country, providers, etc), categorical filtering sometimes fails
-to capture stations of lower-level administrative groupings, such as city or
-district. To address that, the `.list()` method also contains 2 sets of
-geospatial features you can use to query for locations spatially:
+Country and ISO code filtering provide a straightforward way to filter results
+to a country, which is a broad administrative area. For workflows that need
+more precision, a city, district, or custom region, geospatial filtering is
+often a better fit. The `.list()` method on the `Locations`, `Parameters` and
+`Providers` resources support two approaches to spatial querying:
 
 1. Point and Radius
 2. Bounding Box
@@ -26,7 +25,7 @@ To query for locations within the radius of a point, you will need the
 coordinates in WGS84 format (EPSG:4326) of the center point and the radius (in
 meters) within which you want to search. The query below is an example of how
 you can query locations that are within 10,000 meters from Accra's city center.
-The API only supports query radii up to 25,0000 meters (25 km.).
+The API supports a query radius up to 25,000 meters (25 km.).
 
 <Map
   latitude={5.5583456}
@@ -51,7 +50,7 @@ accra_locations_radius = client.locations.list(
 client.close()
 ```
     <Aside type="caution">
-    This example use a placeholder API key `replace-me-with-a-valid-key` and 
+    This example uses a placeholder API key `replace-me-with-a-valid-key` and 
     will not work as-is. Replace this value with a valid OpenAQ API key.
     </Aside>
 

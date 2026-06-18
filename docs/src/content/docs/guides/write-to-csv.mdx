@@ -8,15 +8,15 @@ import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 You may want a local copy of data instead of querying the API again. Reasons
 include analyzing it later or using a different tool outside of Python.
 
-This guide shows how to write measurements data queried using the OpenAQ SDK to
-a .csv file for later use.
+This guide shows how to write measurements data to a .csv file for later use 
+using the OpenAQ SDK.
 
 ## Getting measurements data
 
-As an example, the code below fetches all hourly PM2.5 data for location ID
-2178 reported for the last month of 2025. See [Querying measurements](/guides/querying-measurements)
-for a closer look at how this workflow finds sensor IDs and queries
-measurements.
+As an example, the code below fetches all hourly PM<sub>2.5</sub> meausrement
+values for location ID 2178 reported in December of 2025. See 
+[Querying measurements](/guides/querying-measurements) for a closer look at how
+this workflow finds sensor IDs and queries measurements.
 
 ```py
 from openaq import OpenAQ
@@ -52,11 +52,13 @@ Python's built-in `csv` module or Pandas.
 
 <Tabs>
 <TabItem label="csv module">
-Python's `csv` module comes with the standard library, so no extra packages need
-installing beyond the OpenAQ Python SDK.
+The Python `csv` module ships with the standard library, so the OpenAQ Python
+SDK is the only dependency required.
 
 ```py
     import csv
+
+    # Assumes `measurements` is the results list from a prior client.measurements.list() call
 
     # Choose column names in .csv output
     headers = ["timestamp", "parameter", "unit", "value"]
@@ -79,12 +81,14 @@ installing beyond the OpenAQ Python SDK.
 </TabItem>
 <TabItem label="Pandas">
 This approach requires Pandas and
-[converting the MeasurementsResponse object into a Pandas DataFrame](/guides/pandas).
+[converting the `MeasurementsResponse` object into a Pandas DataFrame](/guides/pandas).
 Because Pandas flattens nested results automatically, columns can be selected or
 filtered for export instead of extracting fields manually.
 
 ```py
 import pandas as pd
+
+# Assumes `response` is the MeasurementsResponse object from a prior client.measurements.list() call
 
 data = response.dict()
 df = pd.json_normalize(data["results"])

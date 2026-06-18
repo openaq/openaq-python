@@ -6,9 +6,10 @@ import FeedbackForm from '@components/FeedbackForm.astro'
 import { Aside } from '@astrojs/starlight/components';
 
 
-The OpenAQ Python SDK returns data as deserialized Python objects. If you prefer
-to work with this data using Pandas, you can convert it into a DataFrame using
-the following 2 steps:
+The OpenAQ Python SDK deserializes API responses into Python objects. For users
+who prefer to work with tabular data structures, Pandas is a natural fit for
+filtering, aggregating, and exploring measurement results. Converting a response
+into a Pandas DataFrame takes two steps:
 
 1. Convert the response object to a dictionary using the `.dict()` method.
 2. Use the Pandas `json_normalize()` function to flatten the dictionary's nested
@@ -44,7 +45,7 @@ your OpenAQ API key.
 ```
 
     <Aside type="caution">
-    This example use a placeholder API key `replace-me-with-a-valid-key` and 
+    This example uses a placeholder API key `replace-me-with-a-valid-key` and 
     will not work as-is. Replace this value with a valid OpenAQ API key.
     </Aside>
 
