@@ -4,7 +4,8 @@ title: Handling rate limits
 
 import FeedbackForm from '@components/FeedbackForm.astro'
 
-The OpenAQ Python SDK tracks rate limit state automatically using headers
+The OpenAQ Python SDK tracks rate limit state automatically using the [rate limit
+headers](https://docs.openaq.org/using-the-api/rate-limits#rate-limit-headers)
 returned by the API. By default, when the rate limit is exhausted the client
 will call `time.sleep()` and block until the limit resets before continuing.
 This behavior is controlled by the `auto_wait` parameter on the `OpenAQ` client.
