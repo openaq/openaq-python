@@ -1,0 +1,37 @@
+---
+title: orjson JSON serialization
+---
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+The OpenAQ SDK provides optional support for `orjson` for JSON serialization.
+This may provide up to [10x faster performance](https://github.com/ijl/orjson?tab=readme-ov-file#performance) 
+when serializing a response object to JSON. This may be a useful optimization if
+performance is crucial for your application and you need to serialize data to
+JSON.
+
+`orjson` is an optional dependency and can be installed with:
+
+```sh
+pip install openaq[orjson]
+```
+
+When serializing results pass `orjson` to the `json()` method's 
+`encoder` parameter, which defaults to the built-in `json` module:
+
+```py
+from openaq import OpenAQ
+import orjson
+
+client = OpenAQ(api_key="replace-me-with-a-valid-key")
+res = client.locations.get(42)
+
+res.json(encoder = orjson)
+
+client.close()
+```
+
+<PlaceholderWarning />
+
+<FeedbackForm />

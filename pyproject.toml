@@ -8,16 +8,15 @@ description = "Official OpenAQ Python SDK."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
-keywords = []
+keywords = ["air quality", "environment", "openaq"]
 maintainers = [
   { name = "OpenAQ", email = "dev@openaq.org" },
 ]
 authors = [
-  { name = "Russ Biggs", email = "russ@openaq.org" },
-  { name = "Gabe Fosse", email = "gabe@openaq.org" },
+  { name = "Russ Biggs", email = "russ@openaq.org" }
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -27,17 +26,17 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Typing :: Typed",
 ]
-dependencies = []
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://python.openaq.org" 
+Documentation = "https://python.openaq.org"
 Issues = "https://github.com/openaq/openaq-python/issues"
 Source = "https://github.com/openaq/openaq-python"
 Changelog = "https://github.com/openaq/openaq-python/releases"
 
 [project.optional-dependencies]
-all = ["orjson >=3.2.1"]
+orjson = ["orjson >=3.11.6"]
+all = ["openaq[orjson]"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["openaq"]
@@ -59,6 +58,7 @@ path = "openaq/__init__.py"
 
 
 [tool.hatch.envs.test]
+features = ["orjson"]
 dependencies = [
   "coverage[toml]",
   "pytest",
@@ -83,6 +83,10 @@ python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 detached = true
 dependencies = ["mypy", "lxml"]
 
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
 [[tool.mypy.overrides]]
 module = ["orjson"]
 ignore_missing_imports = true
@@ -96,35 +100,18 @@ check = "mypy -p openaq --install-types --non-interactive"
 ci = "mypy -p openaq"
 cov = "mypy -p openaq --exclude 'openaq/vendor/.*' --install-types --html-report mypy-report"
 
-
 [tool.hatch.envs.style]
 detached = true
-dependencies = ["ruff", "black", "isort", "pydocstyle"]
+dependencies = ["ruff"]
 
 [tool.hatch.envs.style.scripts]
-check = ["ruff check", "black --check --diff .", "isort --check-only --diff ."]
-fmt = [
-    "ruff check --select F401 --fix openaq",
-    "isort openaq tests", 
-    "black .", 
-]
-
-[tool.hatch.envs.docs]
-dependencies = [
-  "mkdocs",
-  "mkdocstrings[python]",
-  "mkdocs-material[imaging]",
-  "material-plausible-plugin",
-]
-
-[tool.hatch.envs.docs.scripts]
-build = ["mkdocs build -c"]
-serve = ["mkdocs serve -a localhost:8090"]
+check = ["ruff check .", "ruff format --check ."]
+fmt = ["ruff check --fix .", "ruff format ."]
 
 [tool.coverage.run]
 branch = true
 parallel = true
-omit = ["openaq/__about__.py", "openaq/vendor/*", "tests/*"]
+omit = ["openaq/__init__.py", "openaq/vendor/*", "tests/*"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
@@ -139,18 +126,8 @@ extend-exclude = ["tests"]
 
 [tool.ruff.lint]
 ignore = [
-  "E501", # line too long, handled by black
-  "D104",
+  "E501",
 ]
-select = ["D"]
+select = ["E", "F", "I", "D", "UP", "B", "SIM"]
 pydocstyle.convention = "google"
 
-[tool.black]
-target-version = ['py313']
-skip-string-normalization = true
-
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-combine_as_imports = true

@@ -1,0 +1,19 @@
+OpenAQ Python SDK
+Copyright 2026 OpenAQ
+
+This product is licensed under the Apache License 2.0 (code) and
+CC BY-NC-SA 4.0 (documentation content in docs/src/content/).
+
+Additional Restrictions:
+
+Notwithstanding the above licenses, the following uses are explicitly
+prohibited:
+
+1. Use of this documentation content, in whole or in part, as training
+   data for machine learning or AI models without prior written permission.
+
+2. Use of this documentation content as the primary or substantial source
+   for a MCP (Model Context Protocol) server, API service, or
+   AI-powered tool.
+
+For licensing inquiries contact: dev@openaq.org

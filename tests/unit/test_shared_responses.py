@@ -1,4 +1,5 @@
 import http
+import importlib
 import json
 import numbers
 import types
@@ -50,8 +51,8 @@ def read_resource_file(name: str) -> str:
     Returns:
         The body of the read file as a string.
     """
-    path = Path(Path(__file__).parent, 'resources', f'{name}.json').absolute()
-    with open(path, 'r', encoding='utf-8') as f:
+    path = Path(Path(__file__).parent, "resources", f"{name}.json").absolute()
+    with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
 
@@ -64,8 +65,8 @@ def read_response_file(name: str) -> str:
     Returns:
         The body of the read file as a string.
     """
-    path = Path(Path(__file__).parent, 'responses', f'{name}.json').absolute()
-    with open(path, 'r', encoding='utf-8') as f:
+    path = Path(Path(__file__).parent, "responses", f"{name}.json").absolute()
+    with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
 
@@ -124,7 +125,7 @@ def value_matches_type(value, expected_type) -> bool:
 
 def test_rate_limit_headers_response():
     """Tests that example JSON responses validate against response models."""
-    response = read_response_file('locations')
+    response = read_response_file("locations")
     mocked = mock_response(response)
     location = LocationsResponse.read_response(mocked)
     assert location.headers.x_ratelimit_limit == 23
@@ -133,15 +134,15 @@ def test_rate_limit_headers_response():
 @pytest.mark.parametrize(
     "name,resource_class",
     [
-        ('country', Country),
-        ('instrument', Instrument),
-        ('license', License),
-        ('location', Location),
-        ('manufacturer', Manufacturer),
-        ('owner', Owner),
-        ('parameter', Parameter),
-        ('provider', Provider),
-        ('sensor', Sensor),
+        ("country", Country),
+        ("instrument", Instrument),
+        ("license", License),
+        ("location", Location),
+        ("manufacturer", Manufacturer),
+        ("owner", Owner),
+        ("parameter", Parameter),
+        ("provider", Provider),
+        ("sensor", Sensor),
     ],
 )
 def test_resources_validation(name: str, resource_class: _ModelBase):
@@ -159,17 +160,17 @@ def test_resources_validation(name: str, resource_class: _ModelBase):
 @pytest.mark.parametrize(
     "name,response_class",
     [
-        ('measurements', MeasurementsResponse),
-        ('countries', CountriesResponse),
-        ('locations', LocationsResponse),
-        ('providers', ProvidersResponse),
-        ('parameters', ParametersResponse),
-        ('instruments', InstrumentsResponse),
-        ('licenses', LicensesResponse),
-        ('owners', OwnersResponse),
-        ('manufacturers', ManufacturersResponse),
-        ('locations_variation', LocationsResponse),
-        ('sensors', SensorsResponse),
+        ("measurements", MeasurementsResponse),
+        ("countries", CountriesResponse),
+        ("locations", LocationsResponse),
+        ("providers", ProvidersResponse),
+        ("parameters", ParametersResponse),
+        ("instruments", InstrumentsResponse),
+        ("licenses", LicensesResponse),
+        ("owners", OwnersResponse),
+        ("manufacturers", ManufacturersResponse),
+        ("locations_variation", LocationsResponse),
+        ("sensors", SensorsResponse),
     ],
 )
 def test_responses_validation(name: str, response_class: _ResponseBase):
@@ -187,16 +188,16 @@ def test_responses_validation(name: str, response_class: _ResponseBase):
 @pytest.mark.parametrize(
     "name,response_class",
     [
-        ('measurements', MeasurementsResponse),
-        ('countries', CountriesResponse),
-        ('locations', LocationsResponse),
-        ('providers', ProvidersResponse),
-        ('parameters', ParametersResponse),
-        ('instruments', InstrumentsResponse),
-        ('owners', OwnersResponse),
-        ('manufacturers', ManufacturersResponse),
-        ('locations_variation', LocationsResponse),
-        ('sensors', SensorsResponse),
+        ("measurements", MeasurementsResponse),
+        ("countries", CountriesResponse),
+        ("locations", LocationsResponse),
+        ("providers", ProvidersResponse),
+        ("parameters", ParametersResponse),
+        ("instruments", InstrumentsResponse),
+        ("owners", OwnersResponse),
+        ("manufacturers", ManufacturersResponse),
+        ("locations_variation", LocationsResponse),
+        ("sensors", SensorsResponse),
     ],
 )
 def test_responses_json(name: str, response_class: _ResponseBase):
@@ -205,22 +206,43 @@ def test_responses_json(name: str, response_class: _ResponseBase):
     mocked = mock_response(response)
     response_data = response_class.read_response(mocked)
     d = json.loads(response_data.json())
-    headers_less_response = {k: d[k] for k in set(list(d.keys())) - set(['headers'])}
+    headers_less_response = {k: d[k] for k in set(list(d.keys())) - set(["headers"])}
 
     assert remove_nulls(json.loads(response)) == remove_nulls(headers_less_response)
 
 
+@pytest.mark.parametrize(
+    "name,response_class",
+    [
+        ("locations", LocationsResponse),
+        ("countries", CountriesResponse),
+        ("measurements", MeasurementsResponse),
+    ],
+)
+def test_responses_json_orjson_encoder(name: str, response_class: _ResponseBase):
+    """Tests that json() works correctly with orjson encoder."""
+    import orjson
+
+    response = read_response_file(name)
+    mocked = mock_response(response)
+    response_data = response_class.read_response(mocked)
+    result = response_data.json(encoder=orjson)
+    assert isinstance(result, str)
+    d = json.loads(result)
+    assert isinstance(d, dict)
+
+
 def test_response_ignores_unexpected_fields():
     """Tests that the response model ignores unexpected fields."""
-    base_response = read_response_file('locations')
+    base_response = read_response_file("locations")
     base_json = json.loads(base_response)
     modified_json = json.loads('{"anotherField": null}')
-    base_json['results'][0].update(modified_json)
+    base_json["results"][0].update(modified_json)
     mocked = mock_response(json.dumps(base_json))
     try:
         response_instance = LocationsResponse.read_response(mocked)
         assert not hasattr(
-            response_instance.results[0], 'anotherField'
+            response_instance.results[0], "anotherField"
         ), "Unexpected 'anotherField' was not ignored"
     except Exception as e:
         pytest.fail(f"Deserialization failed with unexpected field 'anotherField': {e}")
@@ -229,16 +251,16 @@ def test_response_ignores_unexpected_fields():
 @pytest.mark.parametrize(
     "name,response_class",
     [
-        ('measurements', MeasurementsResponse),
-        ('countries', CountriesResponse),
-        ('locations', LocationsResponse),
-        ('providers', ProvidersResponse),
-        ('parameters', ParametersResponse),
-        ('instruments', InstrumentsResponse),
-        ('owners', OwnersResponse),
-        ('manufacturers', ManufacturersResponse),
-        ('locations_variation', LocationsResponse),
-        ('sensors', SensorsResponse),
+        ("measurements", MeasurementsResponse),
+        ("countries", CountriesResponse),
+        ("locations", LocationsResponse),
+        ("providers", ProvidersResponse),
+        ("parameters", ParametersResponse),
+        ("instruments", InstrumentsResponse),
+        ("owners", OwnersResponse),
+        ("manufacturers", ManufacturersResponse),
+        ("locations_variation", LocationsResponse),
+        ("sensors", SensorsResponse),
     ],
 )
 def test_field_types(name: str, response_class: _ResponseBase):

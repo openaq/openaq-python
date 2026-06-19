@@ -1,0 +1,62 @@
+---
+title: Exceptions
+---
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+The OpenAQ Python SDK raises exceptions when an error occurs. The package
+includes two main exception types:
+[`OpenAQError`](/reference/exceptions/#openaqerror) and
+[`APIError`](/reference/exceptions/#apierror).
+
+Using `try` and `except` blocks gives you a predictable interface for catching
+errors and identifying the specific error class.
+
+### OpenAQ error
+
+The `OpenAQError` class serves as a superclass for exceptions that show the
+OpenAQ SDK client or methods found an issue and threw an exception _before_
+sending a request to the API.
+
+All `OpenAQError` exceptions include a `message` field with a human-readable
+explanation of the error.
+
+```py
+from openaq import OpenAQ 
+
+try:
+    client = OpenAQ() # raises ApiKeyMissingError since no key is provided
+except Exception as e:
+    print(type(e))
+    print(e)
+```
+
+### API error
+
+The `APIError` class serves as a superclass for exceptions that show an error
+occurred _after_ the request to the API. All `APIError` exceptions wrap HTTP
+error codes (4xx and 5xx) and expose the `status_code` from the response body.
+
+All `APIError` exceptions include `message` and `status_code` fields with a
+human-readable explanation of the error and the HTTP status code number,
+respectively.
+
+```py
+from openaq import OpenAQ 
+
+with OpenAQ(api_key="replace-with-valid-openaq-api-key") as client:
+    try:
+        client.countries.get(999) # raises NotFoundError since there is no country with this ID
+    except Exception as e:
+        print(type(e))
+        print(e)
+```
+<PlaceholderWarning/ >
+
+
+See the [Exceptions](/reference/exceptions) reference documentation for a
+detailed list of exceptions.
+
+
+<FeedbackForm />

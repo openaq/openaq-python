@@ -26,9 +26,9 @@ USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
 @pytest.fixture
 def mock_config_file():
     mock_toml_content = b"""api-key='test_api_key'"""
-    with patch.object(Path, 'is_file', return_value=True):
+    with patch.object(Path, "is_file", return_value=True):
         with patch(
-            'builtins.open', mock_open(read_data=mock_toml_content)
+            "builtins.open", mock_open(read_data=mock_toml_content)
         ) as mock_file:
             yield mock_file
 
@@ -101,9 +101,9 @@ class TestClient:
         with pytest.raises(ApiKeyMissingError):
             OpenAQ(api_key=None, _transport=MockTransport())
 
-    @patch('openaq.client.datetime')
-    @patch('time.sleep')
-    @patch('openaq.client.logger')
+    @patch("openaq.client.datetime")
+    @patch("time.sleep")
+    @patch("openaq.client.logger")
     def test_wait_for_rate_limit_reset_waits_when_positive(
         self, mock_logger, mock_sleep, mock_datetime, setup
     ):
@@ -118,35 +118,76 @@ class TestClient:
             "Rate limit hit. Waiting %s seconds for reset.", 5
         )
 
-    @patch('openaq.client.datetime')
-    @patch('time.sleep')
-    @patch('openaq.client.logger')
-    def test_wait_for_rate_limit_reset_does_not_wait_when_zero(
+    @patch("openaq.client.datetime")
+    @patch("time.sleep")
+    @patch("openaq.client.logger")
+    def test_wait_for_rate_limit_reset_waits_minimum_when_zero(
         self, mock_logger, mock_sleep, mock_datetime, setup
     ):
+        """ttl=0 from server should still wait 1 second to avoid racing the boundary."""
         now = datetime(2026, 2, 12, 0, 0, 0)
         mock_datetime.now.return_value = now
         self.client._rate_limit_reset_datetime = now
 
         self.client._wait_for_rate_limit_reset()
 
-        mock_sleep.assert_not_called()
-        mock_logger.info.assert_not_called()
+        mock_sleep.assert_called_once_with(1)
+        mock_logger.info.assert_called_once_with(
+            "Rate limit hit. Waiting %s seconds for reset.", 1
+        )
 
-    @patch('openaq.client.datetime')
-    @patch('time.sleep')
-    @patch('openaq.client.logger')
-    def test_wait_for_rate_limit_reset_does_not_wait_when_negative(
+    @patch("openaq.client.datetime")
+    @patch("time.sleep")
+    @patch("openaq.client.logger")
+    def test_wait_for_rate_limit_reset_waits_minimum_when_negative(
         self, mock_logger, mock_sleep, mock_datetime, setup
     ):
+        """Reset time in the past (e.g. key expired mid-flight) should still wait 1 second."""
+        now = datetime(2026, 2, 12, 0, 0, 1)
+        mock_datetime.now.return_value = now
+        self.client._rate_limit_reset_datetime = datetime(2026, 2, 12, 0, 0, 0)
+
+        self.client._wait_for_rate_limit_reset()
+
+        mock_sleep.assert_called_once_with(1)
+        mock_logger.info.assert_called_once_with(
+            "Rate limit hit. Waiting %s seconds for reset.", 1
+        )
+
+    @patch("openaq.client.datetime")
+    @patch("time.sleep")
+    @patch("openaq.client.logger")
+    def test_wait_for_rate_limit_reset_waits_minimum_when_far_negative(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        """Reset time well in the past should also wait the minimum 1 second."""
         now = datetime(2026, 2, 12, 0, 0, 0)
         mock_datetime.now.return_value = now
         self.client._rate_limit_reset_datetime = now - timedelta(seconds=5)
 
         self.client._wait_for_rate_limit_reset()
 
-        mock_sleep.assert_not_called()
-        mock_logger.info.assert_not_called()
+        mock_sleep.assert_called_once_with(1)
+        mock_logger.info.assert_called_once_with(
+            "Rate limit hit. Waiting %s seconds for reset.", 1
+        )
+
+    @patch("openaq.client.datetime")
+    @patch("time.sleep")
+    @patch("openaq.client.logger")
+    def test_wait_for_rate_limit_reset_never_sleeps_zero(
+        self, mock_logger, mock_sleep, mock_datetime, setup
+    ):
+        now = datetime(2026, 6, 16, 0, 0, 59)
+        mock_datetime.now.return_value = now
+        self.client._rate_limit_reset_datetime = now
+
+        self.client._wait_for_rate_limit_reset()
+
+        call_args = mock_sleep.call_args[0][0]
+        assert (
+            call_args >= 1
+        ), f"sleep({call_args}) is too short. Must wait at least 1 second when ttl=0."
 
     def test_close_closes_transport(self, setup):
         self.client._transport.close = Mock()
@@ -220,7 +261,7 @@ class TestClient:
         with pytest.raises(RateLimitError, match="30"):
             self.client._check_rate_limit()
 
-    @patch('time.sleep')
+    @patch("time.sleep")
     def test_waits_when_exhausted_and_auto_wait_true(self, mock_sleep, setup):
         self.client._auto_wait = True
         self.client._rate_limit_remaining = 0.0
@@ -230,7 +271,7 @@ class TestClient:
 
         mock_sleep.assert_called_once()
 
-    @patch('time.sleep')
+    @patch("time.sleep")
     def test_resets_capacity_after_wait(self, mock_sleep, setup):
         self.client._auto_wait = True
         self.client._rate_limit_remaining = 0.0
@@ -387,14 +428,16 @@ def test__get_openaq_config_file_exists():
     """
     expected_config = {"api_key": "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"}
 
-    with patch.object(Path, 'is_file', return_value=True):
+    with patch.object(Path, "is_file", return_value=True):
         with patch(
-            'builtins.open', mock_open(read_data=mock_toml_content)
+            "builtins.open", mock_open(read_data=mock_toml_content)
         ) as mock_file:
             result = None
             if int(platform.python_version_tuple()[1]) >= 11:
                 result = _get_openaq_config()
                 assert result == expected_config
-                mock_file.assert_any_call(Path(Path.home() / ".openaq.toml"), 'rb')
+                mock_file.assert_any_call(
+                    Path(Path.home() / ".config" / "openaq" / "config.toml"), "rb"
+                )
             else:
                 assert result == None

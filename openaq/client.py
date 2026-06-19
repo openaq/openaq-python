@@ -10,10 +10,10 @@ import logging
 import os
 import platform
 import time
+from collections.abc import Mapping
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
-from typing import Mapping
 from urllib.parse import urljoin, urlparse
 
 from openaq import __version__
@@ -45,13 +45,13 @@ DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 _has_toml = True
 try:
     import tomllib
-except ImportError:
+except ModuleNotFoundError:
     _has_toml = False
 
 
-def _get_openaq_config() -> dict | None:
-    """Read api_key from ~/.openaq.toml if present."""
-    config_path = Path.home() / ".openaq.toml"
+def _get_openaq_config() -> dict[str, str] | None:
+    """Read api_key from ~/.config/openaq/config.toml if present."""
+    config_path = Path.home() / ".config" / "openaq" / "config.toml"
     if config_path.is_file():
         with open(config_path, "rb") as f:
             if _has_toml:
@@ -279,9 +279,10 @@ class OpenAQ:
         Returns immediately if the reset time has already passed.
         """
         wait_seconds = self._rate_limit_reset_seconds
-        if wait_seconds > 0:
-            logger.info("Rate limit hit. Waiting %s seconds for reset.", wait_seconds)
-            time.sleep(wait_seconds)
+        if wait_seconds <= 0:
+            wait_seconds = 1
+        logger.info("Rate limit hit. Waiting %s seconds for reset.", wait_seconds)
+        time.sleep(wait_seconds)
 
     def _get_int_header(self, headers: Headers, key: str, default: int) -> int:
         """Reads an integer value from response headers with a fallback default.

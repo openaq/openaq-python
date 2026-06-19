@@ -1,0 +1,112 @@
+---
+title: Writing data to csv
+description: Write measurements data in OpenAQ API responses to .csv fies
+---
+import FeedbackForm from '@components/FeedbackForm.astro';
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+You may want a local copy of data instead of querying the API again. Reasons
+include analyzing it later or using a different tool outside of Python.
+
+This guide shows how to write measurements data to a .csv file for later use 
+using the OpenAQ SDK.
+
+## Getting measurements data
+
+As an example, the code below fetches all hourly PM<sub>2.5</sub> meausrement
+values for location ID 2178 reported in December of 2025. See 
+[Querying measurements](/guides/querying-measurements) for a closer look at how
+this workflow finds sensor IDs and queries measurements.
+
+```py
+from openaq import OpenAQ
+from datetime import datetime
+
+client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
+sensors_resp = client.locations.sensors(2178)
+pm25_sensors_id = 0
+
+for sensor in sensors_resp.results:
+    if "pm25" in sensor.name:
+        pm25_sensors_id = sensor.id
+        break
+
+response = client.measurements.list(pm25_sensors_id,
+                                    data="hours",
+                                    datetime_from=datetime(2025, 12, 1),
+                                    datetime_to=datetime(2025, 12, 31)
+                                    )
+
+measurements = response.results
+```
+
+    <PlaceholderWarning/>
+
+## Writing to csv
+
+With the measurements data fetched, write it to a .csv file using either
+Python's built-in `csv` module or Pandas.
+
+<Tabs>
+<TabItem label="csv module">
+The Python `csv` module ships with the standard library, so the OpenAQ Python
+SDK is the only dependency required.
+
+```py
+    import csv
+
+    # Assumes `measurements` is the results list from a prior client.measurements.list() call
+
+    # Choose column names in .csv output
+    headers = ["timestamp", "parameter", "unit", "value"]
+
+    # Write each measurement data into .csv
+    with open("csv_pm25_2178_2025_12.csv", "w", newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=headers)
+        writer.writeheader()
+
+        for item in measurements:
+            row = {
+                "timestamp": item.period.datetime_to.local,
+                "parameter": item.parameter.name,
+                "unit": item.parameter.units,
+                "value": item.value
+            }
+
+            writer.writerow(row)
+```
+</TabItem>
+<TabItem label="Pandas">
+This approach requires Pandas and
+[converting the `MeasurementsResponse` object into a Pandas DataFrame](/guides/pandas).
+Because Pandas flattens nested results automatically, columns can be selected or
+filtered for export instead of extracting fields manually.
+
+```py
+import pandas as pd
+
+# Assumes `response` is the MeasurementsResponse object from a prior client.measurements.list() call
+
+data = response.dict()
+df = pd.json_normalize(data["results"])
+
+# Rename columns as desired
+df = df.rename(columns={
+    "period.datetime_to.local": "timestamp",
+    "parameter.name": "parameter",
+    "parameter.units": "unit"
+    })
+
+# Filter columns to write to .csv
+df[["timestamp", "parameter", "unit", "value"]].to_csv(
+    "pd_pm25_2178_2025_12.csv", index=False
+    )
+
+# Close the connection when done
+client.close()
+```
+</TabItem>
+</Tabs>
+
+<FeedbackForm />

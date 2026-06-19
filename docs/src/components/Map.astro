@@ -1,0 +1,95 @@
+---
+
+export interface Props {
+  latitude: number
+  longitude: number
+  zoom: number
+  mapstyle: string
+  container: string
+  interactive: boolean
+  geojson: string 
+  marker: string
+  containerstyle?: string
+}
+
+const {
+  latitude,
+  longitude,
+  zoom,
+  interactive,
+  container,
+  geojson,
+  marker,
+  containerstyle = 'height: 61.8vh',
+} = Astro.props;
+---
+  <div id={container} style={containerstyle}></div>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css"
+  />
+  <script
+    is:inline
+    src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+
+  <script is:inline define:vars={{container, interactive, longitude, latitude, zoom, geojson, marker}}>
+    
+        const map = new maplibregl.Map({
+          container: container,
+          interactive: false,
+          center: [longitude, latitude],
+          style: 'https://basemap.openaq.org/styles/styles.json',
+          zoom: zoom,
+        });
+
+        if (geojson) {
+            map.on('load', () => {
+          map.addSource('geojson-overlay', {
+            type: 'geojson',
+            data: JSON.parse(geojson),
+          });
+
+          map.addLayer({
+            id: 'geojson-overlay',
+            type: 'fill',
+            source: 'geojson-overlay',
+            layout: {},
+            paint: {
+              'fill-color': '#6a5cd8',
+              'fill-opacity': 0.5,
+            },
+          });
+          map.addLayer({
+            id: 'geojson-overlay-outline',
+            type: 'line',
+            source: 'geojson-overlay',
+            paint: {
+              'line-color': '#6a5cd8',
+
+              'line-width': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                2,
+                1,
+                14,
+                4
+              ],
+            },
+          });
+        
+
+        });
+        }
+
+        if (marker) {
+            new maplibregl.Marker({
+              color: '#6a5cd8',
+            })
+              .setLngLat([
+                JSON.parse(marker).longitude,
+                JSON.parse(marker).latitude,
+              ])
+              .addTo(map);
+          }
+  </script>

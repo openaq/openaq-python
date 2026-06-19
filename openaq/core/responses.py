@@ -14,7 +14,8 @@ from openaq.vendor.humps import camelize, decamelize
 try:
     import orjson
 except ImportError:
-    orjson = None  # type: ignore[assignment]
+    orjson = None  # type: ignore[assignment, unused-ignore]
+
 
 T = TypeVar("T", bound="_ModelBase")
 
@@ -83,10 +84,10 @@ class Headers:
         x_ratelimit_reset: The X-RateLimit-Reset header indicates when, in number of seconds, the rate limit period resets
     """
 
-    x_ratelimit_limit: int | None = None
-    x_ratelimit_remaining: int | None = None
-    x_ratelimit_used: int | None = None
-    x_ratelimit_reset: int | None = None
+    x_ratelimit_limit: int = 0
+    x_ratelimit_remaining: int = 0
+    x_ratelimit_used: int = 0
+    x_ratelimit_reset: int = 0
 
     def __post_init__(self) -> None:
         """Coerces attribute values to correct types."""
@@ -115,7 +116,7 @@ class Meta(_ModelBase):
     found: int
 
 
-R = TypeVar("R", bound="_ResponseBase")
+R = TypeVar("R", bound="_ResponseBase[Any]")
 
 TResult = TypeVar("TResult")
 
@@ -143,13 +144,13 @@ class _ResponseBase(Generic[TResult]):
         return cls(
             Headers(
                 **{
-                    k.replace('-', '_'): int(v) if v.isdigit() else None
+                    k.replace("-", "_"): int(v) if v.isdigit() else 0
                     for k, v in response.headers.items()
-                    if k.replace('-', '_') in valid_headers
+                    if k.replace("-", "_") in valid_headers
                 }
             ),
-            json_data['meta'],
-            json_data['results'],
+            json_data["meta"],
+            json_data["results"],
         )
 
     def __post_init__(self) -> None:
@@ -157,16 +158,21 @@ class _ResponseBase(Generic[TResult]):
         if isinstance(self.meta, dict):
             self.meta = Meta.load(self.meta)
 
-        if hasattr(self.__class__, '__orig_bases__'):
+        if hasattr(self.__class__, "__orig_bases__"):
             for base in self.__class__.__orig_bases__:
-                if hasattr(base, '__args__'):
+                if hasattr(base, "__args__"):
                     result_type = get_args(base)[0]
-                    if isinstance(self.results, list) and self.results:
-                        if isinstance(self.results[0], dict):
-                            self.results = [result_type.load(x) for x in self.results]
+                    if (
+                        isinstance(self.results, list)
+                        and self.results
+                        and isinstance(self.results[0], dict)
+                    ):
+                        self.results = [result_type.load(x) for x in self.results]
                     break
 
-    def _serialize(self, data: Mapping | list) -> dict[str, Any] | list[Any]:
+    def _serialize(
+        self, data: Mapping[str, Any] | list[Any]
+    ) -> dict[str, Any] | list[Any]:
         """Serializes data and convert keys to camel case.
 
         Args:
@@ -174,17 +180,16 @@ class _ResponseBase(Generic[TResult]):
         """
         if isinstance(data, list):
             return [
-                self._serialize(i) if isinstance(i, (Mapping, list)) else i
-                for i in data
+                self._serialize(i) if isinstance(i, Mapping | list) else i for i in data
             ]
         return {
             cast(str, camelize(k)): (
-                self._serialize(v) if isinstance(v, (Mapping, list)) else v
+                self._serialize(v) if isinstance(v, Mapping | list) else v
             )
             for k, v in data.items()
         }
 
-    def dict(self) -> dict:
+    def dict(self) -> dict[str, Any]:
         """Serializes response data to Python dictionary.
 
         Returns:
@@ -195,7 +200,8 @@ class _ResponseBase(Generic[TResult]):
     def json(self, encoder: ModuleType = json) -> str:
         """Serializes response data to JSON string.
 
-        Allows for setting encoder module. Defaults to python core `json`, `orjson` also supported with optional install `pip install openaq[orjson]`
+        Allows for setting encoder module. Defaults to python core `json`,
+        `orjson` also supported with optional install `pip install openaq[orjson]`
 
         Args:
             encoder: JSON serializer module.
@@ -205,7 +211,8 @@ class _ResponseBase(Generic[TResult]):
         """
         if encoder == orjson:
             assert orjson is not None, "orjson must be installed."
-        return encoder.dumps(self._serialize(self.dict()), ensure_ascii=False)
+            return str(encoder.dumps(self._serialize(self.dict())).decode())
+        return str(encoder.dumps(self._serialize(self.dict()), ensure_ascii=False))
 
 
 @dataclass(slots=True)

@@ -1,0 +1,68 @@
+---
+title: Integrating with Pandas
+description: Transform OpenAQ API responses into Pandas DataFrames for data analysis workflows.
+---
+import FeedbackForm from '@components/FeedbackForm.astro';
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
+
+The OpenAQ Python SDK deserializes API responses into Python objects. For users
+who prefer to work with tabular data structures, Pandas is a natural fit for
+filtering, aggregating, and exploring measurement results. Converting a response
+into a Pandas DataFrame takes two steps:
+
+1. Convert the response object to a dictionary using the `.dict()` method.
+2. Use the Pandas `json_normalize()` function to flatten the dictionary's nested
+  structure into a tabular format.
+
+## Code sample
+
+The code below fetches locations data into a Pandas DataFrame stored in the
+variable `df`. To run it, make sure you have the OpenAQ Python SDK and Pandas
+installed. Remember to also replace `replace-me-with-a-valid-key` below with
+your OpenAQ API key.
+
+```py
+  from openaq import OpenAQ
+  import pandas as pd
+
+  # Initialize client
+  client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
+
+  # Fetch locations around Gwangju, South Korea
+  response = client.locations.list(
+      bbox=(126.730556, 35.097440, 126.977749, 35.195835)
+  )
+
+  # Convert to a DataFrame (2 steps)
+  data = response.dict()
+  df = pd.json_normalize(data['results'])
+
+  # Close the connection when done
+  client.close()
+
+  print(df.head())
+```
+
+This will print the first few rows of your data frame, something like this:
+
+```py
+        id                               name locality  ...       datetime_first.local     datetime_last.utc        datetime_last.local
+0  2622578                                서석동           ...  2024-03-20T08:00:00+09:00  2026-06-19T00:00:00Z  2026-06-19T09:00:00+09:00
+1  2622605                            우산동(광주)           ...  2024-03-20T08:00:00+09:00  2026-06-19T00:00:00Z  2026-06-19T09:00:00+09:00
+2  2622680                                농성동           ...  2024-03-20T08:00:00+09:00  2026-06-19T00:00:00Z  2026-06-19T09:00:00+09:00
+3  2622806                                두암동           ...  2024-03-20T08:00:00+09:00  2026-06-19T00:00:00Z  2026-06-19T09:00:00+09:00
+4  2622926  광주 서구 상무자유로 170 (롯데마트 상무점 건너편 인도)           ...  2024-03-20T08:00:00+09:00  2024-04-11T16:00:00Z  2024-04-12T01:00:00+09:00
+
+[5 rows x 23 columns]
+```
+
+<PlaceholderWarning/>
+
+
+
+
+The `json_normalize()` function flattens the nested `results` list into a
+two-dimensional DataFrame, where nested fields become columns with dot
+notation, for example `coordinates.latitude`.
+
+<FeedbackForm/>

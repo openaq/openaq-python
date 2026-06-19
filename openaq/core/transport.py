@@ -10,9 +10,10 @@ import threading
 import time
 import urllib.parse
 from collections import deque
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from http import HTTPStatus
-from typing import Any, Mapping
+from typing import Any
 
 from openaq.core.exceptions import (
     BadGatewayError,
@@ -74,7 +75,7 @@ class Limits:
     keepalive_expiry: float = 30.0
 
 
-class Headers(dict):
+class Headers(dict[str, str]):
     """A case-insensitive dictionary for HTTP headers.
 
     Keys are normalized to lowercase on insertion and lookup, ensuring that
@@ -259,7 +260,11 @@ class ConnectionPool:
             try:
                 pc.conn.close()
             except Exception:
-                pass
+                logger.debug(
+                    "Failed to close expired connection for %s",
+                    host,
+                    exc_info=True,
+                )
             self._total -= 1
 
     def acquire(self, host: str, pool_timeout: float | None = None) -> PooledConnection:
@@ -319,7 +324,11 @@ class ConnectionPool:
                 try:
                     pc.conn.close()
                 except Exception:
-                    pass
+                    logger.debug(
+                        "Failed to close discarded connection for %s",
+                        pc.host,
+                        exc_info=True,
+                    )
                 self._total -= 1
                 self._has_capacity.notify_all()
                 return
@@ -331,7 +340,11 @@ class ConnectionPool:
                 try:
                     pc.conn.close()
                 except Exception:
-                    pass
+                    logger.debug(
+                        "Failed to close evicted connection for %s (idle queue full)",
+                        pc.host,
+                        exc_info=True,
+                    )
                 self._total -= 1
             self._has_capacity.notify_all()
 
@@ -343,7 +356,12 @@ class ConnectionPool:
                     try:
                         pc.conn.close()
                     except Exception:
-                        pass
+                        logger.debug(
+                            "Failed to close connection for %s during shutdown",
+                            pc.host,
+                            exc_info=True,
+                        )
+
             self._idle.clear()
             self._total = 0
             self._has_capacity.notify_all()
@@ -395,7 +413,7 @@ class Transport:
             self._connect_timeout = timeout.connect
             self._read_timeout = timeout.read
             self._pool_timeout = timeout.pool
-        elif isinstance(timeout, (int, float)):
+        elif isinstance(timeout, int | float):
             self._connect_timeout = float(timeout)
             self._read_timeout = float(timeout)
             self._pool_timeout = None

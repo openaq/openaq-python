@@ -1,0 +1,39 @@
+---
+// src/components/Footer.astro
+import Pagination from '@astrojs/starlight/components/Pagination.astro';
+---
+
+<Pagination {...Astro.props} />
+
+<footer class="license-notice">
+  <p>
+    &copy; {new Date().getFullYear()} OpenAQ.
+    Documentation licensed under
+    <a 
+      href="https://creativecommons.org/licenses/by-nc-sa/4.0/" 
+      target="_blank" 
+      rel="noopener noreferrer"
+    >
+      CC BY-NC-SA 4.0
+    </a>.
+  </p>
+</footer>
+
+<style>
+  .license-notice {
+    border-top: 1px solid var(--sl-color-gray-5);
+    padding: 1rem var(--sl-content-pad-x);
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+    text-align: center;
+  }
+
+  .license-notice a {
+    color: var(--sl-color-text-accent);
+    text-decoration: none;
+  }
+
+  .license-notice a:hover {
+    text-decoration: underline;
+  }
+</style>

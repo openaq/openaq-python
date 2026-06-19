@@ -1,0 +1,64 @@
+---
+title: Logging
+---
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+The OpenAQ client uses the Python standard libary `logging` module. No extra
+dependencies are needed, you control verbosity through Python's built-in logging
+configuration.
+
+The simplest way to see all debug output is to enable logging at the `DEBUG`
+level before creating the client:
+
+```py
+import logging
+import openaq
+
+logging.basicConfig(level=logging.DEBUG)
+
+with openaq.OpenAQ(api_key="replace-me-with-a-valid-key") as client:
+    results = client.locations.list()
+```
+
+<PlaceholderWarning />
+
+This prints all log messages from the `openaq` logger and every other library
+in your process, to stderr.
+
+## Targeting the OpenAQ Logger
+
+To see only OpenAQ-specific messages without noise from other libraries,
+configure the `openaq` logger directly:
+
+```py
+    import logging
+    import openaq
+
+    logger = logging.getLogger("openaq")
+    logger.setLevel(logging.DEBUG)
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+    logger.addHandler(handler)
+
+    with openaq.OpenAQ(api_key="replace-me-with-a-valid-key") as client:
+        results = client.locations.list()
+```
+
+<PlaceholderWarning/>
+
+---
+
+## Log Levels
+
+| Level | What you'll see |
+|---|---|
+| `DEBUG` | Full request/response details, rate limit state changes |
+| `INFO` | Rate limit waits (when `auto_wait=True` sleeps before retrying) |
+| `WARNING` | Unexpected but recoverable conditions |
+| `ERROR` | Missing API key, rate limit exceeded (when `auto_wait=False`) |
+
+
+<FeedbackForm />

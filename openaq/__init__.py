@@ -1,15 +1,10 @@
 """OpenAQ Python SDK."""
 
+__version__ = "1.0.0"
+
 import logging
 
-__version__ = "1.0.0rc4"
-
-
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
-
-
-from .client import OpenAQ as OpenAQ
+from .client import OpenAQ
 from .core.exceptions import (
     ApiKeyMissingError,
     BadGatewayError,
@@ -27,6 +22,9 @@ from .core.exceptions import (
     TimeoutError,
     ValidationError,
 )
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 __all__ = [
     "OpenAQ",

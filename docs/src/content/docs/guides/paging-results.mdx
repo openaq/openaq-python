@@ -1,0 +1,87 @@
+---
+title: Paging results
+description: Get data stored across multiple pages
+---
+
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+By design, the OpenAQ API and the Python SDK return only a subset of the data
+when a query matches too much data to fit in one response. To get all data
+matching a query, work with pagination as covered in this guide.
+
+The [Pagination](/getting-started/pagination/) page covers how `meta.found` in
+the query response can be an integer or a string, depending on how
+computationally expensive counting the matching records becomes. Two approaches
+exist for getting all results.
+
+## Get all records with exact count
+
+Most resources will return the total count of record in `meta.found` as an
+integer. In those cases, you can use this exact record count to paginate through
+the entire result set:
+
+```py
+from openaq import OpenAQ
+import math
+
+client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
+
+limit = 100
+locations = []
+first_page = client.locations.list(iso="VN", page=1, limit=limit)
+
+# Paginate through sets of results
+try:
+    total_pages = math.ceil(first_page.meta.found / limit)
+    
+    locations.extend(first_page.results)
+    for page in range(2, total_pages + 1):
+        response = client.locations.list(page=page, limit=limit)
+        locations.extend(response.results)
+
+except TypeError:
+    print("Records count in meta.found is not a valid number.")
+
+client.close()
+```
+
+<PlaceholderWarning/>
+
+## Get all records with any response
+
+A large result such as that coming from querying measurements, where the amount
+of data is often too large for an exact record count to return reliably and
+efficiently. In this case, `meta.found` returns the string `'>1000'`, indicating 
+that the result it too large to count exactly in an efficient way. When
+filtering can't narrow down the results further, the code below paginates
+through the entire result set until no records remain. This code also handles
+the case preceding this one, where an exact count of records is available.
+
+```py
+from openaq import OpenAQ
+
+# Initialize client
+client = OpenAQ(api_key="replace-with-valid-openaq-api-key")
+
+# Paginate through locations results set
+results = True
+limit = 1000
+page_num = 1
+locations = []
+
+while results:
+    response = client.locations.list(page=page_num, limit=limit)
+    locations.extend(response.results)
+    page_num += 1
+    
+    if response.meta.found == 0:
+        results = False
+
+client.close()
+```
+
+<PlaceholderWarning/>
+
+
+<FeedbackForm />

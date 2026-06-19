@@ -1,0 +1,113 @@
+---
+title: Responses
+---
+
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+The OpenAQ API and Python SDK responses share a consistent format. The SDK 
+automatically transforms raw JSON from the API into Python objects, enabling dot
+notation access. This design simplifies data retrieval and cuts down on
+boilerplate code. You can also still access data as raw JSON or a standard
+Python dictionary when needed.
+
+## Response structure
+
+Every response returned by the OpenAQ client follows a consistent top-level
+layout. Along with the core data payload, responses include metadata and HTTP
+headers to help you manage pagination and API rate limits effectively.
+
+
+```
+├── headers
+│   ├── x_ratelimit_limit: int | None
+│   ├── x_ratelimit_remaining: int | None
+│   ├── x_ratelimit_used: int | None
+│   └── x_ratelimit_reset: int | None
+├── meta
+│   ├── name: str
+│   ├── website: str
+│   ├── page: int
+│   ├── limit: int
+│   └── found: int
+└── results: list[]
+```
+
+### Headers
+
+The `headers` attribute provides information about your API usage using rate
+limit HTTP headers to help the SDK handle throttling proactively. The rate limit
+headers track your total rate limit allowance, how many requests you have used,
+and how many requests remain in the current window. When you approach your
+threshold, the reset field tells you exactly how many seconds remain until your
+limit refreshes, allowing your application to pause or back off dynamically.
+
+### Meta
+
+The `meta` attribute delivers essential context about the API response itself,
+which is especially critical for managing paginated datasets. Alongside basic
+provider information like the name and website, it tracks your current position
+in the dataset by displaying the active page number and the requested per-page
+limit. Crucially, the total found count reveals the entire pool of matching
+records, helping you calculate exactly how many subsequent pages are available
+to fetch.
+
+### Results
+
+The `results` attribute always contains a Python list (a deserialized JSON array)
+holding the primary data payload. This rule applies consistently across the
+SDK, even when fetching a single object via get(), or when filters yield no
+matches (in which case results returns an empty list).
+
+Individual resource schemas reside in the Resources section of the
+documentation.
+
+## Accessing response data
+
+The SDK supports three formats for response data.
+
+### Response objects
+
+By default, resources convert JSON responses into Python data objects. These 
+objects support dot notation for quick property access. You can extract values 
+directly following the preceding structure described:
+
+```py
+# Access the page number
+response.meta.page
+
+# Access the remaining rate limits available for use
+response.headers.x_ratelimit_remaining
+
+# Access the first item in the results list
+response.results[0]
+```
+
+### Dictionary
+
+You can extract responses as a standard Python dictionary. Every response object
+includes a `dict()` method. This method allows standard dictionary key lookup:
+
+```py
+response.dict()['results']
+```
+
+or the built-in `get()` method:
+
+```py
+response.dict().get('results')
+```
+
+Like the data object, the `results` key contains a Python `list`.
+
+
+### JSON
+
+To get the raw, unparsed response payload, use the `json()` method. This method
+returns the raw JSON string:
+
+```py
+response.json()
+```
+
+<FeedbackForm />

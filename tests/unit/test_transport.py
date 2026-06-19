@@ -1,4 +1,5 @@
 import http.client
+import importlib
 import ssl
 import threading
 import time
@@ -131,6 +132,11 @@ class TestResponse:
         r = make_response(200, b'{"key": "value"}')
         assert r.json() == {"key": "value"}
 
+    def test_json_with_unicode(self):
+        r = make_response(200, '{"city": "São Paulo"}'.encode("utf-8"))
+        result = r.json()
+        assert result == {"city": "São Paulo"}
+
 
 class TestConnectionPool:
     def make_pool(self, max_connections=5, max_keepalive=3, expiry=30.0):
@@ -221,8 +227,8 @@ class TestTransport:
         pc.conn.sock = None
         pc.host = "api.openaq.org"
         pc.conn.getresponse.return_value = raw_response
-        acquire = mock.patch.object(transport._pool, 'acquire', return_value=pc)
-        release = mock.patch.object(transport._pool, 'release')
+        acquire = mock.patch.object(transport._pool, "acquire", return_value=pc)
+        release = mock.patch.object(transport._pool, "release")
         return acquire, release, pc
 
     def test_float_timeout_sets_both(self):
@@ -295,7 +301,7 @@ class TestTransport:
     def test_send_request_uppercases_method(self):
         transport = Transport()
         transport._raw_request = mock.Mock(
-            return_value=Response(200, b'{}', http.client.HTTPMessage())
+            return_value=Response(200, b"{}", http.client.HTTPMessage())
         )
 
         transport.send_request(

@@ -1,0 +1,84 @@
+---
+title: Client
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import PlaceholderWarning from '@components/PlaceholderWarning.astro';
+import FeedbackForm from '@components/FeedbackForm.astro'
+
+
+The OpenAQ SDK provides the `OpenAQ` class to call OpenAQ API endpoints.
+
+## API key
+
+To use the SDK, pass a valid OpenAQ API key directly during client
+initialization:
+
+```py
+from openaq import OpenAQ
+
+client = OpenAQ(api_key="replace-with-a-valid-openaq-api-key")
+```
+
+<PlaceholderWarning/ >
+
+
+You can also set the `OPENAQ_API_KEY` environment variable. This configures the
+key without defining it during instantiation:
+
+```py title="main.py"
+from openaq import OpenAQ
+
+client = OpenAQ()
+```
+
+```sh
+OPENAQ_API_KEY=replace-with-a-valid-openaq-api-key python main.py
+```
+<PlaceholderWarning/ >
+
+<Aside type="note">
+Setting the `api_key` argument in the client always supersedes the
+`OPENAQ_API_KEY` environment variable.
+</Aside>
+
+Without a key, the client raises an [`ApiKeyMissingError`](/reference/exceptions/#apikeymissingerror) exception. An invalid
+key raises a [`NotAuthorizedError`](/reference/exceptions/#notauthorizederror) (HTTP 401) exception.
+
+## OpenAQ Client
+
+The `OpenAQ` class provides a synchronous interface to access the API.
+
+```py
+from openaq import OpenAQ
+```
+
+The client uses HTTP connection pooling to efficiently reuse connections. Always
+close the connection after finishing requests to release the pool.
+
+```py
+from openaq import OpenAQ
+
+client = OpenAQ()
+
+# Call resources with the open connection pool
+...
+
+client.close()
+
+```
+
+### Context manager 
+
+The OpenAQ client can also be used as a context manager. Utilizing a `with`
+block ensures the client closes automatically upon exit, eliminating the need
+to manually call the `close()` method.
+
+```py
+with OpenAQ(api_key="replace-with-a-valid-openaq-api-key") as client:
+    ...
+```
+
+<PlaceholderWarning/ >
+
+<FeedbackForm/ >
