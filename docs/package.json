@@ -2,6 +2,8 @@
   "name": "openaq-python-docs",
   "type": "module",
   "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@9.1.0",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
