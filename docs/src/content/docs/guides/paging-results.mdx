@@ -17,9 +17,8 @@ exist for getting all results.
 
 ## Get all records with exact count
 
-A result set containing fewer than 1,000 records returns an integer. Queries
-from certain resources, such as locations, also tend to return an exact count of
-records. In those cases, you can use this exact record count to paginate through
+Most resources will return the total count of record in `meta.found` as an
+integer. In those cases, you can use this exact record count to paginate through
 the entire result set:
 
 ```py
@@ -47,13 +46,14 @@ except TypeError:
 client.close()
 ```
 
-    <PlaceholderWarning/>
+<PlaceholderWarning/>
 
 ## Get all records with any response
 
-A large result set often comes from querying measurements, where the amount of
-data is often too large for an exact record count to return reliably and
-efficiently. In this case, `meta.found` returns the string `'>1000'`. When
+A large result such as that coming from querying measurements, where the amount
+of data is often too large for an exact record count to return reliably and
+efficiently. In this case, `meta.found` returns the string `'>1000'`, indicating 
+that the result it too large to count exactly in an efficient way. When
 filtering can't narrow down the results further, the code below paginates
 through the entire result set until no records remain. This code also handles
 the case preceding this one, where an exact count of records is available.
@@ -81,7 +81,7 @@ while results:
 client.close()
 ```
 
-    <PlaceholderWarning/>
+<PlaceholderWarning/>
 
 
 <FeedbackForm />

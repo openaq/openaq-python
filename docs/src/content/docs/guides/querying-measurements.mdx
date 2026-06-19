@@ -10,7 +10,7 @@ import { Steps } from '@astrojs/starlight/components';
 A common task with the OpenAQ API is fetching historical measurements from one
 or more monitoring stations. This guide covers the basics:
 
-> What was the daily average PM<sub>2.5</sub> in Accra, Ghana for 2025?
+> What was the daily average PM<sub>2.5</sub> in Mueang Chaiyaphum, Thailand for 2025?
 
 This guide assumes you have installed the OpenAQ Python SDK and have a valid
 OpenAQ API key.
@@ -20,7 +20,7 @@ OpenAQ API key.
 The OpenAQ API works top-down. For this task, that means moving through three
 resources: Locations, Sensors, and Measurements. The steps are:
 
-1. Find the IDs of monitoring stations within the city of Accra.
+1. Find the IDs of monitoring stations within the city of Mueang Chaiyaphum.
 2. Pick one location, then use the Locations resource with that location's ID to
 find the ID of the sensor measuring PM<sub>2.5</sub> at that location.
 3. Use the Measurements resource with that sensor's ID to get data at the
@@ -42,18 +42,21 @@ Below is the step-by-step workflow with code you can run in a Python notebook.
     <PlaceholderWarning/>
 
 
-2. Retrieve the ID of one location in Accra, Ghana. Search 10 km (10,000 meters)
-    around Accra's central coordinates, 5.54986, -0.21068, and pick the first
+
+2. Retrieve the ID of one location in Mueang Chaiyaphum, Thailand. Search 10 km
+    (10,000 meters) around Chaiyaphum's central coordinates, 15.81207,
+    102.02316, for locations that measure PM<sub>2.5</sub> and pick the first
     result for simplicity.
 
     ```py
-    accra_locations = client.locations.list(
-        coordinates=(5.5583456, -0.2043158),
-        radius=10000, # in meters
+    locations = client.locations.list(
+        parameters_id=2,
+        coordinates=(15.81207, 102.02316),
+        radius=1000,
         limit=1000
-    ).results
+    )
 
-    locations_id = accra_locations[0].id
+    locations_id = locations.results[0].id
     ```
 
 3. Retrieve the ID of the sensor that measures PM<sub>2.5</sub> at the chosen
@@ -64,7 +67,7 @@ Below is the step-by-step workflow with code you can run in a Python notebook.
     sensors = client.locations.sensors(locations_id)
     pm25_sensors_id = 0
 
-    for sensor in sensors_resp.results:
+    for sensor in sensors.results:
         if "pm25" in sensor.name:
             pm25_sensors_id = sensor.id
             break
@@ -87,15 +90,16 @@ Below is the step-by-step workflow with code you can run in a Python notebook.
     ```
 
     You will now have the daily measurements for 2025 at the chosen location in
-    Accra stored as a list in `measurements` and printed to your console.
+    Mueang Chaiyaphum stored as a list in `measurements` and printed to your
+    console.
 
 </Steps>
 
 While you can get the results set of this example in the first page of the
-response (i.e. we are expecting 365 records in the results of this query), there
-will be instances where the records will be spread across several pages when you
-query at different granularity levels (for example `hours`) or over a longer period of
-time. In those cases, it will be necessary to [page the
+response (i.e. we are expecting up top 365 records in the results of this query),
+there will be instances where the records will be spread across several pages
+when you query at different granularity levels (for example `hours`) or over a
+longer period of time. In those cases, it will be necessary to [page the
 results](/guides/paging-results) to get the full data you request.
 
 Now that you have the measurements, if you want to work with the datasets using
