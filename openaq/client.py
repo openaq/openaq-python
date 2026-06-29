@@ -15,6 +15,7 @@ from collections.abc import Mapping
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
+from typing import Any
 from urllib.parse import urljoin, urlparse
 
 from openaq import __version__
@@ -84,7 +85,7 @@ def _resolve_api_key(api_key: str | None) -> str | None:
     return None
 
 
-def _check_api_key(api_key: any) -> str:
+def _check_api_key(api_key: Any) -> str:
     """Validate that the given API key is a 64-character string.
 
     Args:
