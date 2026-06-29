@@ -8,14 +8,12 @@ import pytest
 from freezegun import freeze_time
 
 from openaq import __version__
-from openaq.client import OpenAQ, _get_openaq_config, _has_toml
+from openaq.client import OpenAQ, _check_api_key, _get_openaq_config, _has_toml
 from openaq.core.exceptions import ApiKeyMissingError, RateLimitError
 from openaq.core.transport import (
     DEFAULT_LIMITS,
     DEFAULT_TIMEOUT,
     Headers,
-    Limits,
-    Timeout,
 )
 
 from .mocks import MockTransport
@@ -23,9 +21,49 @@ from .mocks import MockTransport
 USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
 
 
+@pytest.mark.parametrize(
+    "api_key, expected_exception",
+    [
+        ("a" * 64, None),
+        ("f" * 64, None),
+        ("0" * 64, None),
+        ("f" * 63, ApiKeyMissingError),
+        ("f" * 65, ApiKeyMissingError),
+        ("A" * 64, ApiKeyMissingError),
+        ("g" * 64, ApiKeyMissingError),
+        ("f" * 63 + "!", ApiKeyMissingError),
+        ("", ApiKeyMissingError),
+        (12345, ApiKeyMissingError),
+        (None, ApiKeyMissingError),
+        (b"f" * 64, ApiKeyMissingError),
+    ],
+    ids=[
+        "invalid non-hex lowercase",
+        "valid hex lowercase f",
+        "valid hex lowercase 0",
+        "too short 63 chars",
+        "too long 65 chars",
+        "uppercase hex rejected",
+        "non-hex character",
+        "special character",
+        "empty string",
+        "invalid type int",
+        "invalid type None",
+        "invalid type bytes",
+    ],
+)
+def test__check_api_key(api_key, expected_exception):
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            _check_api_key(api_key)
+    else:
+        result = _check_api_key(api_key)
+        assert result == api_key
+
+
 @pytest.fixture
 def mock_config_file():
-    mock_toml_content = b"""api-key='test_api_key'"""
+    mock_toml_content = b"""api-key='e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5'"""
     with patch.object(Path, "is_file", return_value=True):
         with patch(
             "builtins.open", mock_open(read_data=mock_toml_content)
@@ -36,12 +74,18 @@ def mock_config_file():
 class TestClient:
     @pytest.fixture()
     def setup(self):
-        self.client = OpenAQ(api_key="abc123-def456-ghi789", _transport=MockTransport())
+        self.client = OpenAQ(
+            api_key="e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5",
+            _transport=MockTransport(),
+        )
 
     @pytest.fixture()
     def mock_openaq_api_key_env_vars(self):
         with patch.dict(
-            os.environ, {"OPENAQ_API_KEY": "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"}
+            os.environ,
+            {
+                "OPENAQ_API_KEY": "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+            },
         ):
             yield
 
@@ -59,15 +103,18 @@ class TestClient:
 
     def test_custom_headers(self, setup):
         self.client = OpenAQ(
-            api_key="abc123-def456-ghi789",
+            api_key="e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5",
             base_url="https://mycustom.openaq.org",
             _transport=MockTransport(),
         )
-        assert self.client.headers["X-API-Key"] == "abc123-def456-ghi789"
+        assert (
+            self.client.headers["X-API-Key"]
+            == "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+        )
 
     def test_client_params(self, setup):
         self.client = OpenAQ(
-            api_key="abc123-def456-ghi789",
+            api_key="e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5",
             base_url="https://mycustom.openaq.org",
             _transport=MockTransport(),
         )
@@ -75,27 +122,42 @@ class TestClient:
 
     def test_api_env_var(self, mock_openaq_api_key_env_vars):
         client = OpenAQ(_transport=MockTransport())
-        assert client.api_key == "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"
+        assert (
+            client.api_key
+            == "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+        )
 
     @pytest.mark.usefixtures("mock_config_file")
     def test_api_key_from_config(self):
         if int(platform.python_version_tuple()[1]) >= 11:
             client = OpenAQ(_transport=MockTransport())
-            assert client.api_key == "test_api_key"
+            assert (
+                client.api_key
+                == "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+            )
         else:
             with pytest.raises(ApiKeyMissingError):
                 client = OpenAQ(_transport=MockTransport())
 
     def test_api_key_arg_override_env_var(self, setup, mock_openaq_api_key_env_vars):
-        assert self.client.api_key == "abc123-def456-ghi789"
+        assert (
+            self.client.api_key
+            == "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+        )
 
     def test_api_key_arg_override_config(self, setup, mock_config_file):
-        assert self.client.api_key == "abc123-def456-ghi789"
+        assert (
+            self.client.api_key
+            == "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+        )
 
     def test_api_key_arg_override_env_vars_config(
         self, setup, mock_openaq_api_key_env_vars, mock_config_file
     ):
-        assert self.client.api_key == "abc123-def456-ghi789"
+        assert (
+            self.client.api_key
+            == "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+        )
 
     def test_raises_api_key_missing_error_when_key_is_none(self):
         with pytest.raises(ApiKeyMissingError):
@@ -213,7 +275,7 @@ class TestClient:
 
     def test_blocks_after_custom_limit(self):
         client = OpenAQ(
-            api_key="abc123-def456-ghi789",
+            api_key="e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5",
             _transport=MockTransport(),
             auto_wait=False,
             rate_limit_override=5,
@@ -228,7 +290,7 @@ class TestClient:
     def test_allows_exactly_override_requests(self):
         limit = 10
         client = OpenAQ(
-            api_key="abc123-def456-ghi789",
+            api_key="e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5",
             _transport=MockTransport(),
             auto_wait=False,
             rate_limit_override=limit,
@@ -372,12 +434,16 @@ class TestClient:
         self.client._transport.send_request.assert_not_called()
 
     def test_default_timeout_applied_to_transport(self):
-        client = OpenAQ(api_key="abc123-def456-ghi789")
+        client = OpenAQ(
+            api_key="e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+        )
         assert client._transport._connect_timeout == DEFAULT_TIMEOUT.connect
         assert client._transport._read_timeout == DEFAULT_TIMEOUT.read
 
     def test_default_limits_applied_to_transport(self):
-        client = OpenAQ(api_key="abc123-def456-ghi789")
+        client = OpenAQ(
+            api_key="e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+        )
         assert client._transport._pool._max_total == DEFAULT_LIMITS.max_connections
         assert (
             client._transport._pool._max_idle
@@ -401,7 +467,7 @@ class TestClient:
     def test_raises_value_error_for_base_url_without_scheme(self):
         with pytest.raises(ValueError, match="Invalid base_url"):
             OpenAQ(
-                api_key="abc123-def456-ghi789",
+                api_key="e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5",
                 base_url="api.openaq.org/v3/",
                 _transport=MockTransport(),
             )
@@ -409,7 +475,7 @@ class TestClient:
     def test_raises_value_error_for_base_url_without_netloc(self):
         with pytest.raises(ValueError, match="Invalid base_url"):
             OpenAQ(
-                api_key="abc123-def456-ghi789",
+                api_key="e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5",
                 base_url="https://",
                 _transport=MockTransport(),
             )
@@ -424,9 +490,11 @@ def test_tomllib_conditional_import():
 
 def test__get_openaq_config_file_exists():
     mock_toml_content = b"""
-        api-key = 'openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p'
+        api-key = 'e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5'
     """
-    expected_config = {"api_key": "openaq-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"}
+    expected_config = {
+        "api_key": "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+    }
 
     with patch.object(Path, "is_file", return_value=True):
         with patch(
