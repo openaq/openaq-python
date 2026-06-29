@@ -7,6 +7,7 @@ pooling, and rate limiting for requests to the OpenAQ API.
 from __future__ import annotations
 
 import logging
+import math
 import os
 import platform
 import re
@@ -248,7 +249,9 @@ class OpenAQ:
     @property
     def _rate_limit_reset_seconds(self) -> int:
         """Seconds remaining until the rate limit window resets."""
-        return int((self._rate_limit_reset_datetime - datetime.now()).total_seconds())
+        return math.ceil(
+            (self._rate_limit_reset_datetime - datetime.now()).total_seconds()
+        )
 
     def _is_rate_limited(self) -> bool:
         """Returns True if the rate limit is exhausted and the reset time has not yet passed."""
@@ -311,7 +314,7 @@ class OpenAQ:
         Returns immediately if the reset time has already passed.
         """
         wait_seconds = self._rate_limit_reset_seconds
-        if wait_seconds <= 0:
+        if wait_seconds <= 1:
             wait_seconds = 1
         logger.info("Rate limit hit. Waiting %s seconds for reset.", wait_seconds)
         time.sleep(wait_seconds)

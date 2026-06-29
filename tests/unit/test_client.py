@@ -1,3 +1,4 @@
+import http
 import os
 import platform
 from datetime import datetime, timedelta
@@ -59,6 +60,15 @@ def test__check_api_key(api_key, expected_exception):
     else:
         result = _check_api_key(api_key)
         assert result == api_key
+
+
+def apply_rate_limit_headers(client, *, at, remaining, ttl):
+    msg = http.client.HTTPMessage()
+    msg["x-ratelimit-limit"] = "60"
+    msg["x-ratelimit-remaining"] = str(remaining)
+    msg["x-ratelimit-reset"] = str(ttl)
+    with freeze_time(at):
+        client._set_rate_limit(Headers(msg))
 
 
 @pytest.fixture
@@ -479,6 +489,33 @@ class TestClient:
                 base_url="https://",
                 _transport=MockTransport(),
             )
+
+    def test_production_replay_20260628(self, setup):
+        apply_rate_limit_headers(
+            self.client, at="2026-06-28 17:55:44.59+00", remaining=1, ttl=11
+        )
+        with freeze_time("2026-06-28 17:55:50.1+00"):
+            self.client._check_rate_limit()
+
+            apply_rate_limit_headers(
+                self.client, at="2026-06-28 17:55:50.1+00", remaining=0, ttl=10
+            )
+
+        with (
+            freeze_time("2026-06-28 17:55:45.1+00"),
+            patch("time.sleep") as mock_sleep,
+        ):
+            self.client._check_rate_limit()
+
+            mock_sleep.assert_called_once()
+            sleep_time = mock_sleep.call_args[0][0]
+
+            assert sleep_time >= 15.0
+
+        with freeze_time("2026-06-28 17:56:01.000000+00"):
+            with patch("time.sleep") as mock_sleep_after_reset:
+                self.client._check_rate_limit()
+                mock_sleep_after_reset.assert_not_called()
 
 
 def test_tomllib_conditional_import():
