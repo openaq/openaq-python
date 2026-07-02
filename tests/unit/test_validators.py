@@ -40,6 +40,7 @@ from openaq.core.validators import (
     validate_monitor,
     validate_order_by,
     validate_page_param,
+    validate_parameter_type,
     validate_radius,
     validate_rollup,
     validate_sort_order,
@@ -281,9 +282,9 @@ def test_validate_bbox_throws(bbox):
 @pytest.mark.parametrize(
     "countries_id,iso,valid",
     [
-        pytest.param(42, 'US', False, id="both-values-provided"),
+        pytest.param(42, "US", False, id="both-values-provided"),
         pytest.param(42, None, True, id="only-countries_id-provided"),
-        pytest.param(None, 'US', True, id="only-iso-provided"),
+        pytest.param(None, "US", True, id="only-iso-provided"),
         pytest.param(None, None, True, id="neither-provided"),
     ],
 )
@@ -1730,3 +1731,22 @@ def test_datetime_date_params_exclusivity_check(
         )
         == valid
     )
+
+
+@pytest.mark.parametrize(
+    "parameter_type,valid",
+    [
+        pytest.param("pollutant", True, id="valid-pollutant"),
+        pytest.param("meteorological", True, id="valid-meteorological"),
+        pytest.param("Pollutant", False, id="invalid-uppercase"),
+        pytest.param("invalid", False, id="invalid-string"),
+        pytest.param(123, False, id="integer"),
+        pytest.param(None, False, id="none"),
+    ],
+)
+def test_validate_parameter_type(parameter_type: str | int | None, valid: bool):
+    if valid:
+        assert validate_parameter_type(parameter_type) == parameter_type
+    else:
+        with pytest.raises(InvalidParameterError):
+            validate_parameter_type(parameter_type)

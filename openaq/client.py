@@ -7,13 +7,16 @@ pooling, and rate limiting for requests to the OpenAQ API.
 from __future__ import annotations
 
 import logging
+import math
 import os
 import platform
+import re
 import time
 from collections.abc import Mapping
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
+from typing import Any
 from urllib.parse import urljoin, urlparse
 
 from openaq import __version__
@@ -41,6 +44,9 @@ logger = logging.getLogger(__name__)
 ACCEPT_HEADER = "application/json"
 DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 
+API_KEY_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
 # for Python versions <3.11 tomllib is not part of std. library
 _has_toml = True
 try:
@@ -63,7 +69,14 @@ def _get_openaq_config() -> dict[str, str] | None:
 
 
 def _resolve_api_key(api_key: str | None) -> str | None:
-    """Return api_key from argument, environment, or config file — in that order."""
+    """Return api_key from argument, environment, or config file — in that order.
+
+    Args:
+        api_key: API key string, or None to fall back to other sources.
+
+    Returns:
+        The resolved API key string, or None if not found in any source.
+    """
     if api_key:
         return api_key
     if env := os.environ.get("OPENAQ_API_KEY"):
@@ -71,6 +84,26 @@ def _resolve_api_key(api_key: str | None) -> str | None:
     if config := _get_openaq_config():
         return config["api_key"]
     return None
+
+
+def _check_api_key(api_key: Any) -> str:
+    """Validate that the given API key is a 64-character string.
+
+    Args:
+        api_key: Value to validate as an API key.
+
+    Returns:
+        The original api_key if valid.
+
+    Raises:
+        ApiKeyMissingError: If api_key is not a string or is not exactly 64 characters.
+    """
+    if not isinstance(api_key, str):
+        raise ApiKeyMissingError
+    if not API_KEY_RE.match(api_key):
+        raise ApiKeyMissingError
+
+    return api_key
 
 
 class OpenAQ:
@@ -147,7 +180,7 @@ class OpenAQ:
             ApiKeyMissingError: If no API key is provided and the default base
                 URL is used.
         """
-        self._api_key = _resolve_api_key(api_key)
+        self._api_key = _check_api_key(_resolve_api_key(api_key))
         parsed = urlparse(base_url)
         if not parsed.scheme or not parsed.netloc:
             raise ValueError(
@@ -216,7 +249,9 @@ class OpenAQ:
     @property
     def _rate_limit_reset_seconds(self) -> int:
         """Seconds remaining until the rate limit window resets."""
-        return int((self._rate_limit_reset_datetime - datetime.now()).total_seconds())
+        return math.ceil(
+            (self._rate_limit_reset_datetime - datetime.now()).total_seconds()
+        )
 
     def _is_rate_limited(self) -> bool:
         """Returns True if the rate limit is exhausted and the reset time has not yet passed."""
@@ -279,7 +314,7 @@ class OpenAQ:
         Returns immediately if the reset time has already passed.
         """
         wait_seconds = self._rate_limit_reset_seconds
-        if wait_seconds <= 0:
+        if wait_seconds <= 1:
             wait_seconds = 1
         logger.info("Rate limit hit. Waiting %s seconds for reset.", wait_seconds)
         time.sleep(wait_seconds)

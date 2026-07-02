@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.0] - Unreleased
+
+### Added
+
+- Additional check for valid API key in client instantiation.
+
+### Changed
+
+- Updated rate limiter to handle rare corner case caused by incorrect rounding
+logic.
+
 ## [1.0.3] - 2026-06-19
 
 No major changes bumping due to versioning issue in PyPI publishing.

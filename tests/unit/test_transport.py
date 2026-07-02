@@ -76,11 +76,34 @@ class TestHeaders:
         h.update({"X-Custom": "value"})
         assert "x-custom" in h
 
+    def test_update_with_kwargs_only(self):
+        h = Headers()
+        h.update(Authorization="Bearer abc", x_custom="val")
+        assert h["authorization"] == "Bearer abc"
+        assert h["x_custom"] == "val"
+
+    def test_update_with_other_and_kwargs_combined(self):
+        h = Headers()
+        h.update({"Accept": "json"}, x_extra="Foo")
+        assert h["accept"] == "json"
+        assert h["x_extra"] == "Foo"
+
+    def test_update_with_none_and_no_kwargs(self):
+        h = Headers({"existing": "value"})
+        h.update(None)
+        assert h["existing"] == "value"
+        assert len(h) == 1
+
     def test_copy_is_independent(self):
         h = Headers({"key": "value"})
         h2 = h.copy()
         h2["key"] = "changed"
         assert h["key"] == "value"
+
+    def test_update_kwargs_overrides_other(self):
+        h = Headers()
+        h.update({"key": "from_other"}, key="from_kwargs")
+        assert h["key"] == "from_kwargs"
 
 
 class TestEncodeParams:
@@ -217,6 +240,36 @@ class TestConnectionPool:
         assert pool._idle == {}
         assert pool._total == 0
 
+    def test_acquire_blocks_indefinitely_until_release(self):
+        pool = self.make_pool(max_connections=1)
+        pc = pool.acquire("api.openaq.org")
+
+        acquired = threading.Event()
+        result = []
+
+        def try_acquire():
+            acquired.set()
+            result.append(pool.acquire("api.openaq.org"))
+
+        t = threading.Thread(target=try_acquire)
+        t.start()
+        acquired.wait()
+        time.sleep(0.05)
+        assert result == []  # still blocked
+        pool.release(pc)
+        t.join(timeout=2.0)
+        assert len(result) == 1
+        assert result[0] is pc
+
+    def test_acquire_reevicts_expired_after_wakeup(self):
+        pool = self.make_pool(max_connections=1, expiry=0.01)
+        pc = pool.acquire("api.openaq.org")
+        pool.release(pc)
+        time.sleep(0.02)
+        pc2 = pool.acquire("api.openaq.org")
+        assert pc2 is not pc
+        assert pool._total == 1
+
 
 class TestTransport:
     def make_transport(self, **kwargs) -> Transport:
@@ -351,3 +404,13 @@ class TestTransport:
             with pytest.raises(ssl.SSLError):
                 transport._raw_request("GET", "api.openaq.org", "/v3/locations", {})
             assert pc.conn.request.call_count == 1
+
+    def test_none_timeout_disables_all_timeouts(self):
+        t = Transport(timeout=None)
+        assert t._connect_timeout is None
+        assert t._read_timeout is None
+        assert t._pool_timeout is None
+
+    def test_none_timeout_pool_uses_none_connect_timeout(self):
+        t = Transport(timeout=None)
+        assert t._pool._connect_timeout is None
