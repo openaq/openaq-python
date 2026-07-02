@@ -846,14 +846,6 @@ def validate_datetime_params(
             f"or date_from/date_to for 'days'/'years'."
         )
 
-    if not datetime_date_params_exclusivity_check(
-        datetime_from, datetime_to, date_from, date_to
-    ):
-        raise InvalidParameterError(
-            "Cannot mix date and datetime parameters. "
-            "Use either date_from/date_to OR datetime_from/datetime_to, not both."
-        )
-
     if data in ["days", "years"]:
         if date_to:
             if not date_check(date_from) or not date_check(date_to):
