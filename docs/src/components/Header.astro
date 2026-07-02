@@ -1,0 +1,8 @@
+---
+import Default from '@astrojs/starlight/components/Header.astro';
+import VersionBadge from './VersionBadge.astro';
+---
+<div style="display: flex; align-items: center; gap: 1rem;">
+  <Default {...Astro.props} />
+  <VersionBadge />
+</div>
