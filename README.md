@@ -9,6 +9,7 @@ The official Python SDK for the OpenAQ API.
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![slack](https://img.shields.io/badge/Slack-OpenAQ-blue?logo=slack&color=%23198cff
 )](https://join.slack.com/t/openaq/shared_invite/zt-yzqlgsva-v6McumTjy2BZnegIK9XCVw)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21813086.svg)](https://doi.org/10.5281/zenodo.21813086)
 
 -----
 
