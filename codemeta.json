@@ -1,0 +1,37 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "type": "SoftwareSourceCode",
+    "applicationCategory": "Air quality",
+    "author": [
+        {
+            "id": "https://orcid.org/0009-0008-0777-8479",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "id":"https://ror.org/03a79pm79",
+                "name": "OpenAQ"
+            },
+            "email": "russ@openaq.org",
+            "familyName": "Biggs",
+            "givenName": "Russ"
+        }
+    ],
+    "codeRepository": "git+https://github.com/openaq/openaq-python",
+    "dateModified": "2026-07-02",
+    "description": "The OpenAQ Python SDK is the official Python client for interacting with the OpenAQ API. Compatible with Python ≥3.10, it is recommended over hand-written API access code, offering built-in best practices and features including: comprehensive type annotations with inline documentation for better IDE autocomplete; robust API validation with automatic checking of path and query parameters and clear, actionable error messages; deserialized response classes providing Python objects with attribute access, plus JSON and dictionary representation options; and automatic rate-limiting with expressive error handling that gracefully manages API limits.",
+    "downloadUrl": "https://github.com/openaq/openaq-python/archive/refs/tags/v1.1.0.tar.gz",
+    "identifier": "https://doi.org/10.5281/zenodo.21813086",
+    "isPartOf": "https://api.openaq.org",
+    "keywords": [
+        "python",
+        "SDK",
+        "API client"
+    ],
+    "license": "https://spdx.org/licenses/Apache-2.0",
+    "name": "OpenAQ Python SDK",
+    "programmingLanguage": "Python 3.x",
+    "relatedLink": "https://python.openaq.org",
+    "version": "1.1.0",
+    "developmentStatus": "active",
+    "issueTracker": "https://github.com/openaq/openaq-python/issues"
+}
