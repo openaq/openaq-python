@@ -1,0 +1,46 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: OpenAQ Python SDK
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Russ
+    family-names: Biggs
+    orcid: 'https://orcid.org/0009-0008-0777-8479'
+    affiliation: OpenAQ
+identifiers:
+  - type: url
+    value: 'https://doi.org/10.5281/zenodo.21813086'
+    description: The URL of version 1.1.0 of the software
+repository-code: 'https://github.com/openaq/openaq-python'
+url: 'https://python.openaq.org'
+abstract: >-
+  The OpenAQ Python SDK is the official Python client for
+  interacting with the OpenAQ API. Compatible with Python
+  ≥3.10, it is recommended over hand-written API access
+  code, offering built-in best practices and features
+  including: comprehensive type annotations with inline
+  documentation for better IDE autocomplete; robust API
+  validation with automatic checking of path and query
+  parameters and clear, actionable error messages;
+  deserialized response classes providing Python objects
+  with attribute access, plus JSON and dictionary
+  representation options; and automatic rate-limiting with
+  expressive error handling that gracefully manages API
+  limits.
+keywords:
+  - Python
+  - SDK
+  - API client
+  - Air quality
+  - Air pollution
+  - Particulate matter
+  - Atmospheric pollution
+license: Apache-2.0
+version: 1.1.0
+date-released: '2026-07-02'
+
