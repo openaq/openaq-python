@@ -24,19 +24,16 @@ const {
 } = Astro.props;
 ---
   <div id={container} style={containerstyle}></div>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css"
-  />
-  <script
-    is:inline
-    src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@^6.0/dist/maplibre-gl.css" />
+
 
   <script is:inline define:vars={{container, interactive, longitude, latitude, zoom, geojson, marker}}>
-    
+    i
+
+        const maplibregl = await import('https://unpkg.com/maplibre-gl@^6.0/dist/maplibre-gl.mjs');
         const map = new maplibregl.Map({
-          container: container,
-          interactive: false,
+          container,
+          interactive,
           center: [longitude, latitude],
           style: 'https://basemap.openaq.org/styles/styles.json',
           zoom: zoom,
