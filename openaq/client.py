@@ -4,8 +4,6 @@ Provides the OpenAQ client class which manages authentication, connection
 pooling, and rate limiting for requests to the OpenAQ API.
 """
 
-from __future__ import annotations
-
 import logging
 import math
 import os
@@ -17,7 +15,7 @@ from collections.abc import Mapping
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
-from typing import Any
+from typing import Any, Self
 from urllib.parse import urljoin, urlparse
 
 from openaq import __version__
@@ -400,7 +398,7 @@ class OpenAQ:
         """Closes the transport and releases all pooled connections."""
         self._transport.close()
 
-    def __enter__(self) -> OpenAQ:
+    def __enter__(self) -> Self:
         """Enters the context manager, returning the client instance."""
         return self
 
