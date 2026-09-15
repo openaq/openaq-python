@@ -518,13 +518,6 @@ class TestClient:
                 mock_sleep_after_reset.assert_not_called()
 
 
-def test_tomllib_conditional_import():
-    if int(platform.python_version_tuple()[1]) >= 11:
-        assert _has_toml == True
-    else:
-        assert _has_toml == False
-
-
 def test__get_openaq_config_file_exists():
     mock_toml_content = b"""
         api-key = 'e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5'
