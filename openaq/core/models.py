@@ -20,11 +20,17 @@ def build_query_params(
 ) -> dict[str, str | int | float | bool]:
     """Prepares keyword arguments to a dict for httpx query parameters.
 
-    Loops through keyword args, if the value is of type list, tuple, or datetime.datetime,
-    it makes appropriate conversions. This prevents httpx from splitting list or tuple types
-    to individual query params e.g. coordinates=42,42 instead of coordinates=42&coordinates=42.
-    For datetime.datetime types, it converts them to ISO 8601 formatted strings.
+    Converts values into forms that encode correctly in a URL query string:
 
+    - ``None`` values are dropped.
+    - Lists and tuples are joined into a single comma-separated string,
+      e.g. ``coordinates=42,42``. Without this, ``urllib.parse.urlencode``
+      would encode the Python repr of the sequence (``[42, 42]``).
+    - ``datetime.datetime`` and ``datetime.date`` values are converted to
+      ISO 8601 strings.
+    - ``str``, ``int``, ``float``, and ``bool`` values pass through
+      unchanged. Booleans are lowercased later during encoding.
+    
     Args:
         **kwargs: Arbitrary keyword arguments.
 
