@@ -9,7 +9,7 @@ import pytest
 from freezegun import freeze_time
 
 from openaq import __version__
-from openaq.client import OpenAQ, _check_api_key, _get_openaq_config, _has_toml
+from openaq.client import OpenAQ, _check_api_key, _get_openaq_config
 from openaq.core.exceptions import ApiKeyMissingError, RateLimitError
 from openaq.core.transport import (
     DEFAULT_LIMITS,
@@ -139,15 +139,11 @@ class TestClient:
 
     @pytest.mark.usefixtures("mock_config_file")
     def test_api_key_from_config(self):
-        if int(platform.python_version_tuple()[1]) >= 11:
-            client = OpenAQ(_transport=MockTransport())
-            assert (
-                client.api_key
-                == "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
-            )
-        else:
-            with pytest.raises(ApiKeyMissingError):
-                client = OpenAQ(_transport=MockTransport())
+        client = OpenAQ(_transport=MockTransport())
+        assert (
+            client.api_key
+            == "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
+        )
 
     def test_api_key_arg_override_env_var(self, setup, mock_openaq_api_key_env_vars):
         assert (
@@ -517,7 +513,6 @@ class TestClient:
                 self.client._check_rate_limit()
                 mock_sleep_after_reset.assert_not_called()
 
-
 def test__get_openaq_config_file_exists():
     mock_toml_content = b"""
         api-key = 'e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5'
@@ -526,16 +521,23 @@ def test__get_openaq_config_file_exists():
         "api_key": "e7a3a978e3e018e932d666c481ff33b82b7150c6084c0de175755c5cb763a5c5"
     }
 
-    with patch.object(Path, "is_file", return_value=True):
-        with patch(
-            "builtins.open", mock_open(read_data=mock_toml_content)
-        ) as mock_file:
-            result = None
-            if int(platform.python_version_tuple()[1]) >= 11:
-                result = _get_openaq_config()
-                assert result == expected_config
-                mock_file.assert_any_call(
-                    Path(Path.home() / ".config" / "openaq" / "config.toml"), "rb"
-                )
-            else:
-                assert result == None
+    with (
+        patch.object(Path, "is_file", return_value=True),
+        patch("builtins.open", mock_open(read_data=mock_toml_content)) as mock_file,
+    ):
+        result = _get_openaq_config()
+
+    assert result == expected_config
+    mock_file.assert_any_call(Path.home() / ".config" / "openaq" / "config.toml", "rb")
+
+def test__get_openaq_config_no_file():
+    with patch.object(Path, "is_file", return_value=False):
+        assert _get_openaq_config() is None
+
+
+def test__get_openaq_config_non_string_key():
+    with (
+        patch.object(Path, "is_file", return_value=True),
+        patch("builtins.open", mock_open(read_data=b"api-key = 123")),
+    ):
+        assert _get_openaq_config() is None

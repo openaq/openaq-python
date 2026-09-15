@@ -12,6 +12,7 @@ import os
 import platform
 import re
 import time
+import tomllib
 from collections.abc import Mapping
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -47,15 +48,12 @@ DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 API_KEY_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
-import tomllib
-
-
 def _get_openaq_config() -> dict[str, str] | None:
     """Read api_key from ~/.config/openaq/config.toml if present."""
     config_path = Path.home() / ".config" / "openaq" / "config.toml"
     if not config_path.is_file():
         return None
-    with config_path.open("rb") as f:
+    with open(config_path, "rb") as f:
         raw = tomllib.load(f)
     api_key = raw.get("api-key")
     return {"api_key": api_key} if isinstance(api_key, str) else None
