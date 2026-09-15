@@ -1,7 +1,5 @@
 """Base class and utility functions for working with client transport."""
 
-from __future__ import annotations
-
 import http.client
 import json
 import logging
@@ -13,7 +11,7 @@ from collections import deque
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from http import HTTPStatus
-from typing import Any
+from typing import Any, Self
 
 from openaq.core.exceptions import (
     BadGatewayError,
@@ -117,15 +115,13 @@ class Headers(dict[str, str]):
         for k, v in kwargs.items():
             self[k] = v
 
-    def copy(self) -> Headers:
+    def copy(self) -> Self:
         """Returns a shallow copy of this Headers instance.
 
         Returns:
             A new Headers instance with the same key-value pairs.
         """
-        h = Headers()
-        super(Headers, h).update(self)
-        return h
+        return type(self)(self)
 
 
 class Response:

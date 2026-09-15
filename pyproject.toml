@@ -57,32 +57,22 @@ include = [
 path = "openaq/__init__.py"
 
 
-[tool.hatch.envs.test]
-features = ["orjson"]
-dependencies = [
-  "coverage[toml]",
-  "pytest",
-  "pytest-cov",
-  "pytest-mock",
+[tool.hatch.envs.hatch-test]
+extra-dependencies = [
   "freezegun",
+]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.11", "3.12", "3.13", "3.14", "3.15"]
+
+[tool.hatch.envs.hatch-test.overrides]
+matrix.python.features = [
+  { value = "orjson", if = ["3.11", "3.12", "3.13", "3.14"] },
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
 
-[tool.hatch.envs.test.scripts]
-test-unit = 'pytest tests/unit/ -s -vv'
-test-integration = 'pytest tests/integration/ -s -vv'
-test = 'pytest tests/ -s -vv'
-cov = 'pytest --cov --cov-branch --cov-report=xml'
-
-[[tool.hatch.envs.test.matrix]]
-python = ["3.11", "3.12", "3.13", "3.14", "3.15"]
-
-[tool.hatch.envs.test.overrides]
-matrix.python.features = [
-  { value = "orjson", if = ["3.11", "3.12", "3.13", "3.14"] },
-]
 
 [tool.hatch.envs.types]
 detached = true
