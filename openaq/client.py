@@ -4,19 +4,18 @@ Provides the OpenAQ client class which manages authentication, connection
 pooling, and rate limiting for requests to the OpenAQ API.
 """
 
-from __future__ import annotations
-
 import logging
 import math
 import os
 import platform
 import re
 import time
+import tomllib
 from collections.abc import Mapping
 from datetime import datetime, timedelta
 from pathlib import Path
 from types import TracebackType
-from typing import Any
+from typing import Any, Self
 from urllib.parse import urljoin, urlparse
 
 from openaq import __version__
@@ -47,25 +46,15 @@ DEFAULT_BASE_URL = "https://api.openaq.org/v3/"
 API_KEY_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
-# for Python versions <3.11 tomllib is not part of std. library
-_has_toml = True
-try:
-    import tomllib
-except ModuleNotFoundError:
-    _has_toml = False
-
-
 def _get_openaq_config() -> dict[str, str] | None:
     """Read api_key from ~/.config/openaq/config.toml if present."""
     config_path = Path.home() / ".config" / "openaq" / "config.toml"
-    if config_path.is_file():
-        with open(config_path, "rb") as f:
-            if _has_toml:
-                raw = tomllib.load(f)
-                api_key = raw.get("api-key")
-                if isinstance(api_key, str):
-                    return {"api_key": api_key}
-    return None
+    if not config_path.is_file():
+        return None
+    with open(config_path, "rb") as f:
+        raw = tomllib.load(f)
+    api_key = raw.get("api-key")
+    return {"api_key": api_key} if isinstance(api_key, str) else None
 
 
 def _resolve_api_key(api_key: str | None) -> str | None:
@@ -409,7 +398,7 @@ class OpenAQ:
         """Closes the transport and releases all pooled connections."""
         self._transport.close()
 
-    def __enter__(self) -> OpenAQ:
+    def __enter__(self) -> Self:
         """Enters the context manager, returning the client instance."""
         return self
 

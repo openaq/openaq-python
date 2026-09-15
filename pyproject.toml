@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "openaq"
 description = "Official OpenAQ Python SDK."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 keywords = ["air quality", "environment", "openaq"]
 maintainers = [
@@ -18,11 +18,11 @@ authors = [
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Programming Language :: Python :: Implementation :: CPython",
   "Typing :: Typed",
 ]
@@ -57,42 +57,33 @@ include = [
 path = "openaq/__init__.py"
 
 
-[tool.hatch.envs.test]
-features = ["orjson"]
-dependencies = [
-  "coverage[toml]",
-  "pytest",
-  "pytest-cov",
-  "pytest-mock",
+[tool.hatch.envs.hatch-test]
+extra-dependencies = [
   "freezegun",
+]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.11", "3.12", "3.13", "3.14", "3.15"]
+
+[tool.hatch.envs.hatch-test.overrides]
+matrix.python.features = [
+  { value = "orjson", if = ["3.11", "3.12", "3.13", "3.14"] },
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit"]
 
-[tool.hatch.envs.test.scripts]
-test-unit = 'pytest tests/unit/ -s -vv'
-test-integration = 'pytest tests/integration/ -s -vv'
-test = 'pytest tests/ -s -vv'
-cov = 'pytest --cov --cov-branch --cov-report=xml'
-
-[[tool.hatch.envs.test.matrix]]
-python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.hatch.envs.types]
 detached = true
 dependencies = ["mypy", "lxml"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 
 [[tool.mypy.overrides]]
 module = ["orjson"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["tomllib"]
 ignore_missing_imports = true
 
 [tool.hatch.envs.types.scripts]
@@ -114,14 +105,16 @@ parallel = true
 omit = ["openaq/__init__.py", "openaq/vendor/*", "tests/*"]
 
 [tool.coverage.report]
-exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 exclude_also = [
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
   "raise AssertionError",
   "raise NotImplementedError",
   "@(abc\\.)?abstractmethod",
 ]
 
 [tool.ruff]
+target-version = "py311"
 extend-exclude = ["tests"]
 
 [tool.ruff.lint]
