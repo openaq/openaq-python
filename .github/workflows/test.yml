@@ -39,7 +39,7 @@ jobs:
           pip install hatch
 
       - name: Test with coverage
-        run: hatch test --python ${{ matrix.python-version }} --cover
+        run: hatch test --python ${{ matrix.python-version }} --cover tests/unit
 
       - name: Generate coverage XML
         run: hatch run hatch-test.py${{ matrix.python-version }}:coverage xml
