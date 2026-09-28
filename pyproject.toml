@@ -124,3 +124,15 @@ ignore = [
 select = ["E", "F", "I", "D", "UP", "B", "SIM"]
 pydocstyle.convention = "google"
 
+
+[tool.hatch.envs.bench]
+python = "3.11"
+features = ["orjson"]
+dependencies = [
+  "pytest",
+  "pytest-codspeed",
+]
+
+[tool.hatch.envs.bench.scripts]
+run = "pytest tests/benchmarks {args}"
+
