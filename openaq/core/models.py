@@ -30,7 +30,7 @@ def build_query_params(
       ISO 8601 strings.
     - ``str``, ``int``, ``float``, and ``bool`` values pass through
       unchanged. Booleans are lowercased later during encoding.
-    
+
     Args:
         **kwargs: Arbitrary keyword arguments.
 
