@@ -41,17 +41,10 @@ class _ModelBase:
         """
         out: dict[str, Any] = {}
         for k, v in data.items():
-            if k not in _DECAMELIZE_CACHE:
-                _DECAMELIZE_CACHE[k] = cast(str, decamelize(k))
-            key = _DECAMELIZE_CACHE[k]
-            if isinstance(v, dict):
-                out[key] = cls._deserialize(v)
-            elif isinstance(v, list):
-                out[key] = [
-                    cls._deserialize(x) if isinstance(x, dict) else x for x in v
-                ]
-            else:
-                out[key] = v
+            key = _DECAMELIZE_CACHE.get(k)
+            if key is None:
+                key = _DECAMELIZE_CACHE[k] = cast(str, decamelize(k))
+            out[key] = v
         return out
 
     @classmethod
@@ -116,6 +109,9 @@ class Meta(_ModelBase):
     found: int
 
 
+_HEADER_FIELDS: frozenset[str] = frozenset(f.name for f in fields(Headers))
+_RESULT_TYPES: dict[type, Any] = {}
+
 R = TypeVar("R", bound="_ResponseBase[Any]")
 
 TResult = TypeVar("TResult")
@@ -139,36 +135,47 @@ class _ResponseBase(Generic[TResult]):
 
     @classmethod
     def read_response(cls: type[R], response: Response) -> R:
-        valid_headers = [field.name for field in fields(Headers)]
+        """Builds a response object from an HTTP response.
+
+        Args:
+            response: HTTP response from the OpenAQ API.
+
+        Returns:
+            Response object with parsed headers, metadata and results.
+        """
+        headers: dict[str, int] = {}
+        for k, v in response.headers.items():
+            key = k.replace("-", "_")
+            if key in _HEADER_FIELDS:
+                headers[key] = int(v) if v.isdigit() else 0
         json_data = response.json()
-        return cls(
-            Headers(
-                **{
-                    k.replace("-", "_"): int(v) if v.isdigit() else 0
-                    for k, v in response.headers.items()
-                    if k.replace("-", "_") in valid_headers
-                }
-            ),
-            json_data["meta"],
-            json_data["results"],
-        )
+        return cls(Headers(**headers), json_data["meta"], json_data["results"])
+
+    @classmethod
+    def _result_type(cls) -> Any:
+        """Returns the result model type for this response class."""
+        if cls not in _RESULT_TYPES:
+            result_type = None
+            for base in getattr(cls, "__orig_bases__", ()):
+                args = get_args(base)
+                if args:
+                    result_type = args[0]
+                    break
+            _RESULT_TYPES[cls] = result_type
+        return _RESULT_TYPES[cls]
 
     def __post_init__(self) -> None:
         """Automatically convert meta and results based on type hints."""
         if isinstance(self.meta, dict):
             self.meta = Meta.load(self.meta)
-
-        if hasattr(self.__class__, "__orig_bases__"):
-            for base in self.__class__.__orig_bases__:
-                if hasattr(base, "__args__"):
-                    result_type = get_args(base)[0]
-                    if (
-                        isinstance(self.results, list)
-                        and self.results
-                        and isinstance(self.results[0], dict)
-                    ):
-                        self.results = [result_type.load(x) for x in self.results]
-                    break
+        result_type = type(self)._result_type()
+        if (
+            result_type is not None
+            and isinstance(self.results, list)
+            and self.results
+            and isinstance(self.results[0], dict)
+        ):
+            self.results = [result_type.load(x) for x in self.results]
 
     def _serialize(
         self, data: Mapping[str, Any] | list[Any]
