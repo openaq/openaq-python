@@ -17,6 +17,35 @@ except ImportError:
     orjson = None  # type: ignore[assignment, unused-ignore]
 
 
+_JSON_TYPES: frozenset[type] = frozenset({str, int, float, bool, type(None)})
+
+_JSON_KEYS_CACHE: dict[type, tuple[tuple[str, str], ...]] = {}
+
+
+def _json_keys(cls: type) -> tuple[tuple[str, str], ...]:
+    """Returns name key pairs for a dataclass."""
+    pairs = _JSON_KEYS_CACHE.get(cls)
+    if pairs is None:
+        pairs = _JSON_KEYS_CACHE[cls] = tuple(
+            (f.name, cast(str, camelize(f.name))) for f in fields(cast(Any, cls))
+        )
+    return pairs
+
+
+def _to_json_data(obj: Any) -> Any:
+    if type(obj) in _JSON_TYPES:
+        return obj
+    pairs = _JSON_KEYS_CACHE.get(type(obj))
+    if pairs is not None or hasattr(obj, "__dataclass_fields__"):
+        pairs = pairs or _json_keys(type(obj))
+        return {key: _to_json_data(getattr(obj, name)) for name, key in pairs}
+    if isinstance(obj, list | tuple):
+        return [_to_json_data(x) for x in obj]
+    if isinstance(obj, dict):
+        return {cast(str, camelize(k)): _to_json_data(v) for k, v in obj.items()}
+    return obj
+
+
 T = TypeVar("T", bound="_ModelBase")
 
 _DECAMELIZE_CACHE: dict[str, str] = {}
@@ -177,25 +206,6 @@ class _ResponseBase(Generic[TResult]):
         ):
             self.results = [result_type.load(x) for x in self.results]
 
-    def _serialize(
-        self, data: Mapping[str, Any] | list[Any]
-    ) -> dict[str, Any] | list[Any]:
-        """Serializes data and convert keys to camel case.
-
-        Args:
-            data: input dictionary of API response data to be serialized.
-        """
-        if isinstance(data, list):
-            return [
-                self._serialize(i) if isinstance(i, Mapping | list) else i for i in data
-            ]
-        return {
-            cast(str, camelize(k)): (
-                self._serialize(v) if isinstance(v, Mapping | list) else v
-            )
-            for k, v in data.items()
-        }
-
     def dict(self) -> dict[str, Any]:
         """Serializes response data to Python dictionary.
 
@@ -216,10 +226,11 @@ class _ResponseBase(Generic[TResult]):
         Returns:
             string representation of the response in JSON.
         """
+        data = _to_json_data(self)
         if encoder == orjson:
             assert orjson is not None, "orjson must be installed."
-            return str(encoder.dumps(self._serialize(self.dict())).decode())
-        return str(encoder.dumps(self._serialize(self.dict()), ensure_ascii=False))
+            return str(encoder.dumps(data).decode())
+        return str(encoder.dumps(data, ensure_ascii=False))
 
 
 @dataclass(slots=True)

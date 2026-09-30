@@ -1,15 +1,15 @@
 import http
-import importlib
 import json
 import numbers
 import types
-from dataclasses import fields
+from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Union, get_args, get_origin, get_type_hints
 
 import pytest
 
 from openaq.core.responses import (
+    _JSON_KEYS_CACHE,
     CountriesResponse,
     Country,
     Instrument,
@@ -29,8 +29,10 @@ from openaq.core.responses import (
     ProvidersResponse,
     Sensor,
     SensorsResponse,
+    _json_keys,
     _ModelBase,
     _ResponseBase,
+    _to_json_data,
 )
 from openaq.core.transport import Response
 
@@ -52,7 +54,7 @@ def read_resource_file(name: str) -> str:
         The body of the read file as a string.
     """
     path = Path(Path(__file__).parent, "resources", f"{name}.json").absolute()
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return f.read()
 
 
@@ -66,7 +68,7 @@ def read_response_file(name: str) -> str:
         The body of the read file as a string.
     """
     path = Path(Path(__file__).parent, "responses", f"{name}.json").absolute()
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return f.read()
 
 
@@ -88,7 +90,8 @@ def remove_nulls(value):
 
 def value_matches_type(value, expected_type) -> bool:
     """Currently has some special cases covered(Union, numbers, lists with same
-    type values, tuples), but making this test fully generic is not trivial"""
+    type values, tuples), but making this test fully generic is not trivial
+    """
     if expected_type is float:
         return isinstance(value, numbers.Real)
 
@@ -222,7 +225,7 @@ def test_responses_json(name: str, response_class: _ResponseBase):
 def test_responses_json_orjson_encoder(name: str, response_class: _ResponseBase):
     """Tests that json() works correctly with orjson encoder."""
     orjson = pytest.importorskip("orjson")
-    import orjson
+
     response = read_response_file(name)
     mocked = mock_response(response)
     response_data = response_class.read_response(mocked)
@@ -241,9 +244,9 @@ def test_response_ignores_unexpected_fields():
     mocked = mock_response(json.dumps(base_json))
     try:
         response_instance = LocationsResponse.read_response(mocked)
-        assert not hasattr(
-            response_instance.results[0], "anotherField"
-        ), "Unexpected 'anotherField' was not ignored"
+        assert not hasattr(response_instance.results[0], "anotherField"), (
+            "Unexpected 'anotherField' was not ignored"
+        )
     except Exception as e:
         pytest.fail(f"Deserialization failed with unexpected field 'anotherField': {e}")
 
@@ -277,3 +280,39 @@ def test_field_types(name: str, response_class: _ResponseBase):
             expected_type = type_hints.get(field.name)
 
             assert value_matches_type(value, expected_type)
+
+
+@dataclass
+class ExampleModel:
+    snake_case_value: int
+    display_name: str
+
+
+def test_json_keys_converts_field_names_to_camel_case():
+    """Each field name turns camel case JSON key, in field order."""
+    assert _json_keys(ExampleModel) == (
+        ("snake_case_value", "snakeCaseValue"),
+        ("display_name", "displayName"),
+    )
+
+
+def test_json_keys_are_cached():
+    """The keys for a class are stored after the first lookup."""
+    _json_keys(ExampleModel)
+    assert ExampleModel in _JSON_KEYS_CACHE
+
+
+def test_to_json_data_converts_dict_keys_to_camel_case():
+    """Dictionaries have their keys snake cased"""
+    data = {"snake_case_key": {"inner_key": 1}}
+    assert _to_json_data(data) == {"snakeCaseKey": {"innerKey": 1}}
+
+
+def test_to_json_data_returns_unsupported_values_unchanged():
+    """Models, lists, dicts, or primitives are returned as-is"""
+
+    class Unsupported:
+        pass
+
+    value = Unsupported()
+    assert _to_json_data(value) is value
