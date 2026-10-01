@@ -60,6 +60,7 @@ path = "openaq/__init__.py"
 [tool.hatch.envs.hatch-test]
 extra-dependencies = [
   "freezegun",
+  "hypothesis",
 ]
 
 [[tool.hatch.envs.hatch-test.matrix]]
