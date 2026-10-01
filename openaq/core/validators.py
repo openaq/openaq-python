@@ -729,11 +729,8 @@ def iso8601_datetime_check(value: object) -> TypeGuard[str]:
     """
     if not isinstance(value, str):
         return False
-
     try:
-        # Replace 'Z' with '+00:00' for Python 3.10
-        # https://docs.python.org/3/whatsnew/3.11.html#datetime
-        datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+        datetime.datetime.fromisoformat(value)
         return True
     except ValueError:
         return False
@@ -784,8 +781,8 @@ def datetime_from_lesser_check(
     Returns:
         True if datetime_from is in the past or less than datetime_to.
     """
-    if not datetime_to:
-        return datetime_from < datetime.datetime.now()
+    if datetime_to is None:
+        return datetime_from < datetime.datetime.now(datetime_from.tzinfo)
     return datetime_from < datetime_to
 
 
@@ -811,6 +808,20 @@ def datetime_date_params_exclusivity_check(
 
     return not (date_params_used and datetime_params_used)
 
+
+def datetime_timezone_consistency_check(
+    datetime_from: datetime.datetime, datetime_to: datetime.datetime
+) -> bool:
+    """Check that datetime_from and datetime_to both have or are both missing a timezone.
+
+    Args:
+        datetime_from: Value representing the datetime_from query parameter.
+        datetime_to: Value representing the datetime_to query parameter.
+
+    Returns:
+        True if both values are timezone-aware or both are naive, False otherwise.
+    """
+    return (datetime_from.utcoffset() is None) == (datetime_to.utcoffset() is None)
 
 def validate_datetime_params(
     data: Data,
@@ -881,6 +892,10 @@ def validate_datetime_params(
                 )
             datetime_from_datetime = to_datetime(datetime_from)
             datetime_to_datetime = to_datetime(datetime_to)
+            if not datetime_timezone_consistency_check(datetime_from_datetime, datetime_to_datetime):
+                raise InvalidParameterError(
+                    "datetime_from and datetime_to must both include a timezone or both omit one"
+                )
             if not datetime_from_lesser_check(
                 datetime_from_datetime, datetime_to_datetime
             ):

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0] - unreleased
+
+###
+
+### Changed
+
+- Removed conditional import for `tomllib` based on >=3.11 support.
+- Annotated `OpenAQ.__enter__`` and `Headers.copy` with `typing.Self` so type
+  checkers infer the correct return type for subclasses. Also Removes
+  `from __future__ import annotations` from client.py and transport.py.
+
+
 ## [1.1.0] - 2026-07-02
 
 ### Added
