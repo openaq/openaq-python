@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import copy
 import json
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass, fields
+from dataclasses import dataclass, fields
 from types import ModuleType
 from typing import Any, Generic, TypeVar, cast, get_args
 
@@ -44,6 +45,30 @@ def _to_json_data(obj: Any) -> Any:
     if isinstance(obj, dict):
         return {cast(str, camelize(k)): _to_json_data(v) for k, v in obj.items()}
     return obj
+
+
+def _to_dict_data(obj: Any) -> Any:
+    """Converts a model into plain Python data with snake case keys.
+
+    Args:
+        obj: dataclass instance, list, tuple, dict, or primitive value.
+
+    Returns:
+        Plain dicts, lists, tuples, and primitives with the original field names.
+    """
+    if type(obj) in _JSON_TYPES:
+        return obj
+    pairs = _JSON_KEYS_CACHE.get(type(obj))
+    if pairs is not None or hasattr(obj, "__dataclass_fields__"):
+        pairs = pairs or _json_keys(type(obj))
+        return {name: _to_dict_data(getattr(obj, name)) for name, _ in pairs}
+    if isinstance(obj, list):
+        return [_to_dict_data(x) for x in obj]
+    if isinstance(obj, tuple):
+        return tuple(_to_dict_data(x) for x in obj)
+    if isinstance(obj, dict):
+        return {k: _to_dict_data(v) for k, v in obj.items()}
+    return copy.deepcopy(obj)
 
 
 T = TypeVar("T", bound="_ModelBase")
@@ -212,7 +237,7 @@ class _ResponseBase(Generic[TResult]):
         Returns:
             Python dictionary of the response data.
         """
-        return asdict(self)
+        return cast(dict[str, Any], _to_dict_data(self))
 
     def json(self, encoder: ModuleType = json) -> str:
         """Serializes response data to JSON string.
