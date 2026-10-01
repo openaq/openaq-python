@@ -316,3 +316,28 @@ def test_to_json_data_returns_unsupported_values_unchanged():
 
     value = Unsupported()
     assert _to_json_data(value) is value
+
+
+def test_to_dict_data_keeps_snake_case_field_names():
+    """Models become dicts keyed by their original field names."""
+    model = ExampleModel(snake_case_value=1, display_name="name")
+    assert _to_dict_data(model) == {"snake_case_value": 1, "display_name": "name"}
+
+
+def test_to_dict_data_leaves_dict_keys_unchanged():
+    """Dictionary keys are not camel cased."""
+    data = {"snake_case_key": {"inner_key": 1}}
+    assert _to_dict_data(data) == data
+
+
+@pytest.mark.parametrize("value", [None, True, 42, 42.5, "example"])
+def test_to_dict_data_returns_primitives_unchanged(value):
+    """Primitives are returned as-is."""
+    assert _to_dict_data(value) is value
+
+
+def test_to_dict_data_on_loaded_model():
+    """Model converts to a dict keyed by its field names."""
+    country = Country.load(json.loads(read_resource_file("country")))
+    data = _to_dict_data(country)
+    assert list(data) == [f.name for f in fields(Country)]
