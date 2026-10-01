@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import copy
 import json
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass, fields
+from dataclasses import dataclass, fields
 from types import ModuleType
 from typing import Any, Generic, TypeVar, cast, get_args
 
@@ -15,6 +16,59 @@ try:
     import orjson
 except ImportError:
     orjson = None  # type: ignore[assignment, unused-ignore]
+
+
+_JSON_TYPES: frozenset[type] = frozenset({str, int, float, bool, type(None)})
+
+_JSON_KEYS_CACHE: dict[type, tuple[tuple[str, str], ...]] = {}
+
+
+def _json_keys(cls: type) -> tuple[tuple[str, str], ...]:
+    """Returns name key pairs for a dataclass."""
+    pairs = _JSON_KEYS_CACHE.get(cls)
+    if pairs is None:
+        pairs = _JSON_KEYS_CACHE[cls] = tuple(
+            (f.name, cast(str, camelize(f.name))) for f in fields(cast(Any, cls))
+        )
+    return pairs
+
+
+def _to_json_data(obj: Any) -> Any:
+    if type(obj) in _JSON_TYPES:
+        return obj
+    pairs = _JSON_KEYS_CACHE.get(type(obj))
+    if pairs is not None or hasattr(obj, "__dataclass_fields__"):
+        pairs = pairs or _json_keys(type(obj))
+        return {key: _to_json_data(getattr(obj, name)) for name, key in pairs}
+    if isinstance(obj, list | tuple):
+        return [_to_json_data(x) for x in obj]
+    if isinstance(obj, dict):
+        return {cast(str, camelize(k)): _to_json_data(v) for k, v in obj.items()}
+    return obj
+
+
+def _to_dict_data(obj: Any) -> Any:
+    """Converts a model into plain Python data with snake case keys.
+
+    Args:
+        obj: dataclass instance, list, tuple, dict, or primitive value.
+
+    Returns:
+        Plain dicts, lists, tuples, and primitives with the original field names.
+    """
+    if type(obj) in _JSON_TYPES:
+        return obj
+    pairs = _JSON_KEYS_CACHE.get(type(obj))
+    if pairs is not None or hasattr(obj, "__dataclass_fields__"):
+        pairs = pairs or _json_keys(type(obj))
+        return {name: _to_dict_data(getattr(obj, name)) for name, _ in pairs}
+    if isinstance(obj, list):
+        return [_to_dict_data(x) for x in obj]
+    if isinstance(obj, tuple):
+        return tuple(_to_dict_data(x) for x in obj)
+    if isinstance(obj, dict):
+        return {k: _to_dict_data(v) for k, v in obj.items()}
+    return copy.deepcopy(obj)
 
 
 T = TypeVar("T", bound="_ModelBase")
@@ -177,32 +231,13 @@ class _ResponseBase(Generic[TResult]):
         ):
             self.results = [result_type.load(x) for x in self.results]
 
-    def _serialize(
-        self, data: Mapping[str, Any] | list[Any]
-    ) -> dict[str, Any] | list[Any]:
-        """Serializes data and convert keys to camel case.
-
-        Args:
-            data: input dictionary of API response data to be serialized.
-        """
-        if isinstance(data, list):
-            return [
-                self._serialize(i) if isinstance(i, Mapping | list) else i for i in data
-            ]
-        return {
-            cast(str, camelize(k)): (
-                self._serialize(v) if isinstance(v, Mapping | list) else v
-            )
-            for k, v in data.items()
-        }
-
     def dict(self) -> dict[str, Any]:
         """Serializes response data to Python dictionary.
 
         Returns:
             Python dictionary of the response data.
         """
-        return asdict(self)
+        return cast(dict[str, Any], _to_dict_data(self))
 
     def json(self, encoder: ModuleType = json) -> str:
         """Serializes response data to JSON string.
@@ -216,10 +251,11 @@ class _ResponseBase(Generic[TResult]):
         Returns:
             string representation of the response in JSON.
         """
+        data = _to_json_data(self)
         if encoder == orjson:
             assert orjson is not None, "orjson must be installed."
-            return str(encoder.dumps(self._serialize(self.dict())).decode())
-        return str(encoder.dumps(self._serialize(self.dict()), ensure_ascii=False))
+            return str(encoder.dumps(data).decode())
+        return str(encoder.dumps(data, ensure_ascii=False))
 
 
 @dataclass(slots=True)
