@@ -33,6 +33,7 @@ from openaq.core.responses import (
     _ModelBase,
     _ResponseBase,
     _to_json_data,
+    _to_dict_data
 )
 from openaq.core.transport import Response
 
