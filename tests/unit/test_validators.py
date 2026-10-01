@@ -26,6 +26,7 @@ from openaq.core.validators import (
     parameter_type_check,
     radius_check,
     rollup_check,
+    datetime_timezone_consistency_check,
     to_datetime,
     validate_bbox,
     validate_coordinates,
@@ -59,9 +60,9 @@ from openaq.core.validators import (
         pytest.param(999_999_999_999, False, id="far-above-max"),
         pytest.param(False, False, id="bool-false"),
         pytest.param(True, False, id="bool-true"),
-        pytest.param({}, False, id="bool-true"),
-        pytest.param([], False, id="bool-true"),
-        pytest.param((), False, id="bool-true"),
+        pytest.param({}, False, id="empty-dict"),
+        pytest.param([], False, id="empty-list"),
+        pytest.param((), False, id="empty-tuple"),
     ],
 )
 def test_integer_id_check(id: int, valid: bool):
@@ -217,7 +218,7 @@ def test_validate_coordinates_throws(coordinates):
     ],
 )
 def test_validate_bbox(bbox):
-    validate_bbox(bbox) == bbox
+    assert validate_bbox(bbox) == bbox
 
 
 @pytest.mark.parametrize(
@@ -946,7 +947,7 @@ def test_validate_rollup_returns_rollup(rollup: object):
         pytest.param(
             "2024-01-01T12:30:45-05:00", True, id="valid-datetime-with-negative-offset"
         ),
-        pytest.param("2024-01-01T12:30:45Z", True, id="invalid-zulu-time"),
+        pytest.param("2024-01-01T12:30:45Z", True, id="valid-zulu-time"),
         pytest.param("2024-02-29", True, id="valid-leap-year-date"),
         pytest.param("2024-02-29T12:30:45", True, id="valid-leap-year-datetime"),
         pytest.param("2024-13-01", False, id="invalid-month"),
@@ -1068,6 +1069,11 @@ def test_datetime_check(value: object, valid: bool):
             datetime.datetime(2024, 1, 1, 12, 30, 45, 123456),
             id="datetime-string-with-microseconds-converted",
         ),
+        pytest.param(
+            "2024-01-01T12:30:45Z",
+            datetime.datetime(2024, 1, 1, 12, 30, 45, tzinfo=datetime.UTC),
+            id="utc-string-converted",
+        ),
     ],
 )
 def test_to_datetime(value: datetime.datetime | str, expected: datetime.datetime):
@@ -1112,6 +1118,8 @@ def test_to_datetime(value: datetime.datetime | str, expected: datetime.datetime
             "2024-01-15 12:00:00",
             True,
         ),
+        (datetime.datetime(2024, 1, 14, 12, tzinfo=datetime.UTC), None, "2024-01-15 12:00:00", True),
+        (datetime.datetime(2024, 1, 16, 12, tzinfo=datetime.UTC), None, "2024-01-15 12:00:00", False),
     ],
     ids=[
         "from_beforeto",
@@ -1124,6 +1132,8 @@ def test_to_datetime(value: datetime.datetime | str, expected: datetime.datetime
         "future_vs_now",
         "equal_to_now",
         "microsecond_before_now",
+        "utc_past_vs_now",
+        "utc_future_vs_now"
     ],
 )
 def test_datetime_from_lesser_check(datetime_from, datetime_to, frozen_time, expected):
@@ -1320,6 +1330,13 @@ def test_validate_datetime_params_with_both(
             id="measurements-datetime-string-with-time-only-from",
         ),
         pytest.param(
+            "measurements",
+            "2024-01-01T00:00:00Z",
+            None,
+            (datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC), None, None, None),
+            id="measurements-utc-string-only-from",
+        ),
+        pytest.param(
             "days",
             None,
             "2024-01-01",
@@ -1440,6 +1457,14 @@ def test_validate_datetime_params_from_only(
             id="measurements-wrong-params-date",
         ),
         pytest.param(
+            "measurements",
+            "2024-01-01T00:00:00Z",
+            "2024-02-01T00:00:00",
+            None,
+            None,
+            id="measurements-mixed-timezone-awareness",
+        ),
+        pytest.param(
             "hours", None, None, "2024-01-01", None, id="hours-wrong-params-date"
         ),
         pytest.param(
@@ -1453,6 +1478,7 @@ def test_validate_datetime_params_from_only(
         pytest.param(
             "years", "2024-01-01", None, None, None, id="years-wrong-params-datetime"
         ),
+        
     ],
 )
 def test_validate_datetime_params_throws_with_both(
@@ -1462,9 +1488,8 @@ def test_validate_datetime_params_throws_with_both(
     date_from: object,
     date_to: object,
 ):
-    with pytest.raises(Exception):
+    with pytest.raises(InvalidParameterError):
         validate_datetime_params(data, datetime_from, datetime_to, date_from, date_to)
-
 
 @pytest.mark.parametrize(
     "data,datetime_from,date_from",
@@ -1505,6 +1530,7 @@ def test_validate_datetime_params_throws_from_only_invalid_type(
         ),
         pytest.param("days", None, "2024-01-16", id="days-future-string"),
         pytest.param("years", None, datetime.date(2024, 1, 16), id="years-future-date"),
+        pytest.param("measurements", "2024-01-16T00:00:00Z", None, id="measurements-future-utc-string"),
     ],
 )
 def test_validate_datetime_params_throws_from_only_future_datetime(
@@ -1538,6 +1564,26 @@ def test_validate_datetime_params_all_none(
         data, datetime_from, datetime_to, date_from, date_to
     )
     assert result == (None, None, None, None)
+
+
+def test_datetime_from_with_timezone_alone_is_valid():
+    """A past timezone datetime_from is accepted without datetime_to."""
+    result = validate_datetime_params("measurements", "2024-01-01T00:00:00Z", None, None, None)
+    assert result[0].utcoffset() is not None
+
+
+def test_future_datetime_from_with_timezone_is_rejected():
+    """A future timezone datetime_from raises InvalidParameterError."""
+    with pytest.raises(InvalidParameterError):
+        validate_datetime_params("measurements", "2999-01-01T00:00:00Z", None, None, None)
+
+
+def test_mixed_timezone_awareness_is_rejected():
+    """Mixing Z and tz datetime values raises InvalidParameterError."""
+    with pytest.raises(InvalidParameterError):
+        validate_datetime_params(
+            "measurements", "2024-01-01T00:00:00Z", "2024-02-01T00:00:00", None, None
+        )
 
 
 @pytest.mark.parametrize(
@@ -1750,3 +1796,21 @@ def test_validate_parameter_type(parameter_type: str | int | None, valid: bool):
     else:
         with pytest.raises(InvalidParameterError):
             validate_parameter_type(parameter_type)
+
+
+@pytest.mark.parametrize(
+    "datetime_from,datetime_to,valid",
+    [
+        pytest.param(datetime.datetime(2024, 1, 1), datetime.datetime(2024, 1, 2), True, id="both-naive"),
+        pytest.param(
+            datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC),
+            datetime.datetime(2024, 1, 2, tzinfo=datetime.UTC),
+            True,
+            id="both-aware",
+        ),
+        pytest.param(datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC), datetime.datetime(2024, 1, 2), False, id="aware-from-naive-to"),
+        pytest.param(datetime.datetime(2024, 1, 1), datetime.datetime(2024, 1, 2, tzinfo=datetime.UTC), False, id="naive-from-aware-to"),
+    ],
+)
+def test_datetime_timezone_consistency_check(datetime_from, datetime_to, valid):
+    assert datetime_timezone_consistency_check(datetime_from, datetime_to) == valid
