@@ -1,6 +1,8 @@
 import http
 import os
 import platform
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, mock_open, patch
@@ -8,18 +10,87 @@ from unittest.mock import MagicMock, Mock, mock_open, patch
 import pytest
 from freezegun import freeze_time
 
-from openaq import __version__
+from openaq import TimeoutError, __version__
 from openaq.client import OpenAQ, _check_api_key, _get_openaq_config, _has_toml
 from openaq.core.exceptions import ApiKeyMissingError, RateLimitError
 from openaq.core.transport import (
     DEFAULT_LIMITS,
     DEFAULT_TIMEOUT,
     Headers,
+    Limits,
+    Timeout,
+    Transport,
 )
 
 from .mocks import MockTransport
 
 USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
+
+
+@pytest.mark.parametrize("pool_timeout", [0.0, None])
+def test_client_pool_timeout_under_concurrent_requests(pool_timeout):
+    # Custom transport configuration is an internal test hook, not a public
+    # OpenAQ timeout option. Only the network connection is mocked here.
+    request_started = threading.Event()
+    release_response = threading.Event()
+    pool_wait_started = threading.Event()
+    raw_response = Mock()
+    raw_response.status = 200
+    raw_response.msg = http.client.HTTPMessage()
+    raw_response.msg["x-ratelimit-limit"] = "60"
+    raw_response.msg["x-ratelimit-remaining"] = "59"
+    raw_response.msg["x-ratelimit-reset"] = "60"
+    raw_response.read.return_value = (
+        b'{"meta":{"name":"openaq-api","website":"/","page":1,'
+        b'"limit":1000,"found":0},"results":[]}'
+    )
+
+    def delayed_response():
+        request_started.set()
+        if not release_response.wait(timeout=5):
+            raise AssertionError("Test did not release the first response")
+        return raw_response
+
+    transport = Transport(
+        timeout=Timeout(pool=pool_timeout), limits=Limits(max_connections=1)
+    )
+    original_wait = transport._pool._has_capacity.wait
+
+    def record_pool_wait(timeout=None):
+        pool_wait_started.set()
+        return original_wait(timeout=timeout)
+
+    with patch("openaq.core.transport.http.client.HTTPSConnection") as connection:
+        connection.return_value.getresponse.side_effect = delayed_response
+        with patch.object(
+            transport._pool._has_capacity, "wait", side_effect=record_pool_wait
+        ):
+            with OpenAQ(
+                api_key="f" * 64,
+                base_url="https://sdk-test.invalid/v3/",
+                _transport=transport,
+            ) as client:
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    first = executor.submit(client.countries.list)
+                    try:
+                        assert request_started.wait(timeout=2)
+                        second = executor.submit(client.countries.list)
+                        if pool_timeout == 0.0:
+                            with pytest.raises(
+                                TimeoutError, match="Connection pool exhausted"
+                            ):
+                                second.result(timeout=2)
+                            assert not pool_wait_started.is_set()
+                        else:
+                            assert pool_wait_started.wait(timeout=2)
+                            assert not second.done()
+                    finally:
+                        release_response.set()
+                    assert first.result(timeout=2).results == []
+                    if pool_timeout is None:
+                        assert second.result(timeout=2).results == []
+                    # A later client request succeeds after the pool is released.
+                    assert client.countries.list().results == []
 
 
 @pytest.mark.parametrize(
