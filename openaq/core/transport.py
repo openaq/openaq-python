@@ -285,7 +285,7 @@ class ConnectionPool:
         Raises:
             TimeoutError: If no connection becomes available within ``pool_timeout`` seconds.
         """
-        deadline = (time.monotonic() + pool_timeout) if pool_timeout else None
+        deadline = time.monotonic() + pool_timeout if pool_timeout is not None else None
 
         with self._has_capacity:
             while True:

@@ -232,6 +232,30 @@ class TestConnectionPool:
         with pytest.raises(TimeoutError, match="Connection pool exhausted"):
             pool.acquire("api.openaq.org", pool_timeout=0.05)
 
+    def test_zero_pool_timeout_raises_without_waiting_when_full(self):
+        pool = self.make_pool(max_connections=1)
+        pc = pool.acquire("api.openaq.org")
+        try:
+            with mock.patch.object(
+                pool._has_capacity,
+                "wait",
+                side_effect=AssertionError("A zero pool timeout must not wait"),
+            ) as wait:
+                with pytest.raises(TimeoutError, match="Connection pool exhausted"):
+                    pool.acquire("api.openaq.org", pool_timeout=0.0)
+                wait.assert_not_called()
+        finally:
+            pool.release(pc, discard=True)
+
+    def test_zero_pool_timeout_acquires_available_capacity(self):
+        pool = self.make_pool(max_connections=1)
+        pc = pool.acquire("api.openaq.org", pool_timeout=0.0)
+        pool.release(pc)
+        try:
+            assert pool.acquire("api.openaq.org", pool_timeout=0.0) is pc
+        finally:
+            pool.release(pc, discard=True)
+
     def test_close_all_clears_pool(self):
         pool = self.make_pool()
         pc = pool.acquire("api.openaq.org")
