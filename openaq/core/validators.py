@@ -847,11 +847,15 @@ def validate_datetime_params(
         )
 
     if data in ["days", "years"]:
-        if date_to:
-            if not date_check(date_from) or not date_check(date_to):
+        if date_to is not None:
+            if (date_from is not None and not date_check(date_from)) or not date_check(
+                date_to
+            ):
                 raise InvalidParameterError(
                     f"Invalid date_from or date_to, must be either datetime.date type or ISO-8601 formatted date string, got {type(date_from)} and {type(date_to)}"
                 )
+            if date_from is None:
+                return (None, None, None, to_date(date_to))
             date_from_date = to_date(date_from)
             date_to_date = to_date(date_to)
             if not date_from_lesser_check(date_from_date, date_to_date):
@@ -875,10 +879,14 @@ def validate_datetime_params(
 
     else:  # data in ['measurements', 'hours']
         if datetime_to is not None:
-            if not datetime_check(datetime_from) or not datetime_check(datetime_to):
+            if (
+                datetime_from is not None and not datetime_check(datetime_from)
+            ) or not datetime_check(datetime_to):
                 raise InvalidParameterError(
                     f"Invalid datetime_from or datetime_to, must be either datetime.datetime type or ISO-8601 formatted string, got {type(datetime_from)} and {type(datetime_to)}"
                 )
+            if datetime_from is None:
+                return (None, to_datetime(datetime_to), None, None)
             datetime_from_datetime = to_datetime(datetime_from)
             datetime_to_datetime = to_datetime(datetime_to)
             if not datetime_from_lesser_check(

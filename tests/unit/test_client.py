@@ -1,7 +1,7 @@
 import http
 import os
 import platform
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, mock_open, patch
 
@@ -10,16 +10,59 @@ from freezegun import freeze_time
 
 from openaq import __version__
 from openaq.client import OpenAQ, _check_api_key, _get_openaq_config, _has_toml
-from openaq.core.exceptions import ApiKeyMissingError, RateLimitError
+from openaq.core.exceptions import (
+    ApiKeyMissingError,
+    InvalidParameterError,
+    RateLimitError,
+)
 from openaq.core.transport import (
     DEFAULT_LIMITS,
     DEFAULT_TIMEOUT,
     Headers,
+    Response,
 )
 
 from .mocks import MockTransport
 
 USER_AGENT = f"openaq-python-{__version__}-{platform.python_version()}"
+
+
+@pytest.mark.parametrize("data", ["measurements", "hours", "days", "years"])
+@pytest.mark.parametrize("as_string", [False, True])
+def test_measurements_list_with_only_end_filter(data, as_string):
+    is_date = data in ("days", "years")
+    end = date(2024, 1, 1) if is_date else datetime(2024, 1, 1)
+    key = "date_to" if is_date else "datetime_to"
+    response = Response(
+        200,
+        b'{"meta":{"name":"openaq-api","website":"/","page":1,"limit":1000,"found":0},"results":[]}',
+        http.client.HTTPMessage(),
+    )
+    with OpenAQ(api_key="f" * 64) as client:
+        with patch.object(
+            client.transport, "send_request", return_value=response
+        ) as request:
+            result = client.measurements.list(
+                sensors_id=1, data=data, **{key: end.isoformat() if as_string else end}
+            )
+
+    assert result.results == []
+    assert request.call_args.kwargs["params"] == {
+        "page": 1,
+        "limit": 1000,
+        key: end.isoformat(),
+    }
+    assert request.call_args.kwargs["url"].endswith(f"/sensors/1/{data}")
+
+
+@pytest.mark.parametrize("data, key", [("hours", "datetime_to"), ("days", "date_to")])
+@pytest.mark.parametrize("end", ["", False])
+def test_measurements_list_rejects_invalid_end_only_filter(data, key, end):
+    with OpenAQ(api_key="f" * 64) as client:
+        with patch.object(client.transport, "send_request") as request:
+            with pytest.raises(InvalidParameterError, match="Invalid .*_to"):
+                client.measurements.list(sensors_id=1, data=data, **{key: end})
+    request.assert_not_called()
 
 
 @pytest.mark.parametrize(
