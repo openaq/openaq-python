@@ -6,16 +6,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [1.2.0] - unreleased
 
-###
+### Added
+
+- Support for Python 3.15.
+- CodSpeed benchmark suite (`tests/benchmarks/`) covering parsing
+  (measurements, locations, sensors, latest) and serialization (`.json()` with
+  stdlib/orjson, `.dict()`).
 
 ### Changed
 
-- Removed conditional import for `tomllib` based on >=3.11 support.
-- Annotated `OpenAQ.__enter__`` and `Headers.copy` with `typing.Self` so type
-  checkers infer the correct return type for subclasses. Also Removes
-  `from __future__ import annotations` from client.py and transport.py.
+- Annotated `OpenAQ.__enter__` and `Headers.copy` with `typing.Self` so type
+  checkers infer the correct return type for subclasses. Also removed
+  `from __future__ import annotations` from `client.py` and `transport.py`.
+- Faster response parsing and serialization. `read_response()`, `.json()` and
+  `.dict()` now do less work per call. Field-name mappings, header field names
+  and each response class's result type are worked out once and cached, and
+  nested data is no longer rebuilt in multiple times. The output of `.json()`
+  and `.dict()` is unchanged.
+- `.json()` now builds camelCase output in a single pass over the model
+  instead of calling `.dict()` and then renaming keys in a second pass.
+- `.dict()` no longer uses `dataclasses.asdict()`. It still uses snake_case
+  field names and keeps the same field order and types as before.
 
+### Removed
 
+- Support for Python 3.10. The minimum supported version is now 3.11.
+- Private `_ResponseBase._serialize()` method.
+
+### Fixed
+
+- Passing a time-zone-aware `datetime_from` without a `datetime_to` no longer
+  raises `TypeError`.
+- Passing one time-zone-aware and one naive datetime for `datetime_from` and
+  `datetime_to` now raises a clear `InvalidParameterError` instead of a
+  `TypeError`.
+
+### Security
+
+- Pinned `slackapi/slack-github-action` to a commit SHA and upgraded it from
+  v2.0.0 to v4.0.0.
+  
 ## [1.1.0] - 2026-07-02
 
 ### Added
