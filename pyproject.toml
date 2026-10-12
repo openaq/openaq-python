@@ -79,6 +79,12 @@ cov = 'pytest --cov --cov-branch --cov-report=xml'
 [[tool.hatch.envs.test.matrix]]
 python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
+[tool.hatch.envs.test-free-threaded]
+template = "test"
+python = "3.14t"
+# orjson does not support free-threaded Python; exercise the stdlib JSON fallback.
+features = []
+
 [tool.hatch.envs.types]
 detached = true
 dependencies = ["mypy", "lxml"]
@@ -130,4 +136,3 @@ ignore = [
 ]
 select = ["E", "F", "I", "D", "UP", "B", "SIM"]
 pydocstyle.convention = "google"
-

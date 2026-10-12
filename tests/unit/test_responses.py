@@ -221,7 +221,7 @@ def test_responses_json(name: str, response_class: _ResponseBase):
 )
 def test_responses_json_orjson_encoder(name: str, response_class: _ResponseBase):
     """Tests that json() works correctly with orjson encoder."""
-    import orjson
+    orjson = pytest.importorskip("orjson")
 
     response = read_response_file(name)
     mocked = mock_response(response)

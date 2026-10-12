@@ -12,6 +12,15 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python-version: '3.14'
+            hatch-env: test.py3.14
+          - python-version: '3.14t'
+            hatch-env: test-free-threaded
     permissions:
       contents: read
     steps:
@@ -19,14 +28,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
-          python-version: '3.14'
+          python-version: ${{ matrix.python-version }}
           cache: 'pip'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip 
-          pip install hatch
+          pip install 'hatch>=1.18.0'
+      - name: Verify free-threaded test interpreter
+        if: matrix.python-version == '3.14t'
+        run: |
+          hatch -e test-free-threaded run python -c 'import sys, sysconfig, openaq, pytest; assert sysconfig.get_config_var("Py_GIL_DISABLED") == 1; assert not sys._is_gil_enabled()'
       - name: Coverage
-        run: hatch run +py=${{ matrix.python-version }} test:cov
+        run: hatch -e ${{ matrix.hatch-env }} run cov
     
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f
