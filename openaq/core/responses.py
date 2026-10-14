@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import copy
 import json
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass, fields
+from dataclasses import dataclass, fields
 from types import ModuleType
 from typing import Any, Generic, TypeVar, cast, get_args
 
@@ -15,6 +16,59 @@ try:
     import orjson
 except ImportError:
     orjson = None  # type: ignore[assignment, unused-ignore]
+
+
+_JSON_TYPES: frozenset[type] = frozenset({str, int, float, bool, type(None)})
+
+_JSON_KEYS_CACHE: dict[type, tuple[tuple[str, str], ...]] = {}
+
+
+def _json_keys(cls: type) -> tuple[tuple[str, str], ...]:
+    """Returns name key pairs for a dataclass."""
+    pairs = _JSON_KEYS_CACHE.get(cls)
+    if pairs is None:
+        pairs = _JSON_KEYS_CACHE[cls] = tuple(
+            (f.name, cast(str, camelize(f.name))) for f in fields(cast(Any, cls))
+        )
+    return pairs
+
+
+def _to_json_data(obj: Any) -> Any:
+    if type(obj) in _JSON_TYPES:
+        return obj
+    pairs = _JSON_KEYS_CACHE.get(type(obj))
+    if pairs is not None or hasattr(obj, "__dataclass_fields__"):
+        pairs = pairs or _json_keys(type(obj))
+        return {key: _to_json_data(getattr(obj, name)) for name, key in pairs}
+    if isinstance(obj, list | tuple):
+        return [_to_json_data(x) for x in obj]
+    if isinstance(obj, dict):
+        return {cast(str, camelize(k)): _to_json_data(v) for k, v in obj.items()}
+    return obj
+
+
+def _to_dict_data(obj: Any) -> Any:
+    """Converts a model into plain Python data with snake case keys.
+
+    Args:
+        obj: dataclass instance, list, tuple, dict, or primitive value.
+
+    Returns:
+        Plain dicts, lists, tuples, and primitives with the original field names.
+    """
+    if type(obj) in _JSON_TYPES:
+        return obj
+    pairs = _JSON_KEYS_CACHE.get(type(obj))
+    if pairs is not None or hasattr(obj, "__dataclass_fields__"):
+        pairs = pairs or _json_keys(type(obj))
+        return {name: _to_dict_data(getattr(obj, name)) for name, _ in pairs}
+    if isinstance(obj, list):
+        return [_to_dict_data(x) for x in obj]
+    if isinstance(obj, tuple):
+        return tuple(_to_dict_data(x) for x in obj)
+    if isinstance(obj, dict):
+        return {k: _to_dict_data(v) for k, v in obj.items()}
+    return copy.deepcopy(obj)
 
 
 T = TypeVar("T", bound="_ModelBase")
@@ -41,17 +95,10 @@ class _ModelBase:
         """
         out: dict[str, Any] = {}
         for k, v in data.items():
-            if k not in _DECAMELIZE_CACHE:
-                _DECAMELIZE_CACHE[k] = cast(str, decamelize(k))
-            key = _DECAMELIZE_CACHE[k]
-            if isinstance(v, dict):
-                out[key] = cls._deserialize(v)
-            elif isinstance(v, list):
-                out[key] = [
-                    cls._deserialize(x) if isinstance(x, dict) else x for x in v
-                ]
-            else:
-                out[key] = v
+            key = _DECAMELIZE_CACHE.get(k)
+            if key is None:
+                key = _DECAMELIZE_CACHE[k] = cast(str, decamelize(k))
+            out[key] = v
         return out
 
     @classmethod
@@ -116,6 +163,9 @@ class Meta(_ModelBase):
     found: int
 
 
+_HEADER_FIELDS: frozenset[str] = frozenset(f.name for f in fields(Headers))
+_RESULT_TYPES: dict[type, Any] = {}
+
 R = TypeVar("R", bound="_ResponseBase[Any]")
 
 TResult = TypeVar("TResult")
@@ -139,55 +189,47 @@ class _ResponseBase(Generic[TResult]):
 
     @classmethod
     def read_response(cls: type[R], response: Response) -> R:
-        valid_headers = [field.name for field in fields(Headers)]
+        """Builds a response object from an HTTP response.
+
+        Args:
+            response: HTTP response from the OpenAQ API.
+
+        Returns:
+            Response object with parsed headers, metadata and results.
+        """
+        headers: dict[str, int] = {}
+        for k, v in response.headers.items():
+            key = k.replace("-", "_")
+            if key in _HEADER_FIELDS:
+                headers[key] = int(v) if v.isdigit() else 0
         json_data = response.json()
-        return cls(
-            Headers(
-                **{
-                    k.replace("-", "_"): int(v) if v.isdigit() else 0
-                    for k, v in response.headers.items()
-                    if k.replace("-", "_") in valid_headers
-                }
-            ),
-            json_data["meta"],
-            json_data["results"],
-        )
+        return cls(Headers(**headers), json_data["meta"], json_data["results"])
+
+    @classmethod
+    def _result_type(cls) -> Any:
+        """Returns the result model type for this response class."""
+        if cls not in _RESULT_TYPES:
+            result_type = None
+            for base in getattr(cls, "__orig_bases__", ()):
+                args = get_args(base)
+                if args:
+                    result_type = args[0]
+                    break
+            _RESULT_TYPES[cls] = result_type
+        return _RESULT_TYPES[cls]
 
     def __post_init__(self) -> None:
         """Automatically convert meta and results based on type hints."""
         if isinstance(self.meta, dict):
             self.meta = Meta.load(self.meta)
-
-        if hasattr(self.__class__, "__orig_bases__"):
-            for base in self.__class__.__orig_bases__:
-                if hasattr(base, "__args__"):
-                    result_type = get_args(base)[0]
-                    if (
-                        isinstance(self.results, list)
-                        and self.results
-                        and isinstance(self.results[0], dict)
-                    ):
-                        self.results = [result_type.load(x) for x in self.results]
-                    break
-
-    def _serialize(
-        self, data: Mapping[str, Any] | list[Any]
-    ) -> dict[str, Any] | list[Any]:
-        """Serializes data and convert keys to camel case.
-
-        Args:
-            data: input dictionary of API response data to be serialized.
-        """
-        if isinstance(data, list):
-            return [
-                self._serialize(i) if isinstance(i, Mapping | list) else i for i in data
-            ]
-        return {
-            cast(str, camelize(k)): (
-                self._serialize(v) if isinstance(v, Mapping | list) else v
-            )
-            for k, v in data.items()
-        }
+        result_type = type(self)._result_type()
+        if (
+            result_type is not None
+            and isinstance(self.results, list)
+            and self.results
+            and isinstance(self.results[0], dict)
+        ):
+            self.results = [result_type.load(x) for x in self.results]
 
     def dict(self) -> dict[str, Any]:
         """Serializes response data to Python dictionary.
@@ -195,7 +237,7 @@ class _ResponseBase(Generic[TResult]):
         Returns:
             Python dictionary of the response data.
         """
-        return asdict(self)
+        return cast(dict[str, Any], _to_dict_data(self))
 
     def json(self, encoder: ModuleType = json) -> str:
         """Serializes response data to JSON string.
@@ -209,10 +251,11 @@ class _ResponseBase(Generic[TResult]):
         Returns:
             string representation of the response in JSON.
         """
+        data = _to_json_data(self)
         if encoder == orjson:
             assert orjson is not None, "orjson must be installed."
-            return str(encoder.dumps(self._serialize(self.dict())).decode())
-        return str(encoder.dumps(self._serialize(self.dict()), ensure_ascii=False))
+            return str(encoder.dumps(data).decode())
+        return str(encoder.dumps(data, ensure_ascii=False))
 
 
 @dataclass(slots=True)
