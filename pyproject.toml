@@ -7,7 +7,8 @@ name = "openaq"
 description = "Official OpenAQ Python SDK."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { file = "LICENSE" }
+license = "Apache-2.0" 
+license-files = ["LICENSE", "NOTICE"]
 keywords = ["air quality", "environment", "openaq"]
 maintainers = [
   { name = "OpenAQ", email = "dev@openaq.org" },
