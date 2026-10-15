@@ -1102,3 +1102,39 @@ def test_validate_datetime_params_throws_from_only_future_datetime(
 def test_validate_datetime_params_all_none(data: Data):
     """All None parameters return an all None tuple."""
     assert validate_datetime_params(data, None, None, None, None) == (None, None, None, None)
+
+
+@pytest.mark.parametrize(
+    "data,datetime_to,date_to,expected",
+    [
+        (
+            "hours",
+            "2024-01-01",
+            None,
+            (None, datetime.datetime(2024, 1, 1), None, None),
+        ),
+        (
+            "measurements",
+            datetime.datetime(2024, 1, 1),
+            None,
+            (None, datetime.datetime(2024, 1, 1), None, None),
+        ),
+        ("days", None, "2024-01-01", (None, None, None, datetime.date(2024, 1, 1))),
+        (
+            "years",
+            None,
+            datetime.date(2024, 1, 1),
+            (None, None, None, datetime.date(2024, 1, 1)),
+        ),
+    ],
+)
+def test_validate_datetime_params_to_only(data, datetime_to, date_to, expected):
+    assert validate_datetime_params(data, None, datetime_to, None, date_to) == expected
+
+
+@pytest.mark.parametrize("end", ["", False])
+@pytest.mark.parametrize("data", ["hours", "days"])
+def test_validate_datetime_params_to_only_invalid(data, end):
+    datetime_to, date_to = (end, None) if data == "hours" else (None, end)
+    with pytest.raises(InvalidParameterError):
+        validate_datetime_params(data, None, datetime_to, None, date_to)
